@@ -4146,7 +4146,7 @@ const pl = {
   'bk.datasets': "Źródła danych do projektu",
 
   'bk.literature': "Literatura rozdziału",
-  'bk.next': "Na następne zajęcia.",
+  'bk.next': "Następny rozdział.",
   'bk.data': "Dane",
   'bk.check': "Sprawdź",
   'bk.reset': "Od nowa",
@@ -12411,7 +12411,7 @@ class BookApp {
 
   renderSection(s) {
     const meta = s.meeting
-      ? [el('span.bk-meet', t('bk.plan.meeting', { m: s.meeting })), s.parts.map(([kind, min]) => el(`span.bk-kind.bk-kind-${kind}`, `${t(`bk.kind.${kind}`)} · ${min}′`))]
+      ? [el('span.bk-meet', t('bk.plan.meeting', { m: s.meeting })), s.parts.map(([kind, min]) => el(`span.bk-kind.bk-kind-${kind}`, this.chapter.minutes === false ? t(`bk.kind.${kind}`) : `${t(`bk.kind.${kind}`)} · ${min}′`))]
       : s.outside === false ? [] : [el('span.bk-kind.bk-kind-projekt', s.outside || t('bk.outside'))];
     return el('section.bk-section', { id: s.id },
       el('div.bk-sec-head',
@@ -12425,18 +12425,18 @@ class BookApp {
     if (b.p) return el('p.bk-p', { html: rich(b.p) });
     if (b.figure) return el('div.bk-fig', FIGURES[b.figure]({ num: `${t('bk.figure')} ${this.figNums.get(b.figure)}` }));
     if (b.exercise) {
-      return el('div.bk-ex', { id: b.toc ? `ex-${b.exercise}` : null }, exerciseHead(b), EXERCISES[b.exercise]({ onDone }));
+      return el('div.bk-ex', { id: b.toc ? `ex-${b.exercise}` : null }, exerciseHead(b, this.chapter.minutes !== false), EXERCISES[b.exercise]({ onDone }));
     }
     if (b.lesson) {
       const host = el('div.bk-wb');
-      const node = el('div.bk-ex.bk-ex-wide', exerciseHead(b), host);
+      const node = el('div.bk-ex.bk-ex-wide', exerciseHead(b, this.chapter.minutes !== false), host);
       this.workbenches.push(new Workbench(host, lessonById(b.lesson), { label: `${b.num} · ${t('bk.kind.cwiczenie')}`, onDone }));
       return node;
     }
     if (b.discuss) {
       const d = b.discuss;
       return el('aside.bk-discuss',
-        el('div.bk-discuss-head', el('span.bk-kind.bk-kind-dyskusja', d.min ? `${t('bk.kind.dyskusja')} · ${d.min}′` : t('bk.kind.dyskusja')), el('span', d.who)),
+        el('div.bk-discuss-head', el('span.bk-kind.bk-kind-dyskusja', d.min && this.chapter.minutes !== false ? `${t('bk.kind.dyskusja')} · ${d.min}′` : t('bk.kind.dyskusja')), el('span', d.who)),
         el('ol', d.prompts.map((q) => el('li', { html: rich(q) }))));
     }
     if (b.terms) {
@@ -12483,10 +12483,10 @@ class BookApp {
   }
 }
 
-function exerciseHead(b) {
+function exerciseHead(b, minutes = true) {
   return el('div.bk-ex-head',
-    // a course that does not plan by the minute leaves `min` out
-    el('span.bk-kind.bk-kind-cwiczenie', b.min ? `${b.num} · ${b.min}′` : b.num),
+    // minutes show only when the block has `min` and the chapter did not switch them off (`minutes: false`)
+    el('span.bk-kind.bk-kind-cwiczenie', b.min && minutes ? `${b.num} · ${b.min}′` : b.num),
     b.who ? el('span.bk-ex-who', b.who) : null,
     el('h3.bk-ex-title', b.title));
 }
@@ -12518,6 +12518,10 @@ __modules["src/book/book.js"] = { "FIGURES": FIGURES, "ANSWERS": ANSWERS, "EXERC
 const { CURRENT } = __modules["src/book/data/current.js"];
 const CHAPTER = {
   id: 'r1',
+  // no minutes anywhere on the page, no figure with the plan of the meetings, no labels that say
+  // where the work is done (author, 2026-10-08, D27). `parts` keep their minutes for the teacher's notes.
+  minutes: false,
+  plan: false,
   number: 1,
   kicker: 'Warsztat analityki internetowej · Rozdział 1 z 5',
   title: 'Internet jako źródło danych o zachowaniach społecznych',
@@ -12529,7 +12533,7 @@ const CHAPTER = {
     ['K2', 'oceniasz internetowe źródło danych i nazywasz jego ograniczenia metodologiczne'],
   ],
   howTo: [
-    ['teoria', 'czytaj i klikaj rysunki przed zajęciami, bo na zajęciach teoria to krótkie omówienie'],
+    ['teoria', 'czytaj i klikaj rysunki, a potem omawiamy je razem'],
     ['cwiczenie', 'program sprawdza je od razu, a wykonane ćwiczenia liczą się do oceny za zadania (20%)'],
     ['dyskusja', 'w parach lub grupach, na zajęciach stacjonarnych albo zdalnych'],
     ['projekt', 'krok do raportu analitycznego, który daje 80% oceny'],
@@ -12651,7 +12655,7 @@ const CHAPTER = {
         { p: 'Jedna droga jest otwarta zawsze i dla każdego. To wyszukiwanie zaawansowane, nazywane też „Google hacking” (Hrabiec-Hojda, Trzeciakowska 2020). Operatory wyszukiwarki to podstawowe narzędzie infobrokera (Midera 2019) i białego wywiadu (Hassan, Hijazi 2018). Pozwalają znaleźć raporty, tabele i dokumenty, których nie widać w zwykłych wynikach.' },
         { note: 'Wyszukiwarka w ćwiczeniu szuka słów dokładnie w podanej formie, żeby było widać, co robi każdy operator. Google łapie też odmiany słów, więc w prawdziwych wynikach znajdziesz więcej dokumentów.', tone: 'info' },
         { lesson: 'operatory', num: 'Ćwiczenie 1.6', title: 'Operatory wyszukiwarki. Raporty z serwisów gov.pl', min: 20 },
-        { exercise: 'agent', num: 'Ćwiczenie 1.6b', title: 'Ślad agenta. Skąd wziął te liczby?', min: 15, who: 'w domu, przed spotkaniem 3' },
+        { exercise: 'agent', num: 'Ćwiczenie 1.6b', title: 'Ślad agenta. Skąd wziął te liczby?', min: 15 },
         { datasets: true },
         { terms: [
           ['API', 'interfejs, przez który program pobiera dane z serwisu na zasadach ustalonych przez jego właściciela'],
@@ -12702,11 +12706,11 @@ const CHAPTER = {
     },
 
     {
-      id: 's1-8', num: '1.9', title: 'Projekt, krok 1. Karta źródła', meeting: 0,
+      id: 's1-8', num: '1.9', title: 'Projekt, krok 1. Karta źródła', meeting: 0, outside: false,
       parts: [],
       blocks: [
         { p: 'Raport analityczny daje 80% oceny i zaczyna się od źródła. Wypełnij kartę dla źródła, którego chcesz użyć w projekcie. Karta zapisuje się w przeglądarce, a na końcu możesz ją pobrać jako plik tekstowy i dołączyć do projektu.' },
-        { exercise: 'karta', num: 'Projekt', title: 'Karta źródła', min: 90, who: 'poza zajęciami' },
+        { exercise: 'karta', num: 'Projekt', title: 'Karta źródła', min: 90 },
       ],
     },
   ],
@@ -12723,9 +12727,9 @@ const CHAPTER = {
     { id: 'karta', label: 'Projekt, krok 1. Karta źródła', section: 's1-8' },
   ],
 
-  next: 'Przed spotkaniem 3 (rozdział 2) wejdź na trends.google.com i wpisz dwa hasła, które Cię ciekawią. Zapisz, w którym miesiącu każde z nich ma wartość 100. Co ta setka właściwie znaczy, zobaczymy na zajęciach.',
+  next: 'Rozdział 2 zaczniemy od trends.google.com. Wpiszemy dwa hasła i sprawdzimy, w którym miesiącu każde z nich ma wartość 100. Zobaczymy też, co ta setka właściwie znaczy.',
 
-  prep: 'Przygotowanie zajmie około 4 godzin z 24 przewidzianych w sylabusie. Obejmuje lekturę, rysunki i kartę źródła.',
+  prep: '',
 
   datasets: [
     { name: 'Wykorzystanie internetu według wieku (Eurostat)', url: 'https://ec.europa.eu/eurostat/databrowser/view/isoc_ci_ac_i/default/table?lang=en', what: 'Kto korzysta z internetu i do czego. Z tych danych pochodzi rysunek {rys:coverage}.', licence: 'Otwarta licencja Eurostatu.' },
@@ -12843,10 +12847,10 @@ const sections = [
     id: 's1-lab', num: 'Lab', title: 'Laboratorium. Dane prosto z API', meeting: 0, parts: [], outside: false,
     blocks: [
       { p: 'Rysunki w tym temacie powstały z otwartych danych. Każdy z nich możesz odtworzyć samodzielnie. Dane udostępnia **API**, czyli adres, pod którym program dostaje odpowiedź w ustalonym formacie, zwykle JSON.' },
-      { p: 'Każde zadanie ma dwie ścieżki. W ścieżce z kodem piszesz kilka wierszy w Pythonie, a strona uruchamia je w przeglądarce. W ścieżce bez kodu szukasz tych samych liczb w przeglądarce danych. Obie kończą się tym samym wynikiem, więc wybierz jedną.' },
+      { p: 'Każde zadanie ma dwie ścieżki. W ścieżce z kodem piszesz kilka wierszy w Pythonie, a strona uruchamia je w przeglądarce. W ścieżce bez kodu liczysz to samo w arkuszu kalkulacyjnym albo na kalkulatorze. Obie kończą się tym samym wynikiem, więc wybierz jedną.' },
       { exercise: 'lab1', num: 'Lab 1', title: 'Eurostat. Ilu internautów jest w mediach społecznościowych?', min: 15, toc: 'Lab 1. Eurostat' },
       { exercise: 'lab2', num: 'Lab 2', title: 'Google Flu Trends. Sprawdź podpis pod rysunkiem', min: 20, toc: 'Lab 2. Google Flu Trends' },
-      { p: 'Oba API działają bez rejestracji, ale to wyjątek. Zwykle trzeba dostać **klucz**, a serwis liczy zapytania. API z danymi o grypie przyjmuje bez klucza 60 zapytań na godzinę z jednego adresu. Na zajęciach cała sala ma często jeden adres, więc **limit zapytań** szybko się kończy. Wtedy funkcja `pobierz` bierze kopię odpowiedzi, którą zapisaliśmy wcześniej, i pisze o tym w wyniku.' },
+      { p: 'Oba API działają bez rejestracji, ale to wyjątek. Zwykle trzeba dostać **klucz**, a serwis liczy zapytania. API z danymi o grypie przyjmuje bez klucza 60 zapytań na godzinę z jednego adresu. Na zajęciach cała sala ma często jeden adres, więc **limit zapytań** szybko się kończy. Wtedy funkcja `get_json` z kodu zadania bierze kopię odpowiedzi z pliku `saved_responses.json` i pisze o tym w wyniku.' },
       { p: 'Długie wyniki API oddaje po kawałku, strona po stronie. To **stronicowanie**. Program musi wtedy pytać w pętli, aż dostanie wszystko.' },
       { p: 'Dobra praktyka jest jedna i prosta. Zapisz surową odpowiedź API w pliku razem z datą i adresem zapytania, a obliczenia rób na tym pliku. Dane w źródle mogą się zmienić albo zniknąć. Eurostat poprawia swoje tabele, a dane CDC o grypie mają wiele wydań.' },
       { terms: [

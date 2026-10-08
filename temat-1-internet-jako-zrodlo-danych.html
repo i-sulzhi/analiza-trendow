@@ -12404,17 +12404,18 @@ class BookApp {
         el('div.bk-box-title', t('bk.howTo')),
         el('ul.bk-howto', ch.howTo.map(([kind, text]) => el('li', el(`span.bk-kind.bk-kind-${kind}`, t(`bk.kind.${kind}`)), text)))),
       courseMap(ch.number, ch.course),
-      planFigure(ch.sections),
-      el('p.bk-prep', ch.prep));
+      // a course that does all its work in class has no split to draw (`plan: false`, no `prep`)
+      ch.plan === false ? null : planFigure(ch.sections),
+      ch.prep ? el('p.bk-prep', ch.prep) : null);
   }
 
   renderSection(s) {
     const meta = s.meeting
       ? [el('span.bk-meet', t('bk.plan.meeting', { m: s.meeting })), s.parts.map(([kind, min]) => el(`span.bk-kind.bk-kind-${kind}`, `${t(`bk.kind.${kind}`)} · ${min}′`))]
-      : [el('span.bk-kind.bk-kind-projekt', s.outside || t('bk.outside'))];
+      : s.outside === false ? [] : [el('span.bk-kind.bk-kind-projekt', s.outside || t('bk.outside'))];
     return el('section.bk-section', { id: s.id },
       el('div.bk-sec-head',
-        el('div.bk-sec-meta', meta),
+        meta.length ? el('div.bk-sec-meta', meta) : null,
         el('h2.bk-sec-title', el('span.bk-sec-num', s.num), ' ', s.title)),
       s.blocks.map((b) => this.renderBlock(b)));
   }
@@ -12779,9 +12780,6 @@ __modules["src/book/chapter1.js"] = { "CHAPTER": CHAPTER };
  * every cross-reference in the shared texts still points at the right place.
  */
 const { CHAPTER: BASE } = __modules["src/book/chapter1.js"];
-const BEFORE = 'W domu, przed spotkaniem';
-const AFTER = 'W domu, po spotkaniu';
-
 const base = (id) => {
   const s = BASE.sections.find((x) => x.id === id);
   if (!s) throw new Error(`chapter: no section ${id} in the workshop chapter`);
@@ -12823,37 +12821,25 @@ const s17 = base('s1-6');
 const s18 = base('s1-7');
 const s19 = base('s1-8');
 
-// What the table of contents says under each title, so the order of work is visible at a glance.
-const TOC = {
-  before: { tag: 'przed spotkaniem', tone: 'before' },
-  meeting: { tag: 'na spotkaniu', tone: 'meeting' },
-  after: { tag: 'po spotkaniu', tone: 'after' },
-};
-const home = (s, outside, blocks = s.blocks) => ({ ...s, meeting: 0, parts: [], outside, blocks, toc: outside === BEFORE ? TOC.before : TOC.after });
+// Everything is done in class (decision A14): no section says "at home" or "at the meeting".
+const inClass = (s, blocks = s.blocks) => ({ ...s, meeting: 0, parts: [], outside: false, blocks });
 
 const sections = [
-  // ---- before the meeting: the easy part, read and clicked at home
-  home(s11, BEFORE, [
-    { note: 'Ten temat ma jedno spotkanie. Przed nim przeczytaj podrozdziały 1.1–1.4 i 1.8 i zrób ich ćwiczenia. To około godziny. Lab 3 w podrozdziale 1.8 możesz zrobić już teraz albo po spotkaniu, gdy poznasz laboratorium. Na spotkaniu robimy podrozdziały 1.5 i 1.6, laboratorium i początek projektu. Po spotkaniu zostają ćwiczenia 1.5 i 1.6, podrozdział 1.7 i karta źródła.', tone: 'info' },
-    ...s11.blocks.filter((b) => !b.discuss),
-  ]),
-  home(s12, BEFORE),
-  home(s13, BEFORE),
-  home(s14, BEFORE, s14.blocks.filter((b) => !b.discuss)),
-
-  // ---- the meeting, 90 minutes
+  inClass(s11),
+  inClass(s12),
+  inClass(s13),
+  inClass(s14),
   {
-    ...s15, meeting: 1, toc: TOC.meeting, parts: [['teoria', 15]],
+    ...inClass(s15),
     blocks: [
       ...s15.blocks.filter(not(isLesson('wzmianki'))).filter((b) => !b.terms && !b.read),
       { note: 'Te pojęcia wrócą w semestrze 2. Ramy błędów użyjesz na „Socjologii obliczeniowej”, a pełności i precyzji na „Text mining”.', tone: 'info' },
-      { ...s15.blocks.find(isLesson('wzmianki')), who: 'w domu, po spotkaniu' },
+      s15.blocks.find(isLesson('wzmianki')),
       ...s15.blocks.filter((b) => b.terms || b.read),
     ],
   },
   {
-    id: 's1-lab', num: 'Lab', title: 'Laboratorium. Dane prosto z API', meeting: 1, toc: TOC.meeting,
-    parts: [['cwiczenie', 35]],
+    id: 's1-lab', num: 'Lab', title: 'Laboratorium. Dane prosto z API', meeting: 0, parts: [], outside: false,
     blocks: [
       { p: 'Rysunki w tym temacie powstały z otwartych danych. Każdy z nich możesz odtworzyć samodzielnie. Dane udostępnia **API**, czyli adres, pod którym program dostaje odpowiedź w ustalonym formacie, zwykle JSON.' },
       { p: 'Każde zadanie ma dwie ścieżki. W ścieżce z kodem piszesz kilka wierszy w Pythonie, a strona uruchamia je w przeglądarce. W ścieżce bez kodu szukasz tych samych liczb w przeglądarce danych. Obie kończą się tym samym wynikiem, więc wybierz jedną.' },
@@ -12871,7 +12857,7 @@ const sections = [
     ],
   },
   {
-    ...s16, meeting: 1, toc: TOC.meeting, parts: [['teoria', 5], ['cwiczenie', 20]],
+    ...inClass(s16),
     blocks: (() => {
       const agent = s16.blocks.find(isExercise('agent'));
       const operators = s16.blocks.find(isLesson('operatory'));
@@ -12879,37 +12865,36 @@ const sections = [
       // the recorded trace is done in class here, right after the text that announces it
       blocks = swap(blocks, textHas('w ćwiczeniu 1.6b na końcu podrozdziału'), (b) => [
         { p: b.p.replace('sprawdzisz w ćwiczeniu 1.6b na końcu podrozdziału', 'sprawdzisz poniżej, w ćwiczeniu 1.6b') },
-        { ...agent, min: 10, who: 'na spotkaniu' },
+        { ...agent, min: 10 },
         { discuss: { who: 'w parach', min: 10, prompts: [
           'Zadajcie to samo pytanie swojemu agentowi, na przykład ChatGPT, Claude albo Gemini z włączonym wyszukiwaniem. Poproście o źródło każdej liczby.',
           'Sprawdźcie jego odpowiedź tak samo jak w ćwiczeniu 1.6b. Która liczba ma źródło, a która jest wyliczona albo dopisana?',
           'Czy wasz agent znalazł bazę Eurostatu? Jeśli nie, na którym kroku się zatrzymał? W laboratorium ta sama liczba wymagała jednego zapytania do API.',
         ] } },
       ]);
-      // the operators lesson stays, as homework, where the text about advanced search ends
+      // the operators lesson stays where the text about advanced search ends
       const i = blocks.findIndex((b) => b.datasets);
-      blocks.splice(i, 0, { ...operators, who: 'w domu, po spotkaniu' });
+      blocks.splice(i, 0, operators);
       return blocks;
     })(),
   },
 
-  // ---- after the meeting
-  home(s17, AFTER, swap(s17.blocks, isExercise('cechy'), (b) => ({ ...b, title: 'Oceń źródło i porównaj z naszą oceną', who: 'samodzielnie' }))),
+  inClass(s17, swap(s17.blocks, isExercise('cechy'), (b) => ({ ...b, title: 'Oceń źródło i porównaj z naszą oceną', who: 'samodzielnie' }))),
   // the anonymity figure gets its lab right after the paragraph that closes it
-  home(s18, BEFORE, swap(s18.blocks, textHas('Najbezpieczniej jest pokazywać w raporcie tylko wyniki zbiorcze'), (b) => [
+  inClass(s18, swap(s18.blocks, textHas('Najbezpieczniej jest pokazywać w raporcie tylko wyniki zbiorcze'), (b) => [
     b,
-    { exercise: 'lab3', num: 'Lab 3', title: 'Ile osób da się wskazać w tabeli bez nazwisk?', min: 10, who: 'w domu', toc: 'Lab 3. Tabela bez nazwisk' },
+    { exercise: 'lab3', num: 'Lab 3', title: 'Ile osób da się wskazać w tabeli bez nazwisk?', min: 10, toc: 'Lab 3. Tabela bez nazwisk' },
   ])),
   {
-    ...s19, meeting: 1, toc: TOC.meeting, parts: [['cwiczenie', 15]],
+    ...inClass(s19),
     blocks: [
-      { p: 'Raport analityczny i **panel informacyjny** dają razem 80% oceny. Oba zaczynają się od źródła. Na spotkaniu wybierz źródło i narysuj drogę danych. Kartę źródła dokończ w domu. Karta zapisuje się w przeglądarce, a na końcu możesz ją pobrać jako plik tekstowy.' },
-      { discuss: { who: 'w parach, na spotkaniu', min: 15, prompts: [
+      { p: 'Raport analityczny i **panel informacyjny** dają razem 80% oceny. Oba zaczynają się od źródła. Wybierz źródło i narysuj drogę danych. Potem wypełnij kartę źródła. Karta zapisuje się w przeglądarce, a na końcu możesz ją pobrać jako plik tekstowy.' },
+      { discuss: { who: 'w parach', min: 15, prompts: [
         'Narysujcie pięć pudełek. Źródło, pobranie, surowe dane z datą, przetwarzanie i panel. Przy każdym dopiszcie, jakim narzędziem to zrobicie.',
         'Przy każdym pudełku dopiszcie jeden błąd z rysunku {rys:errors}, który może tam powstać.',
         'Co stanie się z panelem, jeśli źródło zmieni zasady dostępu albo format danych? Zapiszcie jedno zdanie.',
       ] } },
-      { ...s19.blocks.find(isExercise('karta')), who: 'zacznij na spotkaniu, dokończ w domu' },
+      s19.blocks.find(isExercise('karta')),
     ],
   },
 ];
@@ -12925,14 +12910,15 @@ const CHAPTER = {
     ['K1', 'łączysz wiedzę społeczną i techniczną, gdy oceniasz źródło danych'],
   ],
   howTo: [
-    ['teoria', 'czytaj i klikaj rysunki w domu, bo na spotkaniu teoria to krótkie omówienie'],
+    ['teoria', 'czytaj i klikaj rysunki, a potem omawiamy je razem'],
     ['cwiczenie', 'program sprawdza je od razu, a wykonane ćwiczenia liczą się do oceny za zadania (20%)'],
-    ['dyskusja', 'w parach, na spotkaniu stacjonarnym albo zdalnym'],
+    ['dyskusja', 'w parach albo w małych grupach'],
     ['projekt', 'krok do raportu analitycznego i panelu informacyjnego, które dają 80% oceny'],
   ],
   course: COURSE,
   siteNav: ['home'],
-  sections,
+  // labels inherited from the workshop that say where the work is done ("w domu", "poza zajęciami") go too
+  sections: sections.map((s) => ({ ...s, blocks: s.blocks.map((b) => (b.who && /dom|spotkani|zajęciami/i.test(b.who) ? { ...b, who: undefined } : b)) })),
   summary: [
     ...BASE.summary.slice(0, BASE.summary.findIndex((it) => it.lesson === 'wzmianki') + 1),
     { id: 'lab1', label: 'Lab 1. Eurostat z API', section: 's1-lab' },
@@ -12941,8 +12927,9 @@ const CHAPTER = {
     { id: 'lab3', label: 'Lab 3. Tabela bez nazwisk', section: 's1-7' },
     ...BASE.summary.slice(BASE.summary.findIndex((it) => it.id === 'etyka') + 1),
   ],
-  next: 'Przed spotkaniem 2 (temat 2) wejdź na trends.google.com i wpisz dwa hasła, które Cię ciekawią. Zapisz, w którym miesiącu każde z nich ma wartość 100. Co ta setka właściwie znaczy, zobaczymy na spotkaniu.',
-  prep: 'Praca w domu zajmie około 4 godzin. Godzina przed spotkaniem to lektura i rysunki. Po spotkaniu zostają ćwiczenia i karta źródła.',
+  next: 'Temat 2 zaczniemy od trends.google.com. Wpiszemy dwa hasła i sprawdzimy, w którym miesiącu każde z nich ma wartość 100. Zobaczymy też, co ta setka właściwie znaczy.',
+  prep: '',
+  plan: false,
 };
 
 __modules["../../analiza-trendow-w-internecie/src/chapter1.js"] = { "COURSE": COURSE, "CHAPTER": CHAPTER };
@@ -12965,9 +12952,9 @@ const STRINGS = {
   'bk.plan.mapTitle': '15 godzin lekcyjnych = 7 spotkań po 90 minut i jedno 45 minut (propozycja podziału)',
   'bk.plan.final': 'Spotkanie {m} trwa 45 minut. To prezentacje projektów. Raport analityczny i panel informacyjny dają razem 80% oceny.',
   'bk.plan.label': 'Plan tematu',
-  'bk.plan.chapterTitle': 'Jedno spotkanie, 90 minut. Reszta w domu',
+  'bk.plan.chapterTitle': 'Jedno spotkanie, 90 minut',
   'bk.card.fileTitle': 'Karta źródła (projekt, krok 1). Analiza trendów w Internecie',
-  'bk.next': 'Na następne spotkanie.',
+  'bk.next': 'Następny temat.',
   'bk.outcomes': 'Po tym temacie (efekty uczenia się z sylabusa)',
   'bk.howTo': 'Jak pracować z tym tematem',
 

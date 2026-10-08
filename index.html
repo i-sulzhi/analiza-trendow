@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Analiza trendów w Internecie</title>
+<style>
+:root {
+  --bg: #faf9f6; --card: #ffffff; --ink: #1f2328; --muted: #5d636b; --line: #e3e0d8;
+  --accent: #2f6f5e; --accent-ink: #ffffff; --soft: #eef4f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17191c; --card: #1f2226; --ink: #e8e6e1; --muted: #a3a8ae; --line: #33373c;
+    --accent: #6fbfa6; --accent-ink: #10221c; --soft: #1f2d28;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17191c; --card: #1f2226; --ink: #e8e6e1; --muted: #a3a8ae; --line: #33373c;
+  --accent: #6fbfa6; --accent-ink: #10221c; --soft: #1f2d28;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 40px 16px 56px; }
+.kicker { color: var(--muted); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 6px; }
+h1 { font-size: 34px; line-height: 1.15; margin: 0 0 12px; }
+.lead { color: var(--muted); margin: 0 0 12px; }
+.start { margin: 0 0 28px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--soft); border-radius: 0 8px 8px 0; }
+.cards { display: grid; gap: 14px; }
+.card { display: block; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; color: inherit; text-decoration: none; }
+a.card:hover, a.card:focus-visible { border-color: var(--accent); outline: none; }
+.card h2 { font-size: 20px; margin: 0 0 4px; }
+.card p { margin: 0; color: var(--muted); }
+.card .go { display: inline-block; margin-top: 12px; background: var(--accent); color: var(--accent-ink); border-radius: 8px; padding: 6px 12px; font-size: 15px; font-weight: 600; }
+.card.later { background: var(--soft); border-style: dashed; }
+h3 { font-size: 17px; margin: 36px 0 8px; }
+.files a { color: var(--accent); }
+.files li { margin: 4px 0; }
+footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+footer p { margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Informatyka Społeczna · studia II stopnia</p>
+  <h1>Analiza trendów w Internecie</h1>
+  <p class="lead">Materiały do przedmiotu. Działają w przeglądarce. Rysunki i ćwiczenia są interaktywne, a program sprawdza odpowiedzi od razu. Laboratoria uruchamiają Pythona w przeglądarce, bez instalacji.</p>
+  <p class="start">Przed spotkaniem 1 przeczytaj podrozdziały 1.1–1.4 i 1.8 tematu 1 i wykonaj ich ćwiczenia. Zajmie to około godziny.</p>
+
+  <div class="cards">
+    <a class="card" href="temat-1-internet-jako-zrodlo-danych.html">
+      <h2>Temat 1. Internet jako źródło danych</h2>
+      <p>Spotkanie 1. Kto jest w danych, co mierzy ślad, trzy laboratoria z danymi z API, ślad agenta, etyka i karta źródła do projektu.</p>
+      <span class="go">Otwórz temat</span>
+    </a>
+    <div class="card later">
+      <h2>Tematy 2–5</h2>
+      <p>W przygotowaniu. Trendy w wyszukiwarkach, ruch i zachowania użytkowników, profile z mediów społecznościowych, narzędzia analizy i wizualizacji.</p>
+    </div>
+  </div>
+
+  <h3>Co warto wiedzieć</h3>
+  <ul class="files">
+    <li>Strona przy każdym otwarciu pyta „Kim jesteś?”. Każda osoba ma osobny postęp, także na wspólnym komputerze.</li>
+    <li>Na końcu tematu jest raport dla prowadzącego. Pobierasz go i przekazujesz samodzielnie.</li>
+    <li>Pierwsze uruchomienie kodu pobiera Pythona (ok. 10 MB), więc potrzebny jest internet. Każde laboratorium ma też drogę bez kodu.</li>
+    <li><a href="temat-1-internet-jako-zrodlo-danych.html" download>Pobierz temat 1 jako plik</a></li>
+  </ul>
+
+  <footer>
+    <p>Postęp, kod i karta źródła zapisują się tylko w Twojej przeglądarce. Strona nie używa plików cookie ani analityki.</p>
+    <p>Opracowali dr Ilya Sulzhytski i Claude (Anthropic). Wersja z <span id="ver">2026-10-08</span>.</p>
+  </footer>
+</main>
+</body>
+</html>

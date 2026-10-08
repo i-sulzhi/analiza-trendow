@@ -1547,6 +1547,11 @@ textarea.kc-input { resize: vertical; }
   .py-code { font-size: 12px; padding: 10px; }
 }
 
+/* files beside the code: names as small download buttons */
+.py-files { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-size: 13px; color: var(--ink-soft); }
+.py-file { padding: 2px 10px; border: 1px solid var(--line-strong); border-radius: 14px; background: transparent; color: var(--ink); font: 12px var(--mono); cursor: pointer; }
+.py-file:hover { border-color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -12960,7 +12965,8 @@ const STRINGS = {
   'py.pathCode': 'Z kodem (Python)',
   'py.pathBase': 'Bez kodu',
   'py.codeLabel': 'Kod w Pythonie',
-  'py.note': 'Kod działa w Twojej przeglądarce. Funkcja `pobierz(url)` wysyła prawdziwe zapytanie do API i zwraca odpowiedź JSON. W zwykłym Pythonie to samo robi `requests.get(url).json()`. Funkcja `wczytaj(nazwa)` zwraca tabelę zapisaną na tej stronie. Pierwsze uruchomienie pobiera Pythona (ok. 10 MB) i trwa kilkanaście sekund. Pętla bez końca zawiesi kartę. Zamknij ją wtedy i otwórz stronę ponownie, kod zostanie.',
+  'py.note': 'To zwykły Python. Kod używa bibliotek `requests` i `json`, a każda funkcja jest zdefiniowana poniżej, więc możesz ją przeczytać i zmienić. Ten sam kod zadziała na Twoim komputerze. Pierwsze uruchomienie pobiera Pythona (ok. 10 MB) i trwa kilkanaście sekund. Pętla bez końca zawiesi kartę. Zamknij ją wtedy i otwórz stronę ponownie, kod zostanie.',
+  'py.files': 'Pliki obok kodu, do pobrania:',
   'py.run': '▶ Uruchom',
   'py.noCodeAnswer': 'Bez kodu, wpisane liczby:',
   'py.running': 'Działa…',
@@ -12970,7 +12976,7 @@ const STRINGS = {
   'py.noOutput': '(kod nic nie wypisał)',
   'py.errorAt': 'Błąd w wierszu {line}. {error}',
   'py.pyError': 'Python zgłosił błąd. Jego opis jest w ostatnim wierszu powyżej. Popraw kod i uruchom go jeszcze raz.',
-  'py.netError': 'Zapytanie do API się nie udało. Sprawdź adres w kodzie i połączenie z internetem. Jeśli w błędzie jest „HTTP 429”, serwis odrzucił zapytanie, bo skończył się limit. Spróbuj za godzinę albo wróć do adresu z zadania.',
+  'py.netError': 'Zapytanie do API się nie udało, a dla tego adresu nie ma zapisanej kopii. Sprawdź adres w kodzie i połączenie z internetem. Kod 429 w błędzie znaczy, że serwis odrzucił zapytanie, bo skończył się limit. Spróbuj za godzinę albo wróć do adresu z zadania.',
   'py.offline': 'Nie udało się pobrać Pythona. Ta ścieżka wymaga internetu. Bez internetu wybierz ścieżkę „Bez kodu”.',
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.baseWrong': 'Do poprawy {k|pole|pola|pól}, zaznaczone na czerwono.',
@@ -12982,53 +12988,32 @@ __modules["../../analiza-trendow-w-internecie/src/strings.js"] = { "STRINGS": ST
 /* ===== ../../analiza-trendow-w-internecie/src/pyrun.js ===== */
 (function () {
 /**
- * Python in the browser: Pyodide, loaded on demand.
+ * Python in the browser: Pyodide, loaded on demand, with the real `requests` library.
  *
  * The rest of the page works offline; only the code path of a lab needs the network, twice:
- * once for Pyodide itself (about 10 MB from the CDN, cached by the browser afterwards) and
- * then for the API requests the student's code makes. Both APIs used in the labs send
+ * once for Pyodide and `requests` (about 10 MB from the CDN, cached by the browser afterwards)
+ * and then for the API requests the student's code makes. Both APIs used in the labs send
  * `Access-Control-Allow-Origin: *`, so the page can read them.
  *
- * The student's code calls `pobierz(url)`, defined in PRELUDE: a plain GET that returns the
- * parsed JSON. When the API refuses or cannot be reached it falls back to a recorded copy of
- * the same response and SAYS SO in the output. `wczytaj(name)` returns a table that is part of
- * the page (the invented profiles of the anonymity figure), with no request at all. The fallback matters in class: Delphi accepts
- * 60 anonymous requests per hour per address, and a whole room often shares one address.
+ * The student's code is ordinary Python: `import requests`, `import json`, and every function
+ * it calls is declared in the code the student sees (decision A11). Nothing is defined behind
+ * the scenes. What the page does add is FILES beside the code, in Pyodide's file system:
+ * `saved_responses.json` (recorded API responses, which the visible `get_json` falls back to
+ * when an API refuses, saying so) and `profiles.json` (the invented table of the anonymity
+ * figure). The fallback matters in class: Delphi accepts 60 anonymous requests per hour per
+ * address, and a whole room often shares one address.
  *
  * `runPython(code)` runs the code in a fresh namespace and returns what the exercise needs:
- * everything printed, the value of the variable `wynik` (converted to plain JS), and the error
+ * everything printed, the value of the variable `result` (converted to plain JS), and the error
  * if there was one (the last line of the traceback, which is the part a student can read).
  */
 
 const PYODIDE_VERSION = '0.28.3';
 const CDN = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
-
-const PRELUDE = `
-import json as _json
-from js import XMLHttpRequest as _XHR
-
-def pobierz(url):
-    \"\"\"Wyślij zapytanie GET i zwróć odpowiedź JSON jako słownik albo listę.\"\"\"
-    try:
-        req = _XHR.new()
-        req.open("GET", url, False)
-        req.send(None)
-        if req.status != 200:
-            raise OSError("HTTP " + str(req.status))
-        return _json.loads(str(req.responseText))
-    except Exception as blad:
-        kopia = _KOPIE.get(url)
-        if kopia is None:
-            raise OSError("Zapytanie się nie udało (" + str(blad) + "). Adres: " + url)
-        print("Uwaga. API nie przyjęło zapytania (" + str(blad) + "). Biorę kopię odpowiedzi zapisaną " + _DATA_KOPII + ".")
-        return _json.loads(kopia)
-
-def wczytaj(nazwa):
-    \"\"\"Zwróć tabelę zapisaną na tej stronie jako listę słowników.\"\"\"
-    if nazwa not in _TABELE:
-        raise KeyError("Nie ma tabeli " + repr(nazwa) + ". Dostępne tabele: " + ", ".join(sorted(_TABELE)))
-    return _json.loads(_TABELE[nazwa])
-`;
+/** Libraries the labs import that are not in Pyodide's core. */
+const PACKAGES = ['requests'];
+/** The variable of the student's code that the page checks. */
+const RESULT = 'result';
 
 let loading = null;
 
@@ -13041,7 +13026,9 @@ function loadPython() {
     const script = document.createElement('script');
     script.src = `${CDN}pyodide.js`;
     script.onload = () => {
-      globalThis.loadPyodide({ indexURL: CDN }).then(resolve, (e) => fail(String(e?.message || e), false));
+      globalThis.loadPyodide({ indexURL: CDN })
+        .then((py) => py.loadPackage(PACKAGES).then(() => py))
+        .then(resolve, (e) => fail(String(e?.message || e), false));
     };
     script.onerror = () => fail('pyodide.js could not be loaded', true);
     document.head.append(script);
@@ -13072,35 +13059,27 @@ function errorLine(message) {
 /**
  * @returns {Promise<{ok: boolean, stdout: string, value: any, error: string|null, line: number|null}>}
  */
-async function runPython(code, { copies = {}, copiesDate = '', tables = {} } = {}) {
+async function runPython(code, { files = {} } = {}) {
   const py = await loadPython();
   const out = [];
   py.setStdout({ batched: (s) => out.push(s) });
   py.setStderr({ batched: (s) => out.push(s) });
+  // the files are written again before every run, so code that changed one starts clean
+  for (const [name, text] of Object.entries(files)) py.FS.writeFile(name, text);
   const scope = py.globals.get('dict')();
-  const kopie = py.toPy(copies);
-  scope.set('_KOPIE', kopie);
-  scope.set('_DATA_KOPII', copiesDate);
-  // tables go in as JSON text, so every call of wczytaj returns a fresh list the code may change
-  const tabele = py.toPy(Object.fromEntries(Object.entries(tables).map(([name, rows]) => [name, JSON.stringify(rows)])));
-  scope.set('_TABELE', tabele);
   try {
-    // the helper runs under its own file name, so the line number in an error is the student's
-    py.runPython(PRELUDE, { globals: scope, filename: '<pobierz>' });
     await py.runPythonAsync(code, { globals: scope });
-    const value = toPlain(scope.get('wynik'));
+    const value = toPlain(scope.get(RESULT));
     return { ok: true, stdout: out.join('\n'), value, error: null, line: null };
   } catch (e) {
     const message = String(e?.message || e);
     return { ok: false, stdout: out.join('\n'), value: undefined, error: lastLine(message), line: errorLine(message) };
   } finally {
-    kopie.destroy?.();
-    tabele.destroy?.();
     scope.destroy?.();
   }
 }
 
-__modules["../../analiza-trendow-w-internecie/src/pyrun.js"] = { "PYODIDE_VERSION": PYODIDE_VERSION, "PRELUDE": PRELUDE, "loadPython": loadPython, "lastLine": lastLine, "errorLine": errorLine, "runPython": runPython };
+__modules["../../analiza-trendow-w-internecie/src/pyrun.js"] = { "PYODIDE_VERSION": PYODIDE_VERSION, "PACKAGES": PACKAGES, "RESULT": RESULT, "loadPython": loadPython, "lastLine": lastLine, "errorLine": errorLine, "runPython": runPython };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/generated.js ===== */
@@ -13108,7 +13087,7 @@ __modules["../../analiza-trendow-w-internecie/src/pyrun.js"] = { "PYODIDE_VERSIO
 // Generated by tools/make_generated.py from tasks/*.py and data-sources/api/. Do not edit.
 const GENERATED = {
   "lab1": {
-    "starter": "API = \"https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/\"\nGRUPY = [\"Y16_24\", \"Y25_34\", \"Y35_44\", \"Y45_54\", \"Y55_64\", \"Y65_74\"]\n\ndef odsetek(zbior, wskaznik, wiek):\n    url = (API + zbior + \"?format=JSON&geo=PL&unit=PC_IND&time=2025\"\n           + \"&indic_is=\" + wskaznik + \"&ind_type=\" + wiek)\n    dane = pobierz(url)\n    return dane[\"value\"][\"0\"]\n\n# Przykład: jedna grupa wieku\nprint(odsetek(\"isoc_ci_ifp_iu\", \"I_IU3\", \"Y65_74\"))   # korzysta z internetu\nprint(odsetek(\"isoc_ci_ac_i\", \"I_IUSNET\", \"Y65_74\"))  # uczestniczy w mediach społecznościowych\n\n# Zadanie: dla każdej grupy policz, jaki procent internautów\n# uczestniczy w mediach społecznościowych. Zaokrąglij do całości.\nwynik = {}\nfor wiek in GRUPY:\n    pass  # tu wpisz swój kod\nprint(wynik)\n",
+    "starter": "import json\nimport requests\n\nAPI = \"https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/\"\nAGE_GROUPS = [\"Y16_24\", \"Y25_34\", \"Y35_44\", \"Y45_54\", \"Y55_64\", \"Y65_74\"]\n\n\ndef get_json(url):\n    \"\"\"Wysyła zapytanie GET pod adres url i zwraca odpowiedź JSON.\n\n    Gdy API odmówi albo nie odpowie, funkcja bierze kopię tej samej odpowiedzi\n    z pliku saved_responses.json i mówi o tym w wyniku.\n    \"\"\"\n    try:\n        response = requests.get(url, timeout=30)\n        response.raise_for_status()\n        return response.json()\n    except requests.RequestException as error:\n        with open(\"saved_responses.json\", encoding=\"utf-8\") as file:\n            saved = json.load(file)\n        if url not in saved[\"responses\"]:\n            raise\n        print(\"Uwaga. API nie przyjęło zapytania:\", error)\n        print(\"Biorę kopię odpowiedzi zapisaną\", saved[\"recorded\"])\n        return saved[\"responses\"][url]\n\n\ndef get_share(dataset, indicator, age_group):\n    \"\"\"Zwraca odsetek osób w grupie wieku age_group (Polska, 2025 r.).\"\"\"\n    url = (API + dataset + \"?format=JSON&geo=PL&unit=PC_IND&time=2025\"\n           + \"&indic_is=\" + indicator + \"&ind_type=\" + age_group)\n    data = get_json(url)\n    return data[\"value\"][\"0\"]\n\n\n# Przykład: jedna grupa wieku\nprint(get_share(\"isoc_ci_ifp_iu\", \"I_IU3\", \"Y65_74\"))   # korzysta z internetu\nprint(get_share(\"isoc_ci_ac_i\", \"I_IUSNET\", \"Y65_74\"))  # uczestniczy w mediach społecznościowych\n\n# Zadanie: dla każdej grupy policz, jaki procent internautów\n# uczestniczy w mediach społecznościowych. Zaokrąglij do całości.\nresult = {}\nfor age_group in AGE_GROUPS:\n    pass  # tu wpisz swój kod\nprint(result)\n",
     "expect": {
       "Y16_24": 92,
       "Y25_34": 89,
@@ -13124,12 +13103,12 @@ const GENERATED = {
     }
   },
   "lab2": {
-    "starter": "API = \"https://api.delphi.cmu.edu/epidata/\"\nTYGODNIE = \"201230-201329\"   # sezon 2012/13, od 30. tygodnia 2012 r.\n\ngft = pobierz(API + \"gft/?locations=nat&epiweeks=\" + TYGODNIE)[\"epidata\"]\ncdc = pobierz(API + \"fluview/?regions=nat&epiweeks=\" + TYGODNIE)[\"epidata\"]\n\n# Google podaje przypadki na 100 000 wizyt, a lekarze procent wizyt.\ngoogle = {r[\"epiweek\"]: r[\"num\"] / 1000 for r in gft}\nlekarze = {r[\"epiweek\"]: r[\"wili\"] for r in cdc}\nprint(\"Liczba tygodni:\", len(google), \"Pierwszy:\", min(google), google[min(google)], lekarze[min(google)])\n\n# Zadanie 1: w ilu tygodniach Google pokazał więcej niż lekarze?\nwyzej = 0   # tu wpisz swój kod\n\n# Zadanie 2: ile razy więcej pokazał Google w tygodniu swojego szczytu?\nrazy = 0    # tu wpisz swój kod\n\nwynik = {\"wyzej\": wyzej, \"razy\": round(razy, 1)}\nprint(wynik)\n",
+    "starter": "import json\nimport requests\n\nAPI = \"https://api.delphi.cmu.edu/epidata/\"\nWEEKS = \"201230-201329\"   # sezon 2012/13, od 30. tygodnia 2012 r.\n\n\ndef get_json(url):\n    \"\"\"Wysyła zapytanie GET pod adres url i zwraca odpowiedź JSON.\n\n    Gdy API odmówi albo nie odpowie, funkcja bierze kopię tej samej odpowiedzi\n    z pliku saved_responses.json i mówi o tym w wyniku.\n    \"\"\"\n    try:\n        response = requests.get(url, timeout=30)\n        response.raise_for_status()\n        return response.json()\n    except requests.RequestException as error:\n        with open(\"saved_responses.json\", encoding=\"utf-8\") as file:\n            saved = json.load(file)\n        if url not in saved[\"responses\"]:\n            raise\n        print(\"Uwaga. API nie przyjęło zapytania:\", error)\n        print(\"Biorę kopię odpowiedzi zapisaną\", saved[\"recorded\"])\n        return saved[\"responses\"][url]\n\n\ngft_rows = get_json(API + \"gft/?locations=nat&epiweeks=\" + WEEKS)[\"epidata\"]\ncdc_rows = get_json(API + \"fluview/?regions=nat&epiweeks=\" + WEEKS)[\"epidata\"]\n\n# Google podaje przypadki na 100 000 wizyt, a lekarze procent wizyt.\ngoogle = {row[\"epiweek\"]: row[\"num\"] / 1000 for row in gft_rows}\ndoctors = {row[\"epiweek\"]: row[\"wili\"] for row in cdc_rows}\nfirst_week = min(google)\nprint(\"Liczba tygodni:\", len(google), \"Pierwszy:\", first_week, google[first_week], doctors[first_week])\n\n# Zadanie 1: w ilu tygodniach Google pokazał więcej niż lekarze?\nweeks_above = 0   # tu wpisz swój kod\n\n# Zadanie 2: ile razy więcej pokazał Google w tygodniu swojego szczytu?\nratio = 0         # tu wpisz swój kod\n\nresult = {\"weeks_above\": weeks_above, \"ratio\": round(ratio, 1)}\nprint(result)\n",
     "expect": {
-      "wyzej": 49,
-      "razy": 2.3
+      "weeks_above": 49,
+      "ratio": 2.3
     },
-    "stdout": "Liczba tygodni: 52 Pierwszy: 201230 0.869 0.949257\n{'wyzej': 49, 'razy': 2.3}\n",
+    "stdout": "Liczba tygodni: 52 Pierwszy: 201230 0.869 0.949257\n{'weeks_above': 49, 'ratio': 2.3}\n",
     "facts": {
       "weeks": 52,
       "peakToPeak": 1.7,
@@ -13139,12 +13118,12 @@ const GENERATED = {
     }
   },
   "lab3": {
-    "starter": "from collections import Counter\n\nprofile = wczytaj(\"profile\")   # 1000 wymyślonych profili, już bez nazwisk\nprint(len(profile), \"profili, pierwszy:\", profile[0])\n\n# Przykład: ile osób jest jedynych w tabeli po samym kraju?\ngrupy = Counter(p[\"kraj\"] for p in profile)\nprint(\"jedyni po samym kraju:\", sum(1 for p in profile if grupy[p[\"kraj\"]] == 1))\n\n# Zadanie 1: ile osób jest jedynych po trzech polach naraz (kraj, branza, staz)?\ntrzy_pola = 0    # tu wpisz swój kod\n\n# Zadanie 2: podaj staż w przedziałach 10 lat (1–10, 11–20 i tak dalej)\n# i policz jeszcze raz, ile osób jest jedynych.\nprzedzialy = 0   # tu wpisz swój kod\n\nwynik = {\"trzy_pola\": trzy_pola, \"przedzialy\": przedzialy}\nprint(wynik)\n",
+    "starter": "import json\nfrom collections import Counter\n\n\ndef load_profiles(path):\n    \"\"\"Wczytuje tabelę profili z pliku JSON i zwraca listę słowników.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        return json.load(file)\n\n\ndef count_unique(profiles, get_group):\n    \"\"\"Liczy osoby, które są jedyne w swojej grupie.\n\n    get_group to funkcja, która dla jednej osoby zwraca jej grupę.\n    \"\"\"\n    group_sizes = Counter(get_group(person) for person in profiles)\n    return sum(1 for person in profiles if group_sizes[get_group(person)] == 1)\n\n\nprofiles = load_profiles(\"profiles.json\")   # 1000 wymyślonych profili, już bez nazwisk\nprint(len(profiles), \"profili, pierwszy:\", profiles[0])\n\n\n# Przykład: grupą jest sam kraj\ndef group_by_country(person):\n    return person[\"country\"]\n\n\nprint(\"jedyni po samym kraju:\", count_unique(profiles, group_by_country))\n\n\n# Zadanie 1: grupą są trzy pola naraz, czyli country, industry i years.\ndef group_by_three_fields(person):\n    return None   # tu wpisz swój kod\n\n\n# Zadanie 2: to samo, ale staż (years) w przedziałach 10 lat,\n# czyli 1–10, 11–20 i tak dalej.\ndef group_by_three_fields_in_ranges(person):\n    return None   # tu wpisz swój kod\n\n\nresult = {\n    \"three_fields\": count_unique(profiles, group_by_three_fields),\n    \"ranges\": count_unique(profiles, group_by_three_fields_in_ranges),\n}\nprint(result)\n",
     "expect": {
-      "trzy_pola": 725,
-      "przedzialy": 272
+      "three_fields": 725,
+      "ranges": 272
     },
-    "stdout": "1000 profili, pierwszy: {'id': 'P-0001', 'kraj': 'Polska', 'branza': 'kultura', 'staz': 3}\njedyni po samym kraju: 0\n{'trzy_pola': 725, 'przedzialy': 272}\n",
+    "stdout": "1000 profili, pierwszy: {'id': 'P-0001', 'country': 'Polska', 'industry': 'kultura', 'years': 3}\njedyni po samym kraju: 0\n{'three_fields': 725, 'ranges': 272}\n",
     "facts": {
       "n": 1000,
       "groups": 841,
@@ -13185,7 +13164,7 @@ __modules["../../analiza-trendow-w-internecie/src/generated.js"] = { "GENERATED"
  * The two labs of topic 1: real API requests in Python, in the page.
  *
  * Each lab has two paths that end in the same checked numbers. The code path runs the
- * student's Python (Pyodide) and reads the variable `wynik`. The no-code path sends the student
+ * student's Python (Pyodide, with the real `requests`) and reads the variable `result`. The no-code path sends the student
  * to the same source in a data browser or to the chapter's figure and checks typed numbers.
  * The group is mixed (an AI and data mining track, a design track), so nobody is blocked.
  *
@@ -13197,9 +13176,19 @@ __modules["../../analiza-trendow-w-internecie/src/generated.js"] = { "GENERATED"
  */
 const { GENERATED } = __modules["../../analiza-trendow-w-internecie/src/generated.js"];
 const { PROFILES } = __modules["src/book/data/profiles.js"];
-/** Tables the page hands to Python with `wczytaj(name)`: the same rows the figures use. */
-const TABLES = {
-  profile: PROFILES.rows.map(([c, i, y], k) => ({ id: `P-${String(k + 1).padStart(4, '0')}`, kraj: PROFILES.countries[c], branza: PROFILES.industries[i], staz: y })),
+/** The table of the anonymity figure as the labs read it: the same rows, English field names. */
+const PROFILE_ROWS = PROFILES.rows.map(([c, i, y], k) => ({ id: `P-${String(k + 1).padStart(4, '0')}`, country: PROFILES.countries[c], industry: PROFILES.industries[i], years: y }));
+
+/**
+ * Files the page puts beside the student's code (name -> text). The code opens them with
+ * plain `open()`, and the student can download them to run the same code elsewhere.
+ */
+const FILES = {
+  'saved_responses.json': JSON.stringify({
+    recorded: GENERATED.copiesDate,
+    responses: Object.fromEntries(Object.entries(GENERATED.copies).map(([url, text]) => [url, JSON.parse(text)])),
+  }),
+  'profiles.json': JSON.stringify(PROFILE_ROWS),
 };
 
 const isNum = (x) => typeof x === 'number' && Number.isFinite(x);
@@ -13218,18 +13207,19 @@ const LABS = {
     id: 'lab1',
     intro: 'Rysunek {rys:coverage} pokazał dwa sita. Teraz pobierzesz te same dane prosto z API Eurostatu i policzysz coś, czego na rysunku nie ma. Jaki procent **internautów** w każdej grupie wieku uczestniczy w mediach społecznościowych?',
     starter: GENERATED.lab1.starter,
+    files: ['saved_responses.json'],
     expect: GENERATED.lab1.expect,
     tol: 0,
     hints: [
-      'W pętli wywołaj funkcję `odsetek` dwa razy, tak jak w przykładzie. Zamiast `"Y65_74"` wpisz zmienną `wiek`.',
-      'Wynik dla grupy to `round(100 * media / internet)`. Zapisz go jako `wynik[wiek]`.',
+      'W pętli wywołaj funkcję `get_share` dwa razy, tak jak w przykładzie. Zamiast `"Y65_74"` wpisz zmienną `age_group`.',
+      'Wynik dla grupy to `round(100 * social_media / internet)`. Zapisz go jako `result[age_group]`.',
     ],
     diagnose(value) {
       const expect = GENERATED.lab1.expect;
-      if (!isDict(value)) return 'Zmienna `wynik` powinna być słownikiem. Zostaw wiersz `wynik = {}` i wypełnij słownik w pętli.';
+      if (!isDict(value)) return 'Zmienna `result` powinna być słownikiem. Zostaw wiersz `result = {}` i wypełnij słownik w pętli.';
       const missing = Object.keys(expect).filter((k) => !(k in value));
-      if (missing.length === Object.keys(expect).length) return 'Słownik `wynik` jest pusty. W pętli zapisz wartość jako `wynik[wiek]`.';
-      if (missing.length) return `W wyniku brakuje grup ${missing.map((k) => AGE[k]).join(', ')}. Pętla powinna przejść przez całą listę \`GRUPY\`.`;
+      if (missing.length === Object.keys(expect).length) return 'Słownik `result` jest pusty. W pętli zapisz wartość jako `result[age_group]`.';
+      if (missing.length) return `W wyniku brakuje grup ${missing.map((k) => AGE[k]).join(', ')}. Pętla powinna przejść przez całą listę \`AGE_GROUPS\`.`;
       const vals = Object.keys(expect).map((k) => value[k]);
       if (!vals.every(isNum)) return 'Każda wartość w słowniku powinna być liczbą.';
       if (vals.every((v) => v > 0 && v <= 1.5)) return 'To ułamki. Pomnóż przez 100 i zaokrąglij do całości.';
@@ -13242,7 +13232,7 @@ const LABS = {
     success(value) {
       return `Tak. Wśród internautów w wieku 16–24 lata w mediach społecznościowych uczestniczy ${value.Y16_24}%, a w wieku 65–74 lata tylko ${value.Y65_74}%. Drugie sito działa więc osobno od pierwszego. Starsi rzadziej są w internecie, a ci, którzy w nim są, rzadziej mają profil.`;
     },
-    more: 'Dla chętnych. W adresie zmień `geo=PL` na `geo=EU27_2020` albo na inny kraj i porównaj wyniki. Zapytanie zwraca format JSON-stat. Wypisz `dane["dimension"]`, żeby zobaczyć, jak opisuje wymiary.',
+    more: 'Dla chętnych. W adresie zmień `geo=PL` na `geo=EU27_2020` albo na inny kraj i porównaj wyniki. Zapytanie zwraca format JSON-stat. W funkcji `get_share` wypisz `data["dimension"]`, żeby zobaczyć, jak opisuje wymiary.',
     base: {
       say: 'Otwórz w przeglądarce danych Eurostatu zbiory [isoc_ci_ifp_iu](https://ec.europa.eu/eurostat/databrowser/view/isoc_ci_ifp_iu/default/table) i [isoc_ci_ac_i](https://ec.europa.eu/eurostat/databrowser/view/isoc_ci_ac_i/default/table). Ustaw Polskę, rok 2025 i osoby w wieku 65–74 lata. Te same liczby pokazuje rysunek {rys:coverage}. Potem policz trzecią liczbę na kalkulatorze.',
       fields: [
@@ -13261,39 +13251,40 @@ const LABS = {
     id: 'lab2',
     intro: 'Rysunek {rys:flu} powstał z dwóch szeregów z otwartego API. Pobierz je i sprawdź podpis pod rysunkiem. W ilu tygodniach sezonu 2012/13 Google pokazał więcej niż lekarze? Ile razy więcej pokazał w tygodniu swojego szczytu?',
     starter: GENERATED.lab2.starter,
+    files: ['saved_responses.json'],
     expect: GENERATED.lab2.expect,
     tol: 0,
     hints: [
-      'Przejdź po kluczach słownika `google`. Wyrażenie `sum(1 for t in google if google[t] > lekarze[t])` policzy tygodnie.',
-      'Tydzień szczytu Google to `max(google, key=google.get)`. Podziel wartość Google z tego tygodnia przez wartość lekarzy z tego samego tygodnia.',
+      'Przejdź po kluczach słownika `google`. Wyrażenie `sum(1 for week in google if google[week] > doctors[week])` policzy tygodnie.',
+      'Tydzień szczytu Google to `max(google, key=google.get)`. Podziel wartość Google z tego tygodnia przez wartość ze słownika `doctors` z tego samego tygodnia.',
     ],
     diagnose(value) {
       const { expect, facts } = GENERATED.lab2;
-      if (!isDict(value) || !isNum(value.wyzej) || !isNum(value.razy)) return 'Słownik `wynik` powinien mieć dwie liczby, `wyzej` i `razy`. Zostaw ostatnie wiersze kodu bez zmian.';
-      if (value.wyzej === 0 && value.razy === 0) return 'W kodzie są jeszcze zera. Wpisz obliczenia w miejscach oznaczonych komentarzem.';
-      const okWeeks = value.wyzej === expect.wyzej;
-      const okTimes = near(value.razy, expect.razy, 0);
+      if (!isDict(value) || !isNum(value.weeks_above) || !isNum(value.ratio)) return 'Słownik `result` powinien mieć dwie liczby, `weeks_above` i `ratio`. Zostaw ostatnie wiersze kodu bez zmian.';
+      if (value.weeks_above === 0 && value.ratio === 0) return 'W kodzie są jeszcze zera. Wpisz obliczenia w miejscach oznaczonych komentarzem.';
+      const okWeeks = value.weeks_above === expect.weeks_above;
+      const okTimes = near(value.ratio, expect.ratio, 0);
       if (!okWeeks) {
-        if (value.wyzej === facts.weeks) return 'To liczba wszystkich tygodni. Policz tylko te, w których `google[t] > lekarze[t]`.';
-        if (value.wyzej === facts.weeks - expect.wyzej) return 'To tygodnie, w których lekarze pokazali więcej. Odwróć znak porównania.';
+        if (value.weeks_above === facts.weeks) return 'To liczba wszystkich tygodni. Policz tylko te, w których `google[week] > doctors[week]`.';
+        if (value.weeks_above === facts.weeks - expect.weeks_above) return 'To tygodnie, w których lekarze pokazali więcej. Odwróć znak porównania.';
         return okTimes
-          ? 'Druga liczba jest dobra. Pierwsza jeszcze nie. Policz tygodnie, w których `google[t] > lekarze[t]`.'
-          : 'Zacznij od pierwszej liczby. Policz tygodnie, w których `google[t] > lekarze[t]`.';
+          ? 'Druga liczba jest dobra. Pierwsza jeszcze nie. Policz tygodnie, w których `google[week] > doctors[week]`.'
+          : 'Zacznij od pierwszej liczby. Policz tygodnie, w których `google[week] > doctors[week]`.';
       }
-      if (near(value.razy, facts.peakToPeak, 0)) return 'Pierwsza liczba jest dobra. W drugiej porównano szczyt Google ze szczytem lekarzy, a to dwa różne tygodnie. Weź wartość lekarzy z tego samego tygodnia, w którym Google był najwyżej.';
-      if (near(value.razy, facts.gftPeak, 0.06)) return 'Pierwsza liczba jest dobra. Druga to wartość Google w szczycie, a nie iloraz. Podziel ją przez wartość lekarzy z tego samego tygodnia.';
-      if (value.razy > 0 && value.razy < 1) return 'Pierwsza liczba jest dobra. W drugiej iloraz jest odwrócony. Dziel Google przez lekarzy.';
+      if (near(value.ratio, facts.peakToPeak, 0)) return 'Pierwsza liczba jest dobra. W drugiej porównano szczyt Google ze szczytem lekarzy, a to dwa różne tygodnie. Weź wartość lekarzy z tego samego tygodnia, w którym Google był najwyżej.';
+      if (near(value.ratio, facts.gftPeak, 0.06)) return 'Pierwsza liczba jest dobra. Druga to wartość Google w szczycie, a nie iloraz. Podziel ją przez wartość lekarzy z tego samego tygodnia.';
+      if (value.ratio > 0 && value.ratio < 1) return 'Pierwsza liczba jest dobra. W drugiej iloraz jest odwrócony. Dziel Google przez lekarzy.';
       return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Znajdź tydzień, w którym Google był najwyżej, i podziel obie wartości z tego tygodnia.';
     },
     success(value) {
-      return `Tak. Google pokazał więcej w ${value.wyzej} z ${GENERATED.lab2.facts.weeks} tygodni, a w tygodniu szczytu ${String(value.razy).replace('.', ',')} razy więcej niż lekarze. To te same liczby co pod rysunkiem {rys:flu}. Porównanie szczytu ze szczytem dałoby tylko ${String(GENERATED.lab2.facts.peakToPeak).replace('.', ',')}, więc trzeba pisać, co z czym porównujemy.`;
+      return `Tak. Google pokazał więcej w ${value.weeks_above} z ${GENERATED.lab2.facts.weeks} tygodni, a w tygodniu szczytu ${String(value.ratio).replace('.', ',')} razy więcej niż lekarze. To te same liczby co pod rysunkiem {rys:flu}. Porównanie szczytu ze szczytem dałoby tylko ${String(GENERATED.lab2.facts.peakToPeak).replace('.', ',')}, więc trzeba pisać, co z czym porównujemy.`;
     },
-    more: 'Dla chętnych. Zmień `TYGODNIE` na `"201030-201129"` i uruchom kod jeszcze raz. To sezon, w którym szacunek Google jeszcze działał.',
+    more: 'Dla chętnych. Zmień `WEEKS` na `"201030-201129"` i uruchom kod jeszcze raz. To sezon, w którym szacunek Google jeszcze działał.',
     base: {
       say: 'Na rysunku {rys:flu} przełączaj sezony i czytaj podpis pod wykresem. Wpisz trzy liczby.',
       fields: [
-        { id: 's13', label: 'W ilu tygodniach sezonu 2012/13 Google pokazał więcej niż lekarze?', expect: GENERATED.lab2.expect.wyzej, tol: 0 },
-        { id: 'razy', label: 'Ile razy więcej pokazał Google w tygodniu swojego szczytu?', expect: GENERATED.lab2.expect.razy, tol: 0.05 },
+        { id: 's13', label: 'W ilu tygodniach sezonu 2012/13 Google pokazał więcej niż lekarze?', expect: GENERATED.lab2.expect.weeks_above, tol: 0 },
+        { id: 'razy', label: 'Ile razy więcej pokazał Google w tygodniu swojego szczytu?', expect: GENERATED.lab2.expect.ratio, tol: 0.05 },
         { id: 's11', label: 'A w ilu tygodniach sezonu 2010/11 Google pokazał więcej?', expect: GENERATED.lab2.facts.over2011, tol: 0 },
       ],
       wrong: {},
@@ -13305,37 +13296,38 @@ const LABS = {
     id: 'lab3',
     intro: 'Rysunek {rys:anonymity} liczy, ile osób zostaje jedynych w tabeli bez nazwisk. Policz to samodzielnie na tej samej tabeli wymyślonych profili. Potem sprawdź, ile daje podanie stażu w przedziałach.',
     starter: GENERATED.lab3.starter,
+    files: ['profiles.json'],
     expect: GENERATED.lab3.expect,
     tol: 0,
     hints: [
-      'Grupą osoby jest krotka z trzech pól, czyli `(p["kraj"], p["branza"], p["staz"])`. Policz grupy przez `Counter`, tak jak w przykładzie z krajem.',
-      'Przedział 10 lat dla stażu to `(p["staz"] - 1) // 10`. Staż 10 trafia wtedy do pierwszego przedziału, a staż 11 do drugiego.',
+      'Grupą osoby jest krotka z trzech pól. Funkcja `group_by_three_fields` ma zwracać `(person["country"], person["industry"], person["years"])`.',
+      'Przedział 10 lat dla stażu to `(person["years"] - 1) // 10`. Staż 10 trafia wtedy do pierwszego przedziału, a staż 11 do drugiego.',
     ],
     diagnose(value) {
       const { expect, facts } = GENERATED.lab3;
-      if (!isDict(value) || !isNum(value.trzy_pola) || !isNum(value.przedzialy)) return 'Słownik `wynik` powinien mieć dwie liczby, `trzy_pola` i `przedzialy`. Zostaw ostatnie wiersze kodu bez zmian.';
-      if (value.trzy_pola === 0 && value.przedzialy === 0) return 'W kodzie są jeszcze zera. Wpisz obliczenia w miejscach oznaczonych komentarzem.';
-      if (value.trzy_pola !== expect.trzy_pola) {
-        if (value.trzy_pola === facts.groups) return 'Pierwsza liczba to liczba różnych zestawów, a nie osób. Policz osoby, których zestaw występuje w tabeli jeden raz.';
-        if (value.trzy_pola === facts.noYears) return 'W pierwszej liczbie brakuje stażu. Grupa to trzy pola naraz, czyli kraj, branża i staż.';
-        return 'Zacznij od pierwszej liczby. Grupą jest krotka z trzech pól. Policz osoby, których grupa ma jedną osobę.';
+      if (!isDict(value) || !isNum(value.three_fields) || !isNum(value.ranges)) return 'Słownik `result` powinien mieć dwie liczby, `three_fields` i `ranges`. Zostaw ostatnie wiersze kodu bez zmian.';
+      if (value.three_fields === 0 && value.ranges === 0) return 'Obie funkcje zwracają jeszcze `None`, więc wszyscy są w jednej grupie i wychodzą zera. Wpisz kod w miejscach oznaczonych komentarzem.';
+      if (value.three_fields !== expect.three_fields) {
+        if (value.three_fields === facts.groups) return 'Pierwsza liczba to liczba różnych zestawów, a nie osób. Zostaw funkcję `count_unique` bez zmian, bo to ona liczy osoby.';
+        if (value.three_fields === facts.noYears) return 'W pierwszej liczbie brakuje stażu. Grupa to trzy pola naraz, czyli kraj, branża i staż.';
+        return 'Zacznij od pierwszej liczby. Funkcja `group_by_three_fields` ma zwracać krotkę z trzech pól.';
       }
-      if (value.przedzialy === facts.fromZero) return 'Pierwsza liczba jest dobra. W drugiej przedziały zaczynają się od zera, czyli 0–9 i 10–19. Zadanie prosi o 1–10 i 11–20, więc użyj `(p["staz"] - 1) // 10`.';
-      if (value.przedzialy === facts.noYears) return 'Pierwsza liczba jest dobra. W drugiej staż zniknął z grupy. Ma w niej zostać, tylko mniej dokładny.';
-      if (value.przedzialy === facts.onlyBins) return 'Pierwsza liczba jest dobra. W drugiej grupa ma tylko staż. Zostaw w niej także kraj i branżę.';
-      if (value.przedzialy === expect.trzy_pola) return 'Pierwsza liczba jest dobra. Druga jest taka sama, więc staż nadal jest dokładny. Zamień go na przedział.';
+      if (value.ranges === facts.fromZero) return 'Pierwsza liczba jest dobra. W drugiej przedziały zaczynają się od zera, czyli 0–9 i 10–19. Zadanie prosi o 1–10 i 11–20, więc użyj `(person["years"] - 1) // 10`.';
+      if (value.ranges === facts.noYears) return 'Pierwsza liczba jest dobra. W drugiej staż zniknął z grupy. Ma w niej zostać, tylko mniej dokładny.';
+      if (value.ranges === facts.onlyBins) return 'Pierwsza liczba jest dobra. W drugiej grupa ma tylko staż. Zostaw w niej także kraj i branżę.';
+      if (value.ranges === expect.three_fields) return 'Pierwsza liczba jest dobra. Druga jest taka sama, więc staż nadal jest dokładny. Zamień go na przedział.';
       return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Zamień w grupie staż na numer przedziału 10 lat.';
     },
     success(value) {
-      const pct = Math.round((value.przedzialy / GENERATED.lab3.facts.n) * 100);
-      return `Tak. Po trzech polach jedynych jest ${value.trzy_pola} z ${GENERATED.lab3.facts.n} osób. Przedziały 10 lat zmniejszają tę liczbę do ${value.przedzialy}, ale to nadal ${pct}% tabeli. Sama zamiana nazwisk na numery nie wystarcza.`;
+      const pct = Math.round((value.ranges / GENERATED.lab3.facts.n) * 100);
+      return `Tak. Po trzech polach jedynych jest ${value.three_fields} z ${GENERATED.lab3.facts.n} osób. Przedziały 10 lat zmniejszają tę liczbę do ${value.ranges}, ale to nadal ${pct}% tabeli. Sama zamiana nazwisk na numery nie wystarcza.`;
     },
     more: 'Dla chętnych. Policz, ile osób jest w grupach mniejszych niż 5. Te osoby nie spełniają k-anonimowości dla k = 5.',
     base: {
       say: 'Użyj rysunku {rys:anonymity}. Zaznaczaj pola i czytaj, ile osób jest jedynych w swojej grupie.',
       fields: [
-        { id: 'trzy', label: 'Jedyni po trzech polach, staż podany dokładnie', expect: GENERATED.lab3.expect.trzy_pola, tol: 0 },
-        { id: 'dziesiec', label: 'Jedyni po trzech polach, staż w przedziałach 10 lat', expect: GENERATED.lab3.expect.przedzialy, tol: 0 },
+        { id: 'trzy', label: 'Jedyni po trzech polach, staż podany dokładnie', expect: GENERATED.lab3.expect.three_fields, tol: 0 },
+        { id: 'dziesiec', label: 'Jedyni po trzech polach, staż w przedziałach 10 lat', expect: GENERATED.lab3.expect.ranges, tol: 0 },
         { id: 'bez', label: 'Jedyni po dwóch polach, bez stażu', expect: GENERATED.lab3.facts.noYears, tol: 0 },
       ],
       wrong: {},
@@ -13365,7 +13357,7 @@ function checkBase(lab, answers) {
   return { ok: false, wrong: wrong.map((f) => f.id), text: lab.base.wrong[first.id] || null };
 }
 
-__modules["../../analiza-trendow-w-internecie/src/tasks.js"] = { "TABLES": TABLES, "matches": matches, "LABS": LABS, "parseNumber": parseNumber, "checkCode": checkCode, "checkBase": checkBase };
+__modules["../../analiza-trendow-w-internecie/src/tasks.js"] = { "PROFILE_ROWS": PROFILE_ROWS, "FILES": FILES, "matches": matches, "LABS": LABS, "parseNumber": parseNumber, "checkCode": checkCode, "checkBase": checkBase };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/pylab.js ===== */
@@ -13388,8 +13380,8 @@ const { rich } = __modules["src/book/rich.js"];
 const { t } = __modules["src/i18n/index.js"];
 const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
 const { runPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
-const { LABS, TABLES, checkCode, checkBase } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
-const { GENERATED } = __modules["../../analiza-trendow-w-internecie/src/generated.js"];
+const { LABS, FILES, checkCode, checkBase } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
+const { download } = __modules["src/ui/download.js"];
 const INDENT = '    ';
 
 /** Tab and Shift+Tab indent like an editor; Escape lets the keyboard leave the field. */
@@ -13427,6 +13419,9 @@ function labAnswer(labId) {
   return typed.length ? `${t('py.noCodeAnswer')} ${typed.join('; ')}` : null;
 }
 
+/** An error of the `requests` library that reached the student: the API refused and there was no saved copy. */
+const NET_ERROR = /requests\.exceptions\.|HTTPError|ConnectionError|Timeout/;
+
 function labExercise(labId) {
   const lab = LABS[labId];
   return ({ onDone } = {}) => {
@@ -13449,7 +13444,9 @@ function labExercise(labId) {
       spellcheck: 'false', autocapitalize: 'off', autocomplete: 'off', autocorrect: 'off',
       'aria-label': t('py.codeLabel'), rows: String(lab.starter.split('\n').length + 1),
     });
-    area.value = saved.code || lab.starter;
+    // code saved before the labs moved to `requests` calls helpers that no longer exist: start again
+    const stale = /\b(pobierz|wczytaj)\(/.test(saved.code || '');
+    area.value = (!stale && saved.code) || lab.starter;
     area.addEventListener('input', save);
     editorKeys(area, save);
     const out = el('pre.py-out', { 'aria-live': 'polite' });
@@ -13470,10 +13467,10 @@ function labExercise(labId) {
       say(verdict, '', null);
       showOut(t('py.loading'), 'py-out-wait');
       try {
-        const res = await runPython(area.value, { copies: GENERATED.copies, copiesDate: GENERATED.copiesDate, tables: TABLES });
+        const res = await runPython(area.value, { files: FILES });
         if (!res.ok) {
           showOut([res.stdout, res.line ? t('py.errorAt', { line: res.line, error: res.error }) : res.error].filter(Boolean).join('\n'), 'py-out-err');
-          say(verdict, 'py-wrong', rich(/Zapytanie się nie udało/.test(res.error) ? t('py.netError') : t('py.pyError')));
+          say(verdict, 'py-wrong', rich(NET_ERROR.test(res.error) ? t('py.netError') : t('py.pyError')));
         } else {
           showOut(res.stdout || t('py.noOutput'));
           const v = checkCode(lab, res.value);
@@ -13500,8 +13497,12 @@ function labExercise(labId) {
       showOut('');
       say(verdict, '', null);
     });
+    // the files the code opens are part of the page; a student can take them to their own computer
+    const fileBar = el('div.py-files', el('span.py-files-label', t('py.files')),
+      lab.files.map((name) => el('button.py-file', { type: 'button', onClick: () => download(name, FILES[name]) }, name)));
     const codePane = el('div.py-pane',
       el('p.py-note', { html: rich(t('py.note')) }),
+      fileBar,
       area,
       el('div.py-bar', runBtn, hintBtn, resetBtn),
       hintBox, out, verdict);

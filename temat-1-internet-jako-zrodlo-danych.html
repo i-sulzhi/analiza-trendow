@@ -13296,6 +13296,8 @@ const LABS = {
       if (near(value.ratio, facts.peakToPeak, 0)) return 'Pierwsza liczba jest dobra. W drugiej porównano szczyt Google ze szczytem lekarzy, a to dwa różne tygodnie. Weź wartość lekarzy z tego samego tygodnia, w którym Google był najwyżej.';
       if (near(value.ratio, facts.gftPeak, 0.06)) return 'Pierwsza liczba jest dobra. Druga to wartość Google w szczycie, a nie iloraz. Podziel ją przez wartość lekarzy z tego samego tygodnia.';
       if (value.ratio > 0 && value.ratio < 1) return 'Pierwsza liczba jest dobra. W drugiej iloraz jest odwrócony. Dziel Google przez lekarzy.';
+      // an epiweek such as 201303: the week itself was put where the ratio belongs
+      if (value.ratio >= 190000) return 'Pierwsza liczba jest dobra. Druga to numer tygodnia, a nie iloraz. Funkcja `find_peak_week` zwraca tydzień. Weź wartości z tego tygodnia, czyli `google[peak_week]` i `doctors[peak_week]`, i podziel je.';
       return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Znajdź tydzień szczytu Google funkcją `find_peak_week` i podziel obie wartości z tego tygodnia.';
     },
     success(value) {
@@ -13328,6 +13330,7 @@ const LABS = {
           if (near(v, f.peakToPeak, 0.05)) return 'W drugiej liczbie porównano szczyt Google ze szczytem lekarzy, a to dwa różne tygodnie. Weź wartość lekarzy z tego samego wiersza, w którym Google jest najwyżej.';
           if (near(v, f.gftPeak, 0.06)) return 'Druga liczba to wartość Google w szczycie, a nie iloraz. Podziel ją przez wartość lekarzy z tego samego wiersza.';
           if (v > 0 && v < 1) return 'W drugiej liczbie iloraz jest odwrócony. Dziel Google przez lekarzy.';
+          if (v >= 190000) return 'Druga liczba to numer tygodnia, a nie iloraz. Weź z tego wiersza wartość Google i wartość lekarzy i podziel je.';
           return 'Druga liczba jeszcze nie. Znajdź wiersz z największą wartością Google i podziel obie wartości z tego wiersza.';
         },
         s11: 'Trzecią liczbę policz tak samo jak pierwszą, tylko w tabeli sezonu 2010/11.',

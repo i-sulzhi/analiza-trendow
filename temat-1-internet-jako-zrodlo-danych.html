@@ -13434,7 +13434,9 @@ function labExercise(labId) {
     };
     const save = () => setItem(`lab:${lab.id}`, { path: state.path, code: area.value, answers: state.answers });
     const finish = () => {
-      setItem(`lab:${lab.id}:solved`, state.path === 'kod' ? { code: area.value } : { answers: { ...state.answers } });
+      // accepted code is the richer answer: typing the numbers afterwards does not replace it
+      if (state.path === 'kod') setItem(`lab:${lab.id}:solved`, { code: area.value });
+      else if (!getItem(`lab:${lab.id}:solved`)?.code) setItem(`lab:${lab.id}:solved`, { answers: { ...state.answers } });
       if (!isDone(lab.id)) markDone(lab.id);
       onDone?.(lab.id);
     };

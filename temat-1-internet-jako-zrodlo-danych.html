@@ -957,6 +957,9 @@ textarea.rp-input { resize: vertical; font: 12.5px/1.5 var(--mono); white-space:
 .bk-toc-on { background: var(--accent-soft); color: var(--ink); }
 .bk-toc-num { font: 700 12px var(--mono); color: var(--accent); }
 .bk-toc-done { color: var(--ok); font-weight: 800; }
+.bk-toc-sub { padding-top: 3px; padding-bottom: 3px; font-size: 13px; }
+.bk-toc-sub .bk-toc-num { color: var(--ink-faint); text-align: right; padding-right: 6px; }
+.bk-ex[id] { scroll-margin-top: 60px; }
 .bk-toc-tag { display: block; margin-top: 2px; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink-faint); }
 .bk-toc-tag-before { color: var(--accent); }
 .bk-toc-tag-meeting { color: var(--ink-soft); }
@@ -12359,13 +12362,17 @@ class BookApp {
       ch.sections.map((s) => {
         const items = doneIn(s);
         const finished = items.length && items.every((it) => this.isItemDone(it));
-        return el('a', {
+        // An exercise may ask for its own line (`toc: 'Lab 2. ...'`): long ones are easy to scroll past.
+        const own = s.blocks.filter((b) => b.exercise && b.toc).map((b) => el('a.bk-toc-item.bk-toc-sub', {
+          href: `#ex-${b.exercise}`, onClick: () => this.toggleToc(false),
+        }, el('span.bk-toc-num', '›'), el('span.bk-toc-title', b.toc), isDone(b.exercise) ? el('span.bk-toc-done', '✓') : null));
+        return [el('a', {
           href: `#${s.id}`,
           class: ['bk-toc-item', this.active === s.id ? 'bk-toc-on' : ''].filter(Boolean).join(' '),
           onClick: () => this.toggleToc(false),
         }, el('span.bk-toc-num', s.num),
         // A course may say when a section is due (`toc: {tag, tone}`): before, at or after the meeting.
-        el('span.bk-toc-title', s.title, s.toc ? el(`span.bk-toc-tag.bk-toc-tag-${s.toc.tone}`, s.toc.tag) : null), finished ? el('span.bk-toc-done', '✓') : null);
+        el('span.bk-toc-title', s.title, s.toc ? el(`span.bk-toc-tag.bk-toc-tag-${s.toc.tone}`, s.toc.tag) : null), finished ? el('span.bk-toc-done', '✓') : null), own];
       }),
       el('a.bk-toc-item', { href: '#bk-end', onClick: () => this.toggleToc(false) }, el('span.bk-toc-num', '✓'), el('span.bk-toc-title', t('bk.summary'))));
   }
@@ -12417,7 +12424,7 @@ class BookApp {
     if (b.p) return el('p.bk-p', { html: rich(b.p) });
     if (b.figure) return el('div.bk-fig', FIGURES[b.figure]({ num: `${t('bk.figure')} ${this.figNums.get(b.figure)}` }));
     if (b.exercise) {
-      return el('div.bk-ex', exerciseHead(b), EXERCISES[b.exercise]({ onDone }));
+      return el('div.bk-ex', { id: b.toc ? `ex-${b.exercise}` : null }, exerciseHead(b), EXERCISES[b.exercise]({ onDone }));
     }
     if (b.lesson) {
       const host = el('div.bk-wb');
@@ -12850,8 +12857,8 @@ const sections = [
     blocks: [
       { p: 'Rysunki w tym temacie powstały z otwartych danych. Każdy z nich możesz odtworzyć samodzielnie. Dane udostępnia **API**, czyli adres, pod którym program dostaje odpowiedź w ustalonym formacie, zwykle JSON.' },
       { p: 'Każde zadanie ma dwie ścieżki. W ścieżce z kodem piszesz kilka wierszy w Pythonie, a strona uruchamia je w przeglądarce. W ścieżce bez kodu szukasz tych samych liczb w przeglądarce danych. Obie kończą się tym samym wynikiem, więc wybierz jedną.' },
-      { exercise: 'lab1', num: 'Lab 1', title: 'Eurostat. Ilu internautów jest w mediach społecznościowych?', min: 15 },
-      { exercise: 'lab2', num: 'Lab 2', title: 'Google Flu Trends. Sprawdź podpis pod rysunkiem', min: 20 },
+      { exercise: 'lab1', num: 'Lab 1', title: 'Eurostat. Ilu internautów jest w mediach społecznościowych?', min: 15, toc: 'Lab 1. Eurostat' },
+      { exercise: 'lab2', num: 'Lab 2', title: 'Google Flu Trends. Sprawdź podpis pod rysunkiem', min: 20, toc: 'Lab 2. Google Flu Trends' },
       { p: 'Oba API działają bez rejestracji, ale to wyjątek. Zwykle trzeba dostać **klucz**, a serwis liczy zapytania. API z danymi o grypie przyjmuje bez klucza 60 zapytań na godzinę z jednego adresu. Na zajęciach cała sala ma często jeden adres, więc **limit zapytań** szybko się kończy. Wtedy funkcja `pobierz` bierze kopię odpowiedzi, którą zapisaliśmy wcześniej, i pisze o tym w wyniku.' },
       { p: 'Długie wyniki API oddaje po kawałku, strona po stronie. To **stronicowanie**. Program musi wtedy pytać w pętli, aż dostanie wszystko.' },
       { p: 'Dobra praktyka jest jedna i prosta. Zapisz surową odpowiedź API w pliku razem z datą i adresem zapytania, a obliczenia rób na tym pliku. Dane w źródle mogą się zmienić albo zniknąć. Eurostat poprawia swoje tabele, a dane CDC o grypie mają wiele wydań.' },
@@ -12891,7 +12898,7 @@ const sections = [
   // the anonymity figure gets its lab right after the paragraph that closes it
   home(s18, BEFORE, swap(s18.blocks, textHas('Najbezpieczniej jest pokazywać w raporcie tylko wyniki zbiorcze'), (b) => [
     b,
-    { exercise: 'lab3', num: 'Lab 3', title: 'Ile osób da się wskazać w tabeli bez nazwisk?', min: 10, who: 'w domu' },
+    { exercise: 'lab3', num: 'Lab 3', title: 'Ile osób da się wskazać w tabeli bez nazwisk?', min: 10, who: 'w domu', toc: 'Lab 3. Tabela bez nazwisk' },
   ])),
   {
     ...s19, meeting: 1, toc: TOC.meeting, parts: [['cwiczenie', 15]],

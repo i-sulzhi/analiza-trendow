@@ -12436,7 +12436,7 @@ class BookApp {
     if (b.discuss) {
       const d = b.discuss;
       return el('aside.bk-discuss',
-        el('div.bk-discuss-head', el('span.bk-kind.bk-kind-dyskusja', `${t('bk.kind.dyskusja')} · ${d.min}′`), el('span', d.who)),
+        el('div.bk-discuss-head', el('span.bk-kind.bk-kind-dyskusja', d.min ? `${t('bk.kind.dyskusja')} · ${d.min}′` : t('bk.kind.dyskusja')), el('span', d.who)),
         el('ol', d.prompts.map((q) => el('li', { html: rich(q) }))));
     }
     if (b.terms) {
@@ -12485,7 +12485,8 @@ class BookApp {
 
 function exerciseHead(b) {
   return el('div.bk-ex-head',
-    el('span.bk-kind.bk-kind-cwiczenie', `${b.num} · ${b.min}′`),
+    // a course that does not plan by the minute leaves `min` out
+    el('span.bk-kind.bk-kind-cwiczenie', b.min ? `${b.num} · ${b.min}′` : b.num),
     b.who ? el('span.bk-ex-who', b.who) : null,
     el('h3.bk-ex-title', b.title));
 }
@@ -12918,7 +12919,14 @@ const CHAPTER = {
   course: COURSE,
   siteNav: ['home'],
   // labels inherited from the workshop that say where the work is done ("w domu", "poza zajęciami") go too
-  sections: sections.map((s) => ({ ...s, blocks: s.blocks.map((b) => (b.who && /dom|spotkani|zajęciami/i.test(b.who) ? { ...b, who: undefined } : b)) })),
+  sections: sections.map((s) => ({
+    ...s,
+    blocks: s.blocks
+      .map((b) => (b.who && /dom|spotkani|zajęciami/i.test(b.who) ? { ...b, who: undefined } : b))
+      // no minutes on exercises and discussions either: the teacher paces the class
+      .map((b) => (b.min ? { ...b, min: undefined } : b))
+      .map((b) => (b.discuss ? { ...b, discuss: { ...b.discuss, min: undefined } } : b)),
+  })),
   summary: [
     ...BASE.summary.slice(0, BASE.summary.findIndex((it) => it.lesson === 'wzmianki') + 1),
     { id: 'lab1', label: 'Lab 1. Eurostat z API', section: 's1-lab' },

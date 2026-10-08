@@ -13344,6 +13344,7 @@ const LABS = {
     intro: 'Rysunek {rys:anonymity} liczy, ile osób zostaje jedynych w tabeli bez nazwisk. Policz to samodzielnie na tej samej tabeli wymyślonych profili. Potem sprawdź, ile daje podanie stażu w przedziałach.',
     starter: GENERATED.lab3.starter,
     files: ['profiles.json'],
+    keys: 'W tabeli pola nazywają się `country`, `industry` i `years`.',
     expect: GENERATED.lab3.expect,
     tol: 0,
     hints: [
@@ -13361,7 +13362,9 @@ const LABS = {
       }
       if (value.ranges === facts.fromZero) return 'Pierwsza liczba jest dobra. W drugiej przedziały zaczynają się od zera, czyli 0–9 i 10–19. Zadanie prosi o 1–10 i 11–20, więc użyj `(person["years"] - 1) // 10`.';
       if (value.ranges === facts.noYears) return 'Pierwsza liczba jest dobra. W drugiej staż zniknął z grupy. Ma w niej zostać, tylko mniej dokładny.';
-      if (value.ranges === facts.onlyBins) return 'Pierwsza liczba jest dobra. W drugiej grupa ma tylko staż. Zostaw w niej także kraj i branżę.';
+      // zero comes out in two ways: the second function still returns None (the usual state after task 1),
+      // or its group is the range of years alone; the value cannot tell them apart, so the message names both
+      if (value.ranges === 0 || value.ranges === facts.onlyBins) return 'Pierwsza liczba jest dobra. Druga wyszła zero. Jeśli funkcja `group_by_three_fields_in_ranges` zwraca jeszcze `None`, wpisz w niej kod. Jeśli zwraca sam przedział stażu, dodaj do grupy kraj i branżę.';
       if (value.ranges === expect.three_fields) return 'Pierwsza liczba jest dobra. Druga jest taka sama, więc staż nadal jest dokładny. Zamień go na przedział.';
       return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Zamień w grupie staż na numer przedziału 10 lat.';
     },
@@ -13403,6 +13406,17 @@ const LABS = {
   },
 };
 
+/**
+ * A plain sentence under a Python error that a beginner cannot read, or null. Chosen from the
+ * error text, because here there is no value to diagnose.
+ */
+function explainError(lab, error) {
+  const e = String(error || '');
+  if (/unhashable type: 'list'/.test(e)) return 'Grupa musi być krotką w nawiasach okrągłych, a nie listą w kwadratowych. Numer wiersza wskazuje gotową funkcję, która liczy grupy, ale poprawka jest w Twojej funkcji.';
+  if (/KeyError/.test(e) && lab.keys) return `Takiego pola nie ma. ${lab.keys}`;
+  return null;
+}
+
 /** "60,6" or "60.6" or " 61 % " -> number, or NaN. */
 function parseNumber(text) {
   const s = String(text ?? '').trim().replace(/\s|%/g, '').replace(',', '.');
@@ -13428,7 +13442,7 @@ function checkBase(lab, answers) {
   return { ok: false, wrong: wrong.map((f) => f.id), text: text || null };
 }
 
-__modules["../../analiza-trendow-w-internecie/src/tasks.js"] = { "PROFILE_ROWS": PROFILE_ROWS, "FILES": FILES, "matches": matches, "LABS": LABS, "parseNumber": parseNumber, "checkCode": checkCode, "checkBase": checkBase };
+__modules["../../analiza-trendow-w-internecie/src/tasks.js"] = { "PROFILE_ROWS": PROFILE_ROWS, "FILES": FILES, "matches": matches, "LABS": LABS, "explainError": explainError, "parseNumber": parseNumber, "checkCode": checkCode, "checkBase": checkBase };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/pylab.js ===== */
@@ -13451,7 +13465,7 @@ const { rich } = __modules["src/book/rich.js"];
 const { t } = __modules["src/i18n/index.js"];
 const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
 const { runPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
-const { LABS, FILES, checkCode, checkBase } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
+const { LABS, FILES, checkCode, checkBase, explainError } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
 const { download } = __modules["src/ui/download.js"];
 const INDENT = '    ';
 
@@ -13543,7 +13557,8 @@ function labExercise(labId) {
         const res = await runPython(area.value, { files: FILES });
         if (!res.ok) {
           showOut([res.stdout, res.line ? t('py.errorAt', { line: res.line, error: res.error }) : res.error].filter(Boolean).join('\n'), 'py-out-err');
-          say(verdict, 'py-wrong', rich(NET_ERROR.test(res.error) ? t('py.netError') : t('py.pyError')));
+          const plain = explainError(lab, res.error);
+          say(verdict, 'py-wrong', rich(NET_ERROR.test(res.error) ? t('py.netError') : [plain, t('py.pyError')].filter(Boolean).join(' ')));
         } else {
           showOut(res.stdout || t('py.noOutput'));
           const v = checkCode(lab, res.value);

@@ -13113,12 +13113,12 @@ const GENERATED = {
     }
   },
   "lab2": {
-    "starter": "import json\nimport requests\n\nAPI = \"https://api.delphi.cmu.edu/epidata/\"\nWEEKS = \"201230-201329\"   # sezon 2012/13, od 30. tygodnia 2012 r.\n\n\ndef get_json(url):\n    \"\"\"Wysyła zapytanie GET pod adres url i zwraca odpowiedź JSON.\n\n    Gdy API odmówi albo nie odpowie, funkcja bierze kopię tej samej odpowiedzi\n    z pliku saved_responses.json i mówi o tym w wyniku.\n    \"\"\"\n    try:\n        response = requests.get(url, timeout=30)\n        response.raise_for_status()\n        return response.json()\n    except requests.RequestException as error:\n        with open(\"saved_responses.json\", encoding=\"utf-8\") as file:\n            saved = json.load(file)\n        if url not in saved[\"responses\"]:\n            raise\n        print(\"Uwaga. API nie przyjęło zapytania:\", error)\n        print(\"Biorę kopię odpowiedzi zapisaną\", saved[\"recorded\"])\n        return saved[\"responses\"][url]\n\n\ngft_rows = get_json(API + \"gft/?locations=nat&epiweeks=\" + WEEKS)[\"epidata\"]\ncdc_rows = get_json(API + \"fluview/?regions=nat&epiweeks=\" + WEEKS)[\"epidata\"]\n\n# Google podaje przypadki na 100 000 wizyt, a lekarze procent wizyt.\ngoogle = {row[\"epiweek\"]: row[\"num\"] / 1000 for row in gft_rows}\ndoctors = {row[\"epiweek\"]: row[\"wili\"] for row in cdc_rows}\nfirst_week = min(google)\nprint(\"Liczba tygodni:\", len(google), \"Pierwszy:\", first_week, google[first_week], doctors[first_week])\n\n# Zadanie 1: w ilu tygodniach Google pokazał więcej niż lekarze?\nweeks_above = 0   # tu wpisz swój kod\n\n# Zadanie 2: ile razy więcej pokazał Google w tygodniu swojego szczytu?\nratio = 0         # tu wpisz swój kod\n\nresult = {\"weeks_above\": weeks_above, \"ratio\": round(ratio, 1)}\nprint(result)\n",
+    "starter": "import json\nimport requests\n\nAPI = \"https://api.delphi.cmu.edu/epidata/\"\nWEEKS = \"201230-201329\"   # sezon 2012/13, od 30. tygodnia 2012 r.\n\n\ndef get_json(url):\n    \"\"\"Wysyła zapytanie GET pod adres url i zwraca odpowiedź JSON.\n\n    Gdy API odmówi albo nie odpowie, funkcja bierze kopię tej samej odpowiedzi\n    z pliku saved_responses.json i mówi o tym w wyniku.\n    \"\"\"\n    try:\n        response = requests.get(url, timeout=30)\n        response.raise_for_status()\n        return response.json()\n    except requests.RequestException as error:\n        with open(\"saved_responses.json\", encoding=\"utf-8\") as file:\n            saved = json.load(file)\n        if url not in saved[\"responses\"]:\n            raise\n        print(\"Uwaga. API nie przyjęło zapytania:\", error)\n        print(\"Biorę kopię odpowiedzi zapisaną\", saved[\"recorded\"])\n        return saved[\"responses\"][url]\n\n\ndef find_peak_week(series):\n    \"\"\"Zwraca tydzień, w którym szereg series ma największą wartość.\"\"\"\n    peak_week = None\n    for week in series:\n        if peak_week is None or series[week] > series[peak_week]:\n            peak_week = week\n    return peak_week\n\n\ngft_rows = get_json(API + \"gft/?locations=nat&epiweeks=\" + WEEKS)[\"epidata\"]\ncdc_rows = get_json(API + \"fluview/?regions=nat&epiweeks=\" + WEEKS)[\"epidata\"]\n\n# Google podaje przypadki na 100 000 wizyt, a lekarze procent wizyt.\ngoogle = {row[\"epiweek\"]: row[\"num\"] / 1000 for row in gft_rows}\ndoctors = {row[\"epiweek\"]: row[\"wili\"] for row in cdc_rows}\nfirst_week = min(google)\nprint(\"Liczba tygodni:\", len(google), \"Pierwszy:\", first_week, google[first_week], doctors[first_week])\n\n# Przykład: tydzień szczytu u lekarzy\ndoctors_peak_week = find_peak_week(doctors)\nprint(\"Szczyt u lekarzy:\", doctors_peak_week, doctors[doctors_peak_week])\n\n# Zadanie 1: w ilu tygodniach Google pokazał więcej niż lekarze?\nweeks_above = 0   # tu wpisz swój kod\n\n# Zadanie 2: ile razy więcej pokazał Google w tygodniu swojego szczytu?\n# Znajdź tydzień szczytu Google i weź wartość lekarzy z tego samego tygodnia.\nratio = 0         # tu wpisz swój kod\n\nresult = {\"weeks_above\": weeks_above, \"ratio\": round(ratio, 1)}\nprint(result)\n",
     "expect": {
       "weeks_above": 49,
       "ratio": 2.3
     },
-    "stdout": "Liczba tygodni: 52 Pierwszy: 201230 0.869 0.949257\n{'weeks_above': 49, 'ratio': 2.3}\n",
+    "stdout": "Liczba tygodni: 52 Pierwszy: 201230 0.869 0.949257\nSzczyt u lekarzy: 201252 6.06082\n{'weeks_above': 49, 'ratio': 2.3}\n",
     "facts": {
       "weeks": 52,
       "peakToPeak": 1.7,
@@ -13278,7 +13278,7 @@ const LABS = {
     tol: 0,
     hints: [
       'Przejdź po kluczach słownika `google`. Wyrażenie `sum(1 for week in google if google[week] > doctors[week])` policzy tygodnie.',
-      'Tydzień szczytu Google to `max(google, key=google.get)`. Podziel wartość Google z tego tygodnia przez wartość ze słownika `doctors` z tego samego tygodnia.',
+      'Tydzień szczytu Google znajdziesz tak samo jak w przykładzie z lekarzami, czyli `peak_week = find_peak_week(google)`. Potem podziel `google[peak_week]` przez `doctors[peak_week]`.',
     ],
     diagnose(value) {
       const { expect, facts } = GENERATED.lab2;
@@ -13296,12 +13296,12 @@ const LABS = {
       if (near(value.ratio, facts.peakToPeak, 0)) return 'Pierwsza liczba jest dobra. W drugiej porównano szczyt Google ze szczytem lekarzy, a to dwa różne tygodnie. Weź wartość lekarzy z tego samego tygodnia, w którym Google był najwyżej.';
       if (near(value.ratio, facts.gftPeak, 0.06)) return 'Pierwsza liczba jest dobra. Druga to wartość Google w szczycie, a nie iloraz. Podziel ją przez wartość lekarzy z tego samego tygodnia.';
       if (value.ratio > 0 && value.ratio < 1) return 'Pierwsza liczba jest dobra. W drugiej iloraz jest odwrócony. Dziel Google przez lekarzy.';
-      return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Znajdź tydzień, w którym Google był najwyżej, i podziel obie wartości z tego tygodnia.';
+      return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Znajdź tydzień szczytu Google funkcją `find_peak_week` i podziel obie wartości z tego tygodnia.';
     },
     success(value) {
       return `Tak. Google pokazał więcej w ${value.weeks_above} z ${GENERATED.lab2.facts.weeks} tygodni, a w tygodniu szczytu ${String(value.ratio).replace('.', ',')} razy więcej niż lekarze. To te same liczby co pod rysunkiem {rys:flu}. Porównanie szczytu ze szczytem dałoby tylko ${String(GENERATED.lab2.facts.peakToPeak).replace('.', ',')}, więc trzeba pisać, co z czym porównujemy.`;
     },
-    more: 'Dla chętnych. Zmień `WEEKS` na `"201030-201129"` i uruchom kod jeszcze raz. To sezon, w którym szacunek Google jeszcze działał.',
+    more: 'Dla chętnych. Zmień `WEEKS` na `"201030-201129"` i uruchom kod jeszcze raz. To sezon, w którym szacunek Google jeszcze działał. Funkcję `find_peak_week` da się też zapisać jednym wierszem, czyli `max(series, key=series.get)`.',
     base: {
       say: 'Policz to samo w arkuszu kalkulacyjnym. Pobierz dwie tabele. Każda ma 52 tygodnie i trzy kolumny, czyli tydzień (`week`), szacunek Google (`google`) i dane lekarzy (`doctors`). Obie wartości są w procentach wizyt. Pliki mają polski format, czyli średniki i przecinki dziesiętne.',
       files: ['flu_2012_13.csv', 'flu_2010_11.csv'],

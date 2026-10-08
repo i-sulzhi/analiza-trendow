@@ -957,6 +957,9 @@ textarea.rp-input { resize: vertical; font: 12.5px/1.5 var(--mono); white-space:
 .bk-toc-on { background: var(--accent-soft); color: var(--ink); }
 .bk-toc-num { font: 700 12px var(--mono); color: var(--accent); }
 .bk-toc-done { color: var(--ok); font-weight: 800; }
+.bk-toc-tag { display: block; margin-top: 2px; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink-faint); }
+.bk-toc-tag-before { color: var(--accent); }
+.bk-toc-tag-meeting { color: var(--ink-soft); }
 
 .bk-article { display: grid; justify-items: center; gap: 0; padding: 8px 28px 80px; min-width: 0; }
 .bk-article > section { width: 100%; max-width: 1180px; display: grid; justify-items: center; }
@@ -9329,12 +9332,28 @@ function reload() {
 }
 
 /**
+ * A link to a section (page.html#s1-5) arrives before the page exists: the browser looks for
+ * the anchor while "Kim jesteś?" is on screen and finds nothing. So go there once the page is built.
+ */
+function toAnchor() {
+  try {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (id) document.getElementById(id)?.scrollIntoView?.();
+  } catch { /* no address (tests), or a hash that is not an id */ }
+}
+
+/**
  * Show "Kim jesteś?" in `host`, and call `start()` once someone is chosen.
  * @param {Element} host
  * @param {Function} start  builds the page into the same host
  */
 function gate(host, start) {
-  const go = (p) => { if (p) { mount(host); start(p); } };
+  const go = (p) => {
+    if (!p) return;
+    mount(host);
+    start(p);
+    toAnchor();
+  };
   const showWho = () => {
     const input = el('input.who-input', {
       type: 'text', maxlength: String(MAX_NAME), autocomplete: 'off', spellcheck: 'false',
@@ -12336,7 +12355,9 @@ class BookApp {
           href: `#${s.id}`,
           class: ['bk-toc-item', this.active === s.id ? 'bk-toc-on' : ''].filter(Boolean).join(' '),
           onClick: () => this.toggleToc(false),
-        }, el('span.bk-toc-num', s.num), el('span.bk-toc-title', s.title), finished ? el('span.bk-toc-done', '✓') : null);
+        }, el('span.bk-toc-num', s.num),
+        // A course may say when a section is due (`toc: {tag, tone}`): before, at or after the meeting.
+        el('span.bk-toc-title', s.title, s.toc ? el(`span.bk-toc-tag.bk-toc-tag-${s.toc.tone}`, s.toc.tag) : null), finished ? el('span.bk-toc-done', '✓') : null);
       }),
       el('a.bk-toc-item', { href: '#bk-end', onClick: () => this.toggleToc(false) }, el('span.bk-toc-num', '✓'), el('span.bk-toc-title', t('bk.summary'))));
   }
@@ -12787,7 +12808,13 @@ const s17 = base('s1-6');
 const s18 = base('s1-7');
 const s19 = base('s1-8');
 
-const home = (s, outside, blocks = s.blocks) => ({ ...s, meeting: 0, parts: [], outside, blocks });
+// What the table of contents says under each title, so the order of work is visible at a glance.
+const TOC = {
+  before: { tag: 'przed spotkaniem', tone: 'before' },
+  meeting: { tag: 'na spotkaniu', tone: 'meeting' },
+  after: { tag: 'po spotkaniu', tone: 'after' },
+};
+const home = (s, outside, blocks = s.blocks) => ({ ...s, meeting: 0, parts: [], outside, blocks, toc: outside === BEFORE ? TOC.before : TOC.after });
 
 const sections = [
   // ---- before the meeting: the easy part, read and clicked at home
@@ -12801,7 +12828,7 @@ const sections = [
 
   // ---- the meeting, 90 minutes
   {
-    ...s15, meeting: 1, parts: [['teoria', 15]],
+    ...s15, meeting: 1, toc: TOC.meeting, parts: [['teoria', 15]],
     blocks: [
       ...s15.blocks.filter(not(isLesson('wzmianki'))).filter((b) => !b.terms && !b.read),
       { note: 'Te pojęcia wrócą w semestrze 2. Ramy błędów użyjesz na „Socjologii obliczeniowej”, a pełności i precyzji na „Text mining”.', tone: 'info' },
@@ -12810,7 +12837,7 @@ const sections = [
     ],
   },
   {
-    id: 's1-lab', num: 'Lab', title: 'Laboratorium. Dane prosto z API', meeting: 1,
+    id: 's1-lab', num: 'Lab', title: 'Laboratorium. Dane prosto z API', meeting: 1, toc: TOC.meeting,
     parts: [['cwiczenie', 35]],
     blocks: [
       { p: 'Rysunki w tym temacie powstały z otwartych danych. Każdy z nich możesz odtworzyć samodzielnie. Dane udostępnia **API**, czyli adres, pod którym program dostaje odpowiedź w ustalonym formacie, zwykle JSON.' },
@@ -12829,7 +12856,7 @@ const sections = [
     ],
   },
   {
-    ...s16, meeting: 1, parts: [['teoria', 5], ['cwiczenie', 20]],
+    ...s16, meeting: 1, toc: TOC.meeting, parts: [['teoria', 5], ['cwiczenie', 20]],
     blocks: (() => {
       const agent = s16.blocks.find(isExercise('agent'));
       const operators = s16.blocks.find(isLesson('operatory'));
@@ -12859,7 +12886,7 @@ const sections = [
     { exercise: 'lab3', num: 'Lab 3', title: 'Ile osób da się wskazać w tabeli bez nazwisk?', min: 10, who: 'w domu' },
   ])),
   {
-    ...s19, meeting: 1, parts: [['cwiczenie', 15]],
+    ...s19, meeting: 1, toc: TOC.meeting, parts: [['cwiczenie', 15]],
     blocks: [
       { p: 'Raport analityczny i **panel informacyjny** dają razem 80% oceny. Oba zaczynają się od źródła. Na spotkaniu wybierz źródło i narysuj drogę danych. Kartę źródła dokończ w domu. Karta zapisuje się w przeglądarce, a na końcu możesz ją pobrać jako plik tekstowy.' },
       { discuss: { who: 'w parach, na spotkaniu', min: 15, prompts: [

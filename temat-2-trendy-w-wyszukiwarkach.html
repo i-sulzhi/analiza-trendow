@@ -19922,7 +19922,7 @@ const LABS2 = {
   tr3: {
     ...common,
     id: 'tr3',
-    intro: 'Kandydatów jest 13, a jedno zapytanie mieści 5. Trzy pliki łączy **kotwica**, czyli kandydat obecny w dwóch plikach. Stanowski łączy pierwszy plik z drugim, a Biejat drugi z trzecim. Dopisz mnożnik trzeciego pliku i policz udział każdego kandydata w całym oknie.',
+    intro: 'Kandydatów jest 13, a jedno zapytanie mieści 5. Trzy pliki łączy **kotwica**, czyli kandydat obecny w dwóch plikach. Stanowski łączy plik `a` z plikiem `b`, a Biejat plik `b` z plikiem `c`. Dopisz mnożnik trzeciego pliku i policz udział każdego kandydata w całym oknie.',
     starter: G.tr3.starter,
     files: ['t1_kandydaci.csv', 't2_lancuch_a.csv', 't3_lancuch_b.csv'],
     expect: G.tr3.expect,
@@ -20447,7 +20447,7 @@ function chainFigure({ num: n = 'Rysunek' } = {}) {
         : `Każdy plik ma własne 100, więc mali kandydaci rosną. Marek Woch ma tu ${one(woch)}%.`));
   };
   draw();
-  return frame(n, 'Krok 3. Trzynastu kandydatów z trzech zapytań', host, caption(`${SRC} Kotwice to Stanowski (pliki 1 i 2) oraz Biejat (pliki 2 i 3). Sumy z 30 dni.`));
+  return frame(n, 'Krok 3. Trzynastu kandydatów z trzech zapytań', host, caption(`${SRC} Kotwice to Stanowski (pliki a i b) oraz Biejat (pliki b i c). Sumy z 30 dni.`));
 }
 
 // ---------------------------------------------------------------- term or topic
@@ -20632,9 +20632,9 @@ function step3() {
   return {
     head: ['Krok', 'Obliczenie', 'Wynik'],
     rows: [
-      ['mnożnik pliku 2, czyli suma Stanowskiego z 30 dni w pliku 1 / w pliku 2', `${sa} / ${sb}`, `**${pl(r3(fb))}**`],
-      ['suma Hołowni z 30 dni, przeniesiona z pliku 2 do skali pliku 1', `${h} × ${pl(r3(fb))}`, `**${pl(r1(h * fb))}**`],
-      ['mnożnik pliku 3, kotwica Biejat', `${pl(r3(fb))} × Biejat (plik 2) / Biejat (plik 3)`, 'policzysz w Lab 3'],
+      ['mnożnik pliku b, czyli suma Stanowskiego z 30 dni w pliku a / w pliku b', `${sa} / ${sb}`, `**${pl(r3(fb))}**`],
+      ['suma Hołowni z 30 dni, przeniesiona z pliku b do skali pliku a', `${h} × ${pl(r3(fb))}`, `**${pl(r1(h * fb))}**`],
+      ['mnożnik pliku c, kotwica Biejat', `${pl(r3(fb))} × Biejat (plik b) / Biejat (plik c)`, 'policzysz w Lab 3'],
     ],
   };
 }
@@ -20821,11 +20821,11 @@ const sections = [
     { p: `Mamy trzy zapytania w tym samym oknie, [pierwsze](${trendsUrl('t1_kandydaci.csv')}), [drugie ze Stanowskim](${trendsUrl('t2_lancuch_a.csv')}) i [trzecie z Biejat](${trendsUrl('t3_lancuch_b.csv')}). Kotwica musi mieć wyraźne wartości w obu plikach. Kandydat, który spada do „<1”, nie nadaje się na kotwicę.` },
     { figure: 'wycsvb' },
     { steps: [
-      ['Plik 1', 'Trzaskowski, Nawrocki, Mentzen, Braun i **Stanowski**'],
-      ['Plik 2', '**Stanowski**, Hołownia, Zandberg, **Biejat** i Senyszyn'],
-      ['Plik 3', '**Biejat**, Jakubiak, Bartoszewicz, Maciak i Woch'],
+      ['Plik a', 'Trzaskowski, Nawrocki, Mentzen, Braun i **Stanowski**'],
+      ['Plik b', '**Stanowski**, Hołownia, Zandberg, **Biejat** i Senyszyn'],
+      ['Plik c', '**Biejat**, Jakubiak, Bartoszewicz, Maciak i Woch'],
     ] },
-    { p: '**mnożnik = suma kotwicy we wcześniejszym pliku / suma kotwicy w późniejszym pliku**. Wartość przeniesiona do skali pliku 1 to wartość razy mnożnik.' },
+    { p: '**mnożnik = suma kotwicy we wcześniejszym pliku / suma kotwicy w późniejszym pliku**. Wartość przeniesiona do skali pliku a to wartość razy mnożnik. W kodzie Lab 3 pliki też nazywają się `a`, `b` i `c`.' },
     { table: step3() },
     { exercise: 'tr3', num: 'Lab 3', title: 'Połącz trzy pliki kotwicami', toc: 'Lab 3. Kotwica' },
     { figure: 'wychain' },

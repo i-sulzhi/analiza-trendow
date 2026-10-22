@@ -20598,9 +20598,23 @@ const sections = [
       { title: 'Krok 6. Głosy', text: 'Czy wyszukiwania mówią o wyniku?', href: '#w2-7' },
       { title: 'Krok 7. Popularne wyszukiwania', text: 'O co pytano obok słowa „prezydent”?', href: '#w2-8' },
     ] },
-    { p: 'Najpierw trzy rzeczy o liczbach z Trends.' },
-    { p: 'Trends nie podaje liczby wyszukiwań. Podaje **indeks** od 0 do 100. Setka to najwyższy punkt w wybranym oknie czasu i przy wybranych hasłach. Każda inna liczba to ułamek tego punktu.' },
-    { p: 'Indeks liczy się z **próby** wyszukiwań, a nie ze wszystkich. Ta sama prośba w innym dniu daje trochę inne liczby. Dlatego każdy nasz plik ma w nazwie dzień pobrania.' },
+    { p: 'Trends nie podaje liczby wyszukiwań. Każda liczba na wykresie powstaje w trzech krokach.' },
+    { steps: [
+      ['Próba', 'Google bierze część wszystkich wyszukiwań z danego dnia i regionu.'],
+      ['Udział', 'Liczy, jaki ułamek próby to Twoje hasło.'],
+      ['Skala do szczytu', 'Dzieli każdy udział przez największy w oknie i mnoży przez 100.'],
+    ] },
+    { table: {
+      head: ['Dzień', 'Udział w próbie', 'Indeks Trends'],
+      rows: [
+        ['1.05', '0,2%', '100 × 0,2 / 0,6\u00a0=\u00a0**33**'],
+        ['2.05', '0,6% (szczyt)', '100 × 0,6 / 0,6\u00a0=\u00a0**100**'],
+        ['3.05', '0,3%', '100 × 0,3 / 0,6\u00a0=\u00a0**50**'],
+        ['4.05', '0,004%', '100 × 0,004 / 0,6\u00a0=\u00a0**<1**'],
+      ],
+    } },
+    { p: 'Udziały w tabeli są wymyślone, bo Google ich nie podaje. Wzór jest jeden, **indeks = 100 × udział dnia / największy udział w oknie**. Dlatego 100 to zawsze szczyt wybranego okna, a nie liczba osób. Bardzo mały udział Trends zapisuje jako „<1”.' },
+    { p: 'Próba jest losowana na nowo. To samo zapytanie w innym dniu daje trochę inne liczby. Dlatego każdy nasz plik ma w nazwie dzień pobrania.' },
     { p: 'W jednym zapytaniu mieści się pięć haseł albo tematów. **Hasło** to dokładnie wpisane słowo. **Temat** to pojęcie, które Google rozpoznaje w różnych zapisach i językach.' },
     { p: 'Każdy krok ma ten sam porządek.' },
     { steps: [

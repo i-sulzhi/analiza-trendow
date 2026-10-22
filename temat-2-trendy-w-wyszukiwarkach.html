@@ -15850,38 +15850,38 @@ const GENERATED2 = {
   "tr2": {
    "alt": {
     "kind": "csv",
-    "code": "import csv\n\nFILE = \"t1_kandydaci.csv\"\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    return rows[2], rows[3:]\n\n\ndef short_name(column):\n    \"\"\"Zamienia nagłówek \"Karol Nawrocki: (Polska)\" na \"Karol Nawrocki\".\"\"\"\n    return column.split(\":\")[0]\n\n\nheader, data = read_trends_csv(FILE)\nnames = [short_name(column) for column in header[1:]]\nlast_week = data[-7:]\nprint(\"Ostatnie 7 dni:\", last_week[0][0], \"–\", last_week[-1][0])\n\n# Zadanie: udział każdego kandydata w wyszukiwaniach z ostatnich 7 dni, w procentach.\n# Najpierw suma indeksu każdego kandydata z tych 7 dni, potem jego część w sumie wszystkich.\nsums = {}\nfor k, name in enumerate(names, start=1):\n    sums[name] = sum(int(row[k]) for row in last_week)\ntotal = sum(sums.values())\nshares = {name: round(100 * sums[name] / total) for name in names}\n\nresult = shares\nprint(result)\n"
+    "code": "import csv\n\nFILE = \"t1_kandydaci.csv\"\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    return rows[2], rows[3:]\n\n\ndef short_name(column):\n    \"\"\"Zamienia nagłówek \"Karol Nawrocki: (Polska)\" na \"Karol Nawrocki\".\"\"\"\n    return column.split(\":\")[0]\n\n\nheader, data = read_trends_csv(FILE)\nnames = [short_name(column) for column in header[1:]]\nlast_week = data[-7:]\nprint(\"Ostatnie 7 dni:\", last_week[0][0], \"–\", last_week[-1][0])\n\n# Zadanie: udział każdego kandydata w wyszukiwaniach z ostatnich 7 dni, w procentach.\n# Najpierw suma indeksu każdego kandydata z tych 7 dni, potem jego część w sumie wszystkich.\nsums = {}\nfor k, name in enumerate(names, start=1):\n    sums[name] = sum(int(row[k]) for row in last_week)\ntotal = sum(sums.values())\nshares = {name: round(100 * sums[name] / total, 1) for name in names}\n\nresult = shares\nprint(result)\n"
    },
-   "starter": "import pandas as pd\n\nFILE = \"t1_kandydaci.csv\"\n\ndf = pd.read_csv(FILE, skiprows=2, index_col=0)   # jak w Lab 1\ndf.columns = df.columns.str.split(\":\").str[0]\nlast_week = df.tail(7)                            # ostatnie 7 dni, 11–17 maja 2025 r.\nprint(last_week)\n\n# Zadanie: udział każdego kandydata w wyszukiwaniach z ostatnich 7 dni, w procentach.\n# Najpierw suma każdej kolumny z 7 dni, potem jej część w sumie wszystkich pięciu.\nsums = last_week.iloc[0] * 0                      # tu wpisz swój kod: suma każdej kolumny\nshares = sums                                     # tu wpisz swój kod: procent z całości\n\nresult = {name: round(float(value)) for name, value in shares.items()}\nprint(result)\n",
+   "starter": "import pandas as pd\n\nFILE = \"t1_kandydaci.csv\"\n\ndf = pd.read_csv(FILE, skiprows=2, index_col=0)   # jak w Lab 1\ndf.columns = df.columns.str.split(\":\").str[0]\nlast_week = df.tail(7)                            # ostatnie 7 dni, 11–17 maja 2025 r.\nprint(last_week)\n\n# Zadanie: udział każdego kandydata w wyszukiwaniach z ostatnich 7 dni, w procentach.\n# Najpierw suma każdej kolumny z 7 dni, potem jej część w sumie wszystkich pięciu.\nsums = last_week.iloc[0] * 0                      # tu wpisz swój kod: suma każdej kolumny (teraz same zera)\nshares = sums                                     # tu wpisz swój kod: procent z całości\n\nresult = {name: round(float(value), 1) for name, value in shares.items()}\nprint(result)\n",
    "expect": {
-    "Rafał Trzaskowski": 24,
-    "Karol Nawrocki": 23,
-    "Sławomir Mentzen": 20,
-    "Grzegorz Braun": 16,
-    "Krzysztof Stanowski": 18
+    "Rafał Trzaskowski": 23.8,
+    "Karol Nawrocki": 23.4,
+    "Sławomir Mentzen": 19.6,
+    "Grzegorz Braun": 15.6,
+    "Krzysztof Stanowski": 17.6
    },
    "starterError": null,
    "starterValue": {
-    "Rafał Trzaskowski": 0,
-    "Karol Nawrocki": 0,
-    "Sławomir Mentzen": 0,
-    "Grzegorz Braun": 0,
-    "Krzysztof Stanowski": 0
+    "Rafał Trzaskowski": 0.0,
+    "Karol Nawrocki": 0.0,
+    "Sławomir Mentzen": 0.0,
+    "Grzegorz Braun": 0.0,
+    "Krzysztof Stanowski": 0.0
    },
    "facts": {
     "lastDay": {
-     "Rafał Trzaskowski": 21,
-     "Karol Nawrocki": 22,
-     "Sławomir Mentzen": 25,
-     "Grzegorz Braun": 20,
-     "Krzysztof Stanowski": 13
+     "Rafał Trzaskowski": 20.6,
+     "Karol Nawrocki": 22.4,
+     "Sławomir Mentzen": 24.6,
+     "Grzegorz Braun": 19.7,
+     "Krzysztof Stanowski": 12.7
     },
     "window": {
-     "Rafał Trzaskowski": 23,
-     "Karol Nawrocki": 26,
-     "Sławomir Mentzen": 20,
-     "Grzegorz Braun": 18,
-     "Krzysztof Stanowski": 13
+     "Rafał Trzaskowski": 23.0,
+     "Karol Nawrocki": 26.3,
+     "Sławomir Mentzen": 19.5,
+     "Grzegorz Braun": 18.3,
+     "Krzysztof Stanowski": 12.9
     },
     "sums": {
      "Rafał Trzaskowski": 389,
@@ -16013,7 +16013,7 @@ const GENERATED2 = {
     "kind": "csv",
     "code": "import csv\n\nBEFORE = \"t9_prezydent_przed.csv\"   # tydzień przed drugą turą\nAFTER = \"t10_prezydent_po.csv\"      # tydzień z drugą turą i po niej\n\n# Słowa, po których poznać zapytanie o innego prezydenta niż prezydent Polski\nOTHER = [\"francji\", \"macron\", \"rumunii\", \"rumunia\", \"białorusi\", \"warszawy\", \"bydgoszczy\", \"gliwic\", \"chorzowa\", \"miasta\"]\n\n\ndef read_sections(path):\n    \"\"\"Czyta plik powiązanych zapytań z Trends. W jednym pliku są dwie tabele.\n\n    Zwraca słownik {\"TOP\": [[zapytanie, wartość], ...], \"RISING\": [...]}.\n    Tabela zaczyna się od wiersza z jej nazwą, a kończy pustym wierszem.\n    \"\"\"\n    sections = {}\n    current = None\n    with open(path, encoding=\"utf-8\") as file:\n        for row in csv.reader(file):\n            if row in ([\"TOP\"], [\"RISING\"]):\n                current = row[0]\n                sections[current] = []\n            elif not row:\n                current = None\n            elif current:\n                sections[current].append(row)\n    return sections\n\n\nbefore = read_sections(BEFORE)\nafter = read_sections(AFTER)\nprint(\"Tabele:\", list(after), \"wierszy:\", [len(rows) for rows in after.values()])\nprint(\"Pierwsze rosnące:\", after[\"RISING\"][:2])\n\n\ndef growth(text):\n    \"\"\"Zamienia wzrost z Trends na liczbę: \"+ 4 050%\" daje 4050, a \"Przebicie\" daje None.\n\n    Trends pisze \"Przebicie\", gdy wzrost jest bardzo duży. Tysiące oddziela\n    twardą spacją (znak \\xa0), a nie zwykłą.\n    \"\"\"\n    if text == \"Przebicie\":\n        return None\n    return int(\"\".join(ch for ch in text if ch.isdigit()))\n\n\ndef is_other(query):\n    \"\"\"Czy zapytanie dotyczy innego prezydenta niż prezydent Polski?\"\"\"\n    return any(word in query for word in OTHER)\n\n\n# Zadanie 1: ile rosnących zapytań po drugiej turze ma \"Przebicie\"?\nbreakout = sum(1 for query, value in after[\"RISING\"] if value == \"Przebicie\")\n\n# Zadanie 2: jaki jest największy wzrost podany liczbą?\nmax_growth = max(growth(value) for query, value in after[\"RISING\"] if growth(value) is not None)\n\n# Zadanie 3: jaka część indeksu w tabeli TOP przed drugą turą dotyczy innych prezydentów?\ntotal = sum(int(value) for query, value in before[\"TOP\"])\nother = sum(int(value) for query, value in before[\"TOP\"] if is_other(query))\nother_share = round(100 * other / total)\n\nresult = {\"breakout\": breakout, \"max_growth\": max_growth, \"other_share\": other_share}\nprint(result)\n"
    },
-   "starter": "import io\nimport pandas as pd\n\nBEFORE = \"t9_prezydent_przed.csv\"   # tydzień przed drugą turą\nAFTER = \"t10_prezydent_po.csv\"      # tydzień z drugą turą i po niej\nOTHER = [\"francji\", \"macron\", \"rumunii\", \"rumunia\", \"białorusi\", \"warszawy\", \"bydgoszczy\", \"gliwic\", \"chorzowa\", \"miasta\"]\n\n\ndef table(path, name):\n    \"\"\"Jedna z dwóch tabel pliku powiązanych zapytań (TOP albo RISING) jako DataFrame.\"\"\"\n    lines = open(path, encoding=\"utf-8\").read().split(\"\\n\")\n    start = lines.index(name) + 1\n    end = lines.index(\"\", start)\n    return pd.read_csv(io.StringIO(\"\\n\".join(lines[start:end])), header=None, names=[\"query\", \"value\"])\n\nrising = pd.read_csv(AFTER)                       # tu popraw: w pliku są dwie tabele, użyj funkcji table\ntop = table(BEFORE, \"TOP\")\nprint(rising.head(3))\n\n# Zadanie 1: ile rosnących zapytań po drugiej turze ma \"Przebicie\"?\nbreakout = 0                                      # tu wpisz swój kod\n\n# Zadanie 2: największy wzrost podany liczbą\nnumbers = pd.to_numeric(rising[\"value\"].str.replace(r\"[+% ]\", \"\", regex=True), errors=\"coerce\")   # tu popraw?\nprint(\"Braki:\", int(numbers.isna().sum()))\n\n# Zadanie 3: część indeksu w tabeli TOP przed drugą turą, która dotyczy innych prezydentów\nother = top[\"query\"].str.contains(\"prezydent francji\")   # tu popraw: weź wszystkie słowa z listy OTHER\n\nresult = {\"breakout\": breakout, \"max_growth\": int(numbers.max()),\n          \"other_share\": round(float(100 * top.loc[other, \"value\"].sum() / top[\"value\"].sum()))}\nprint(result)\n",
+   "starter": "import io\nimport pandas as pd\n\nBEFORE = \"t9_prezydent_przed.csv\"   # tydzień przed drugą turą\nAFTER = \"t10_prezydent_po.csv\"      # tydzień z drugą turą i po niej\nOTHER = [\"francji\", \"macron\", \"rumunii\", \"rumunia\", \"białorusi\", \"warszawy\", \"bydgoszczy\", \"gliwic\", \"chorzowa\", \"miasta\"]\n\n\ndef table(path, name):\n    \"\"\"Jedna z dwóch tabel pliku powiązanych zapytań (TOP albo RISING) jako DataFrame.\"\"\"\n    lines = open(path, encoding=\"utf-8\").read().split(\"\\n\")\n    start = lines.index(name) + 1\n    end = lines.index(\"\", start)\n    return pd.read_csv(io.StringIO(\"\\n\".join(lines[start:end])), header=None, names=[\"query\", \"value\"])\n\nrising = pd.read_csv(AFTER)                       # tu popraw: w pliku są dwie tabele, użyj funkcji table\ntop = table(BEFORE, \"TOP\")\nprint(rising.head(3))\n\n# Zadanie 1: ile rosnących zapytań po drugiej turze ma \"Przebicie\"?\nbreakout = 0                                      # tu wpisz swój kod\n\n# Zadanie 2: największy wzrost podany liczbą\nnumbers = pd.to_numeric(rising[\"value\"].str.replace(r\"[+% ]\", \"\", regex=True), errors=\"coerce\")   # czy to działa dla \"+ 4 050%\"? Zobacz, ile jest „Braki”\nprint(\"Braki:\", int(numbers.isna().sum()))\n\n# Zadanie 3: część indeksu w tabeli TOP przed drugą turą, która dotyczy innych prezydentów\nother = top[\"query\"].str.contains(\"prezydent francji\")   # tu popraw: weź wszystkie słowa z listy OTHER\n\nresult = {\"breakout\": breakout, \"max_growth\": int(numbers.max()),\n          \"other_share\": round(float(100 * top.loc[other, \"value\"].sum() / top[\"value\"].sum()))}\nprint(result)\n",
    "expect": {
     "breakout": 14,
     "max_growth": 4050,
@@ -19952,15 +19952,14 @@ const LABS2 = {
       if (matches(facts.lastDay, value)) return 'To udziały z jednego, ostatniego dnia. Google liczy je z 7 dni. Zsumuj wszystkie 7 wierszy.';
       if (matches(facts.window, value)) return 'To udziały z całego okna 30 dni. Zadanie pyta o ostatnie 7 dni, czyli `last_week`.';
       if (vals.includes(100)) return 'Ktoś ma 100. To skala do szczytu, a nie udział. Dziel przez sumę wszystkich kandydatów, a nie przez największą wartość.';
-      if (vals.every((v) => isNum(v) && v > 0 && v < 1)) return 'To ułamki. Pomnóż przez 100 i zaokrąglij do całości.';
-      if (matches(expect, value, 0.6)) return 'Liczby są dobre, ale nie są zaokrąglone. Użyj `round(...)`.';
+      if (vals.every((v) => isNum(v) && v > 0 && v < 1)) return 'To ułamki, a nie procenty. Pomnóż przez 100, `shares = 100 * sums / sums.sum()`.';
       return 'Jeszcze nie to. Udział kandydata to jego suma z 7 dni podzielona przez sumę wszystkich pięciu, razy 100.';
     },
     success(value) {
       const sum = Object.values(value).reduce((a, b) => a + b, 0);
-      return `Tak. W ostatnim tygodniu przed pierwszą turą Trzaskowski ma ${value['Rafał Trzaskowski']}%, a Nawrocki ${value['Karol Nawrocki']}%. Razem wychodzi ${sum}%, bo każdy udział jest zaokrąglony. Udział ma sens tylko wewnątrz jednego zapytania. Ci sami kandydaci w innym zestawie dostaną inne procenty.`;
+      return `Tak. W ostatnim tygodniu przed pierwszą turą Trzaskowski ma ${pl(value['Rafał Trzaskowski'])}%, a Nawrocki ${pl(value['Karol Nawrocki'])}%. Razem wychodzi ${pl(Math.round(sum * 10) / 10)}%, bo każdy udział jest zaokrąglony. Udział ma sens tylko wewnątrz jednego zapytania. Ci sami kandydaci w innym zestawie dostaną inne procenty.`;
     },
-    more: `Dla chętnych. Policz udziały z całego okna 30 dni. Kolejność na górze się odwraca. Nawrocki ma wtedy ${G.tr2.facts.window['Karol Nawrocki']}%, a Trzaskowski ${G.tr2.facts.window['Rafał Trzaskowski']}%. Wybór okna zmienia wniosek, więc trzeba go podać.`,
+    more: `Dla chętnych. Policz udziały z całego okna 30 dni. Kolejność na górze się odwraca. Nawrocki ma wtedy ${pl(G.tr2.facts.window['Karol Nawrocki'])}%, a Trzaskowski ${pl(G.tr2.facts.window['Rafał Trzaskowski'])}%. Wybór okna zmienia wniosek, więc trzeba go podać.`,
     base: {
       say: `Policz to samo w arkuszu na pliku \`t1_kandydaci.csv\`. ${IMPORT}`,
       files: ['t1_kandydaci.csv'],

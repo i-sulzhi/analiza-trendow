@@ -1738,6 +1738,15 @@ textarea.kc-input { resize: vertical; }
   .wy-csv { font-size: 11px; }
 }
 
+.wy-csv-nbsp { color: var(--err); font-weight: 700; }
+.wy-rising { margin: 0; padding: 0 0 0 1.8em; display: grid; gap: 4px; font-size: 14px; }
+.wy-rising-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+.wy-rising-q { flex: 1 1 14em; min-width: 0; overflow-wrap: anywhere; }
+.wy-rising-v { font: 600 13px var(--mono); color: var(--ok); white-space: nowrap; }
+.wy-rising-break { color: var(--warn); }
+.wy-rising-other .wy-rising-q { color: var(--ink-soft); text-decoration: line-through; text-decoration-color: var(--ink-faint); }
+.wy-rising-tag { font-size: 11px; padding: 1px 6px; border-radius: 8px; background: var(--warn-bg); color: var(--ink-soft); white-space: nowrap; }
+
 </style>
 </head>
 <body>
@@ -15773,6 +15782,8 @@ const GENERATED2 = {
   "t6_stanowski.csv": "Kategoria: Wszystko\n\nDzień,stanowski: (Polska),Krzysztof Stanowski: (Polska),Krzysztof Stanowski: (Polska)\n2025-04-18,15,18,0\n2025-04-19,14,16,0\n2025-04-20,15,17,0\n2025-04-21,10,11,0\n2025-04-22,8,9,0\n2025-04-23,10,11,0\n2025-04-24,10,10,0\n2025-04-25,8,9,0\n2025-04-26,11,12,0\n2025-04-27,11,12,0\n2025-04-28,20,21,0\n2025-04-29,16,17,0\n2025-04-30,26,28,0\n2025-05-01,46,48,0\n2025-05-02,18,20,0\n2025-05-03,15,17,0\n2025-05-04,13,14,0\n2025-05-05,12,15,0\n2025-05-06,13,15,0\n2025-05-07,15,17,0\n2025-05-08,20,22,0\n2025-05-09,21,25,0\n2025-05-10,21,24,0\n2025-05-11,21,25,0\n2025-05-12,76,83,0\n2025-05-13,92,100,0\n2025-05-14,46,52,0\n2025-05-15,42,47,0\n2025-05-16,44,49,0\n2025-05-17,35,39,0\n",
   "t7_mapa.csv": "Kategoria: Wszystko\n\nRegion,Rafał Trzaskowski: (Od 19.05.2025 do 31.05.2025),Karol Nawrocki: (Od 19.05.2025 do 31.05.2025)\nmazowieckie,45%,55%\nwojewództwo łódzkie,48%,52%\npomorskie,43%,57%\nmałopolskie,46%,54%\nśląskie,43%,57%\nświętokrzyskie,45%,55%\nwarmińsko-mazurskie,48%,52%\nWojewództwo dolnośląskie,44%,56%\nopolskie,46%,54%\nwielkopolskie,45%,55%\nkujawsko-pomorskie,45%,55%\npodlaskie,45%,55%\nlubuskie,47%,53%\nWojewództwo zachodniopomorskie,47%,53%\nWojewództwo podkarpackie,43%,57%\nlubelskie,42%,58%\n",
   "t8_kandydaci_dzien_pozniej.csv": "Kategoria: Wszystko\n\nDzień,Rafał Trzaskowski: (Polska),Karol Nawrocki: (Polska),Sławomir Mentzen: (Polska),Grzegorz Braun: (Polska),Krzysztof Stanowski: (Polska)\n2025-04-18,23,20,22,30,13\n2025-04-19,22,16,23,23,12\n2025-04-20,31,23,36,28,13\n2025-04-21,22,14,27,17,8\n2025-04-22,17,11,16,15,7\n2025-04-23,19,13,18,13,8\n2025-04-24,18,16,21,14,8\n2025-04-25,18,14,20,14,7\n2025-04-26,15,12,21,10,9\n2025-04-27,30,33,17,11,9\n2025-04-28,39,33,32,33,15\n2025-04-29,39,26,32,48,12\n2025-04-30,30,24,23,31,21\n2025-05-01,35,32,30,43,35\n2025-05-02,32,49,25,25,15\n2025-05-03,31,32,28,24,13\n2025-05-04,28,31,27,23,11\n2025-05-05,27,68,19,19,11\n2025-05-06,32,100,22,55,11\n2025-05-07,37,91,26,34,13\n2025-05-08,43,49,25,21,16\n2025-05-09,42,58,29,24,18\n2025-05-10,30,54,32,23,17\n2025-05-11,32,45,23,23,18\n2025-05-12,70,61,52,43,61\n2025-05-13,71,61,48,32,73\n2025-05-14,50,46,41,34,38\n2025-05-15,50,53,45,32,34\n2025-05-16,71,68,55,48,36\n2025-05-17,47,52,56,45,29\n",
+  "t9_prezydent_przed.csv": "Kategoria: Wszystko\n\"prezydent: (Od 26.05.2025 do 1.06.2025, Polska)\"\n\nTOP\nprezydent polski,100\nwyniki prezydent,40\nprezydent polski 2025,34\nkto prezydent,31\nwybory prezydent 2025,30\nprezydent duda,24\nprezydent francji,23\nprezydent 2025 wyniki,22\nnawrocki prezydent,20\nnowy prezydent,18\nprezydent rp,14\nprezydent warszawy,13\nile zarabia prezydent,12\nprezydent polski wyniki,11\npolska prezydent,9\nprezydent rzeczypospolitej polskiej,9\nile zarabia prezydent polski,9\nprezydent rumunii,8\nnowy prezydent polski,8\nprezydent polski 2025 wyniki,8\nprezydent macron,7\nwybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2,6\nwybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2 sondaże,4\nprezydent francji żona,3\nile lat ma prezydent francji,3\n\nRISING\nwybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2,Przebicie\nwybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2 sondaże,Przebicie\nile lat ma prezydent francji,Przebicie\nprezydent francji uderzony,Przebicie\nod kiedy nowy prezydent,Przebicie\nkiedy nowy prezydent obejmie urząd,Przebicie\nprezydent bydgoszczy,Przebicie\nprezydent gliwic,Przebicie\nczy prezydent musi mieć żonę,Przebicie\nczy prezydent może rozwiązać rząd,Przebicie\nczy prezydent ma immunitet,Przebicie\nczy prezydent mieszka w pałacu prezydenckim,Przebicie\nprezydent francji,+ 600%\nprezydent rzeczypospolitej polskiej,+ 400%\nprezydent francji żona,+ 300%\nprezydent macron,+ 300%\nprezydent polski 2025 wyniki,+ 180%\nprezydent polski wyniki,+ 140%\nprezydent polski 2025,+ 100%\nnowy prezydent polski,+ 100%\nwybory prezydent 2025,+ 80%\nprezydent duda,+ 50%\nnowy prezydent,+ 50%\nprezydent polski,+ 40%\n\n",
+  "t10_prezydent_po.csv": "Kategoria: Wszystko\n\"prezydent: (Od 1.06.2025 do 7.06.2025, Polska)\"\n\nTOP\nprezydent polski,100\nprezydent polski 2025,46\nprezydent wybory,24\nprezydent nawrocki,23\nwyniki prezydent,19\nnowy prezydent,18\nkto prezydent,17\nprezydent 2025 wyniki,13\nkarol nawrocki,10\nkarol nawrocki prezydent,10\ntrzaskowski prezydent,10\nnowy prezydent polski,9\nduda prezydent,8\nprezydent polski wyniki,8\nile zarabia prezydent,8\nprezydent warszawy,7\nnawrocki prezydent polski,7\nprezydent elekt,7\nprezydent polski 2025 wyniki,7\nprezydent rp,6\nile zarabia prezydent polski,5\nnowy prezydent polski 2025,5\nkto jest prezydentem polski,1\nco to znaczy prezydent elekt,1\nod kiedy nowy prezydent,1\n\nRISING\nprezydent polski 2025 wyniki,Przebicie\nkto jest prezydentem polski,Przebicie\nco to znaczy prezydent elekt,Przebicie\nod kiedy nowy prezydent,Przebicie\ngdzie mieszka prezydent polski,Przebicie\nile kadencji może być prezydent miasta,Przebicie\nprezydent chorzowa,Przebicie\nrumunia prezydent,Przebicie\nczy prezydent mieszka w pałacu prezydenckim,Przebicie\nnajmłodszy prezydent polski,Przebicie\n120 minutowy prezydent,Przebicie\nprezydent białorusi,Przebicie\nkto zostanie prezydentem polski,Przebicie\nczy prezydent moze byc karany,Przebicie\nprezydent 2025 wyniki,+ 4 050%\nprezydent polski wyniki,+ 1 800%\nprezydent polski 2025,+ 1 800%\nnowy prezydent polski 2025,+ 800%\nnowy prezydent polski,+ 650%\nwyniki prezydent,+ 500%\nprezydent elekt,+ 350%\nnawrocki prezydent polski,+ 350%\nnowy prezydent,+ 300%\nkarol nawrocki prezydent,+ 300%\nkarol nawrocki,+ 300%\n\n",
   "pkw_tura1.csv": "kandydat,glosy,procent\nTRZASKOWSKI Rafał Kazimierz,6147797,31.36\nNAWROCKI Karol Tadeusz,5790804,29.54\nMENTZEN Sławomir Jerzy,2902448,14.81\nBRAUN Grzegorz Michał,1242917,6.34\nHOŁOWNIA Szymon Franciszek,978901,4.99\nZANDBERG Adrian Tadeusz,952832,4.86\nBIEJAT Magdalena Agnieszka,829361,4.23\nSTANOWSKI Krzysztof Jakub,243479,1.24\nSENYSZYN Joanna,214198,1.09\nJAKUBIAK Marek,150698,0.77\nBARTOSZEWICZ Artur,95640,0.49\nMACIAK Maciej,36371,0.19\nWOCH Marek Marian,18338,0.09\n",
   "pkw_tura2.csv": "kod_pkw,wojewodztwo,trzaskowski,nawrocki,razem,trzaskowski_procent\n20000,dolnośląskie,850305,673218,1523523,55.81\n40000,kujawsko-pomorskie,539860,470660,1010520,53.42\n60000,lubelskie,362053,720119,1082172,33.46\n80000,lubuskie,281477,201982,483459,58.22\n100000,łódzkie,617350,701859,1319209,46.80\n120000,małopolskie,791494,1132733,1924227,41.13\n140000,mazowieckie,1602996,1585019,3188015,50.28\n160000,opolskie,236992,210321,447313,52.98\n180000,podkarpackie,318485,780429,1098914,28.98\n200000,podlaskie,225062,357847,582909,38.61\n220000,pomorskie,754823,521725,1276548,59.13\n240000,śląskie,1172343,1111205,2283548,51.34\n260000,świętokrzyskie,229895,401863,631758,36.39\n280000,warmińsko-mazurskie,343483,320797,664280,51.71\n300000,wielkopolskie,1030175,837129,1867304,55.17\n320000,zachodniopomorskie,496666,359267,855933,58.03\n",
   "search_shares.csv": "candidate,share\nRafał Trzaskowski,14.1\nKarol Nawrocki,16.1\nSławomir Mentzen,12.0\nGrzegorz Braun,11.2\nKrzysztof Stanowski,7.9\nSzymon Hołownia,5.9\nAdrian Zandberg,7.5\nMagdalena Biejat,5.5\nJoanna Senyszyn,7.8\nMarek Jakubiak,3.9\nArtur Bartoszewicz,2.4\nMaciej Maciak,4.2\nMarek Woch,1.6\n",
@@ -15938,6 +15949,47 @@ const GENERATED2 = {
     "rNoTop2": 0.78,
     "n": 13
    }
+  },
+  "tr7": {
+   "starter": "import csv\n\nBEFORE = \"t9_prezydent_przed.csv\"   # tydzień przed drugą turą\nAFTER = \"t10_prezydent_po.csv\"      # tydzień z drugą turą i po niej\n\n# Słowa, po których poznać zapytanie o innego prezydenta niż prezydent Polski\nOTHER = [\"francji\", \"macron\", \"rumunii\", \"rumunia\", \"białorusi\", \"warszawy\", \"bydgoszczy\", \"gliwic\", \"chorzowa\", \"miasta\"]\n\n\ndef read_sections(path):\n    \"\"\"Czyta plik powiązanych zapytań z Trends. W jednym pliku są dwie tabele.\n\n    Zwraca słownik {\"TOP\": [[zapytanie, wartość], ...], \"RISING\": [...]}.\n    Tabela zaczyna się od wiersza z jej nazwą, a kończy pustym wierszem.\n    \"\"\"\n    sections = {}\n    current = None\n    with open(path, encoding=\"utf-8\") as file:\n        for row in csv.reader(file):\n            if row in ([\"TOP\"], [\"RISING\"]):\n                current = row[0]\n                sections[current] = []\n            elif not row:\n                current = None\n            elif current:\n                sections[current].append(row)\n    return sections\n\n\nbefore = read_sections(BEFORE)\nafter = read_sections(AFTER)\nprint(\"Tabele:\", list(after), \"wierszy:\", [len(rows) for rows in after.values()])\nprint(\"Pierwsze rosnące:\", after[\"RISING\"][:2])\n\n\ndef growth(text):\n    \"\"\"Zamienia wzrost z Trends na liczbę: \"+ 4 050%\" daje 4050, a \"Przebicie\" daje None.\n\n    Trends pisze \"Przebicie\", gdy wzrost jest bardzo duży. Tysiące oddziela\n    twardą spacją (znak \\xa0), a nie zwykłą.\n    \"\"\"\n    return int(text.strip(\"+% \"))   # tu popraw: ta wersja działa tylko dla \"+ 600%\"\n\n\ndef is_other(query):\n    \"\"\"Czy zapytanie dotyczy innego prezydenta niż prezydent Polski?\"\"\"\n    return False   # tu popraw: sprawdź, czy w zapytaniu jest któreś słowo z listy OTHER\n\n\n# Zadanie 1: ile rosnących zapytań po drugiej turze ma \"Przebicie\"?\nbreakout = 0   # tu wpisz swój kod\n\n# Zadanie 2: jaki jest największy wzrost podany liczbą?\nmax_growth = max(growth(value) for query, value in after[\"RISING\"])\n\n# Zadanie 3: jaka część indeksu w tabeli TOP przed drugą turą dotyczy innych prezydentów?\ntotal = sum(int(value) for query, value in before[\"TOP\"])\nother = sum(int(value) for query, value in before[\"TOP\"] if is_other(query))\nother_share = round(100 * other / total)\n\nresult = {\"breakout\": breakout, \"max_growth\": max_growth, \"other_share\": other_share}\nprint(result)\n",
+   "expect": {
+    "breakout": 14,
+    "max_growth": 4050,
+    "other_share": 12
+   },
+   "starterError": "ValueError: invalid literal for int() with base 10: 'Przebicie'",
+   "starterValue": null,
+   "facts": {
+    "breakoutBoth": 26,
+    "breakoutBefore": 12,
+    "skipNbsp": 800,
+    "countShare": 24,
+    "noWarsaw": 9,
+    "afterShare": 2,
+    "otherQueries": [
+     "prezydent francji",
+     "prezydent warszawy",
+     "prezydent rumunii",
+     "prezydent macron",
+     "prezydent francji żona",
+     "ile lat ma prezydent francji"
+    ],
+    "topTotal": 466,
+    "risingBefore": 24,
+    "otherRising": [
+     "ile kadencji może być prezydent miasta",
+     "prezydent chorzowa",
+     "rumunia prezydent",
+     "prezydent białorusi",
+     "ile lat ma prezydent francji",
+     "prezydent francji uderzony",
+     "prezydent bydgoszczy",
+     "prezydent gliwic",
+     "prezydent francji",
+     "prezydent francji żona",
+     "prezydent macron"
+    ]
+   }
   }
  },
  "data": {
@@ -16012,6 +16064,18 @@ const GENERATED2 = {
      "/g/11gk8wrdfn"
     ],
     "date": "2025-04-18 2025-05-17"
+   },
+   "t9_prezydent_przed.csv": {
+    "q": [
+     "prezydent"
+    ],
+    "date": "2025-05-26 2025-06-01"
+   },
+   "t10_prezydent_po.csv": {
+    "q": [
+     "prezydent"
+    ],
+    "date": "2025-06-01 2025-06-07"
    }
   },
   "regionCodes": {
@@ -19279,6 +19343,428 @@ const GENERATED2 = {
    "maxDiff": 1,
    "samePeak": true
   },
+  "related": {
+   "before": {
+    "TOP": [
+     [
+      "prezydent polski",
+      "100"
+     ],
+     [
+      "wyniki prezydent",
+      "40"
+     ],
+     [
+      "prezydent polski 2025",
+      "34"
+     ],
+     [
+      "kto prezydent",
+      "31"
+     ],
+     [
+      "wybory prezydent 2025",
+      "30"
+     ],
+     [
+      "prezydent duda",
+      "24"
+     ],
+     [
+      "prezydent francji",
+      "23"
+     ],
+     [
+      "prezydent 2025 wyniki",
+      "22"
+     ],
+     [
+      "nawrocki prezydent",
+      "20"
+     ],
+     [
+      "nowy prezydent",
+      "18"
+     ],
+     [
+      "prezydent rp",
+      "14"
+     ],
+     [
+      "prezydent warszawy",
+      "13"
+     ],
+     [
+      "ile zarabia prezydent",
+      "12"
+     ],
+     [
+      "prezydent polski wyniki",
+      "11"
+     ],
+     [
+      "polska prezydent",
+      "9"
+     ],
+     [
+      "prezydent rzeczypospolitej polskiej",
+      "9"
+     ],
+     [
+      "ile zarabia prezydent polski",
+      "9"
+     ],
+     [
+      "prezydent rumunii",
+      "8"
+     ],
+     [
+      "nowy prezydent polski",
+      "8"
+     ],
+     [
+      "prezydent polski 2025 wyniki",
+      "8"
+     ],
+     [
+      "prezydent macron",
+      "7"
+     ],
+     [
+      "wybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2",
+      "6"
+     ],
+     [
+      "wybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2 sondaże",
+      "4"
+     ],
+     [
+      "prezydent francji żona",
+      "3"
+     ],
+     [
+      "ile lat ma prezydent francji",
+      "3"
+     ]
+    ],
+    "RISING": [
+     [
+      "wybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2",
+      "Przebicie"
+     ],
+     [
+      "wybory prezydenckie w polsce w 2025 prezydent rzeczypospolitej polskiej 2 sondaże",
+      "Przebicie"
+     ],
+     [
+      "ile lat ma prezydent francji",
+      "Przebicie"
+     ],
+     [
+      "prezydent francji uderzony",
+      "Przebicie"
+     ],
+     [
+      "od kiedy nowy prezydent",
+      "Przebicie"
+     ],
+     [
+      "kiedy nowy prezydent obejmie urząd",
+      "Przebicie"
+     ],
+     [
+      "prezydent bydgoszczy",
+      "Przebicie"
+     ],
+     [
+      "prezydent gliwic",
+      "Przebicie"
+     ],
+     [
+      "czy prezydent musi mieć żonę",
+      "Przebicie"
+     ],
+     [
+      "czy prezydent może rozwiązać rząd",
+      "Przebicie"
+     ],
+     [
+      "czy prezydent ma immunitet",
+      "Przebicie"
+     ],
+     [
+      "czy prezydent mieszka w pałacu prezydenckim",
+      "Przebicie"
+     ],
+     [
+      "prezydent francji",
+      "+ 600%"
+     ],
+     [
+      "prezydent rzeczypospolitej polskiej",
+      "+ 400%"
+     ],
+     [
+      "prezydent francji żona",
+      "+ 300%"
+     ],
+     [
+      "prezydent macron",
+      "+ 300%"
+     ],
+     [
+      "prezydent polski 2025 wyniki",
+      "+ 180%"
+     ],
+     [
+      "prezydent polski wyniki",
+      "+ 140%"
+     ],
+     [
+      "prezydent polski 2025",
+      "+ 100%"
+     ],
+     [
+      "nowy prezydent polski",
+      "+ 100%"
+     ],
+     [
+      "wybory prezydent 2025",
+      "+ 80%"
+     ],
+     [
+      "prezydent duda",
+      "+ 50%"
+     ],
+     [
+      "nowy prezydent",
+      "+ 50%"
+     ],
+     [
+      "prezydent polski",
+      "+ 40%"
+     ]
+    ]
+   },
+   "after": {
+    "TOP": [
+     [
+      "prezydent polski",
+      "100"
+     ],
+     [
+      "prezydent polski 2025",
+      "46"
+     ],
+     [
+      "prezydent wybory",
+      "24"
+     ],
+     [
+      "prezydent nawrocki",
+      "23"
+     ],
+     [
+      "wyniki prezydent",
+      "19"
+     ],
+     [
+      "nowy prezydent",
+      "18"
+     ],
+     [
+      "kto prezydent",
+      "17"
+     ],
+     [
+      "prezydent 2025 wyniki",
+      "13"
+     ],
+     [
+      "karol nawrocki",
+      "10"
+     ],
+     [
+      "karol nawrocki prezydent",
+      "10"
+     ],
+     [
+      "trzaskowski prezydent",
+      "10"
+     ],
+     [
+      "nowy prezydent polski",
+      "9"
+     ],
+     [
+      "duda prezydent",
+      "8"
+     ],
+     [
+      "prezydent polski wyniki",
+      "8"
+     ],
+     [
+      "ile zarabia prezydent",
+      "8"
+     ],
+     [
+      "prezydent warszawy",
+      "7"
+     ],
+     [
+      "nawrocki prezydent polski",
+      "7"
+     ],
+     [
+      "prezydent elekt",
+      "7"
+     ],
+     [
+      "prezydent polski 2025 wyniki",
+      "7"
+     ],
+     [
+      "prezydent rp",
+      "6"
+     ],
+     [
+      "ile zarabia prezydent polski",
+      "5"
+     ],
+     [
+      "nowy prezydent polski 2025",
+      "5"
+     ],
+     [
+      "kto jest prezydentem polski",
+      "1"
+     ],
+     [
+      "co to znaczy prezydent elekt",
+      "1"
+     ],
+     [
+      "od kiedy nowy prezydent",
+      "1"
+     ]
+    ],
+    "RISING": [
+     [
+      "prezydent polski 2025 wyniki",
+      "Przebicie"
+     ],
+     [
+      "kto jest prezydentem polski",
+      "Przebicie"
+     ],
+     [
+      "co to znaczy prezydent elekt",
+      "Przebicie"
+     ],
+     [
+      "od kiedy nowy prezydent",
+      "Przebicie"
+     ],
+     [
+      "gdzie mieszka prezydent polski",
+      "Przebicie"
+     ],
+     [
+      "ile kadencji może być prezydent miasta",
+      "Przebicie"
+     ],
+     [
+      "prezydent chorzowa",
+      "Przebicie"
+     ],
+     [
+      "rumunia prezydent",
+      "Przebicie"
+     ],
+     [
+      "czy prezydent mieszka w pałacu prezydenckim",
+      "Przebicie"
+     ],
+     [
+      "najmłodszy prezydent polski",
+      "Przebicie"
+     ],
+     [
+      "120 minutowy prezydent",
+      "Przebicie"
+     ],
+     [
+      "prezydent białorusi",
+      "Przebicie"
+     ],
+     [
+      "kto zostanie prezydentem polski",
+      "Przebicie"
+     ],
+     [
+      "czy prezydent moze byc karany",
+      "Przebicie"
+     ],
+     [
+      "prezydent 2025 wyniki",
+      "+ 4 050%"
+     ],
+     [
+      "prezydent polski wyniki",
+      "+ 1 800%"
+     ],
+     [
+      "prezydent polski 2025",
+      "+ 1 800%"
+     ],
+     [
+      "nowy prezydent polski 2025",
+      "+ 800%"
+     ],
+     [
+      "nowy prezydent polski",
+      "+ 650%"
+     ],
+     [
+      "wyniki prezydent",
+      "+ 500%"
+     ],
+     [
+      "prezydent elekt",
+      "+ 350%"
+     ],
+     [
+      "nawrocki prezydent polski",
+      "+ 350%"
+     ],
+     [
+      "nowy prezydent",
+      "+ 300%"
+     ],
+     [
+      "karol nawrocki prezydent",
+      "+ 300%"
+     ],
+     [
+      "karol nawrocki",
+      "+ 300%"
+     ]
+    ]
+   },
+   "other": [
+    "francji",
+    "macron",
+    "rumunii",
+    "rumunia",
+    "białorusi",
+    "warszawy",
+    "bydgoszczy",
+    "gliwic",
+    "chorzowa",
+    "miasta"
+   ]
+  },
   "recorded": "2026-10-21",
   "pkwUpdated": "23 września 2025"
  }
@@ -19638,6 +20124,68 @@ const LABS2 = {
       success: 'Tak. Wysokie r kandydatów mówi głównie, że duzi są duzi. Dla województw związek jest słaby. Wyszukiwania pokazują uwagę, a nie głosy.',
     },
   },
+  tr7: {
+    ...common,
+    id: 'tr7',
+    intro: 'Google pokazuje w raporcie „Popularne wyszukiwania dla «prezydent»” z rosnącymi procentami. Trends daje te same dane jako **powiązane zapytania**. W jednym pliku są dwie tabele, TOP i RISING. Popraw dwie funkcje i policz trzy rzeczy, „Przebicie” po drugiej turze, największy wzrost podany liczbą i część indeksu, która dotyczy innych prezydentów.',
+    starter: G.tr7.starter,
+    files: ['t9_prezydent_przed.csv', 't10_prezydent_po.csv'],
+    expect: G.tr7.expect,
+    tol: 0,
+    hints: [
+      'W funkcji `growth` najpierw sprawdź, czy `text == "Przebicie"`, i zwróć wtedy `None`. Potem zostaw w tekście same cyfry, `"".join(ch for ch in text if ch.isdigit())`. Twarda spacja zniknie razem z plusem i procentem.',
+      'Funkcja `is_other` może zwrócić `any(word in query for word in OTHER)`.',
+      'Przy największym wzroście pomiń „Przebicie”, czyli wartości, dla których `growth(value)` zwraca `None`.',
+    ],
+    diagnose(value) {
+      const { expect, facts } = G.tr7;
+      if (!sameKeys(value, expect)) return 'Zmienna `result` powinna mieć trzy pola, `breakout`, `max_growth` i `other_share`. Zostaw ostatnie wiersze kodu bez zmian.';
+      if (value.breakout === facts.breakoutBoth) return 'To „Przebicie” z obu tygodni. Zadanie pyta tylko o tydzień po drugiej turze, czyli `after`.';
+      if (value.breakout === facts.breakoutBefore) return 'To „Przebicie” z tygodnia przed drugą turą. Weź tabelę `after["RISING"]`.';
+      if (value.breakout !== expect.breakout) return 'Pierwsza liczba jeszcze nie. Policz wiersze tabeli `after["RISING"]`, w których wartość to „Przebicie”.';
+      if (value.max_growth === facts.skipNbsp) return `Wyszło ${facts.skipNbsp}, bo wartości z twardą spacją, takie jak „+ 4 050%”, zostały pominięte. Zostaw w tekście same cyfry, wtedy twarda spacja zniknie.`;
+      if (value.max_growth !== expect.max_growth) return 'Druga liczba jeszcze nie. Zamień każdy wzrost na liczbę funkcją `growth` i weź największą.';
+      if (value.other_share === facts.countShare) return 'Trzecia liczba to część zapytań, a nie część indeksu. Zsumuj wartości zapytań o innych prezydentów i podziel przez sumę wszystkich wartości w tabeli TOP.';
+      if (value.other_share === facts.afterShare) return 'Trzecia liczba pochodzi z tygodnia po drugiej turze. Zadanie pyta o tydzień przed nią, czyli `before["TOP"]`.';
+      if (value.other_share === 0) return 'Dwie pierwsze liczby są dobre. Zostało `is_other`. Sprawdź, czy w zapytaniu jest któreś słowo z listy `OTHER`.';
+      return 'Dwie pierwsze liczby są dobre. Trzecia jeszcze nie. To suma wartości zapytań o innych prezydentów podzielona przez sumę całej tabeli TOP, razy 100.';
+    },
+    success(value) {
+      const f = G.tr7.facts;
+      return `Tak. Po drugiej turze ${value.breakout} rosnących zapytań ma „Przebicie”, a największy wzrost podany liczbą to ${value.max_growth}%. Przed drugą turą ${value.other_share}% indeksu w tabeli TOP to inni prezydenci, na przykład Francji i Rumunii. Google w swoim raporcie pokazał tylko zapytania o wybory, więc listę ktoś przesiał. Ty też musisz to zrobić i opisać jak.`;
+    },
+    more: `Dla chętnych. Czy „prezydent warszawy” to szum? To urząd Trzaskowskiego, więc część osób szukała kandydata. Bez tego zapytania udział innych prezydentów spada do ${G.tr7.facts.noWarsaw}%. Kodowanie zapytań to decyzja, którą zapisuje się w raporcie.`,
+    base: {
+      say: `Policz to samo w arkuszu. ${IMPORT} Każdy plik ma dwie tabele, jedna pod drugą. Najpierw jest TOP, a pod pustym wierszem RISING.`,
+      files: ['t9_prezydent_przed.csv', 't10_prezydent_po.csv'],
+      steps: [
+        'W pliku `t10_prezydent_po.csv` znajdź tabelę RISING. Policz w niej komórki z napisem „Przebicie”, na przykład funkcją `LICZ.JEŻELI`.',
+        'Zamień pozostałe wzrosty na liczby. Usuń znaki +, % i spacje. Tysiące są oddzielone twardą spacją, czyli znakiem `ZNAK(160)` (`CHAR(160)`), na przykład `=WARTOŚĆ(PODSTAW(PODSTAW(PODSTAW(PODSTAW(B30;"+";"");"%";"");" ";"");ZNAK(160);""))`. Weź największą.',
+        'W pliku `t9_prezydent_przed.csv` oznacz w tabeli TOP zapytania o innych prezydentów, czyli Francji, Macrona, Rumunii, Warszawy, Bydgoszczy i Gliwic.',
+        'Podziel sumę ich wartości przez sumę wszystkich wartości tabeli TOP i pomnóż przez 100. Zaokrąglij do całości.',
+      ],
+      fields: [
+        { id: 'breakout', label: 'Ile rosnących zapytań po drugiej turze ma „Przebicie”?', expect: G.tr7.expect.breakout, tol: 0 },
+        { id: 'max', label: 'Największy wzrost podany liczbą (%)', expect: G.tr7.expect.max_growth, tol: 0 },
+        { id: 'other', label: 'Jaka część indeksu w tabeli TOP przed drugą turą dotyczy innych prezydentów (%)?', expect: G.tr7.expect.other_share, tol: 0.5 },
+      ],
+      wrong: {
+        breakout(v) {
+          if (v === G.tr7.facts.breakoutBoth) return 'Pierwsza liczba liczy oba tygodnie. Weź tylko plik po drugiej turze.';
+          return 'Pierwsza liczba jeszcze nie. Licz tylko w tabeli RISING pliku `t10_prezydent_po.csv`.';
+        },
+        max(v) {
+          if (v === G.tr7.facts.skipNbsp) return 'W drugiej liczbie pominięto wzrosty z twardą spacją, na przykład „+ 4 050%”. Usuń też `ZNAK(160)`.';
+          return 'Druga liczba jeszcze nie. Zamień wzrosty na liczby i weź największą.';
+        },
+        other(v) {
+          if (near(v, G.tr7.facts.countShare, 0.5)) return 'Trzecia liczba to część zapytań, a nie indeksu. Zsumuj wartości, a nie wiersze.';
+          return 'Trzecia liczba jeszcze nie. Suma wartości zapytań o innych prezydentów podzielona przez sumę całej tabeli TOP, razy 100.';
+        },
+      },
+      success: 'Tak. Google w swoim raporcie pokazał tylko zapytania o wybory, więc listę ktoś przesiał. Ty też musisz to zrobić i opisać jak.',
+    },
+  },
 };
 
 /**
@@ -19646,6 +20194,8 @@ const LABS2 = {
  */
 function explainError2(lab, error) {
   const e = String(error || '');
+  if (/base 10: 'Przebicie'/.test(e)) return 'W pliku jest napis „Przebicie”, a nie liczba. Tak Trends oznacza bardzo duży wzrost. Funkcja `growth` powinna zwrócić dla niego `None`.';
+  if (/base 10: '\d+\\xa0\d+'/.test(e)) return 'Liczba ma w środku twardą spację (znak \\xa0), którą Trends oddziela tysiące. Zostaw w tekście same cyfry.';
   if (/could not convert string to float: '<1'|invalid literal for int\(\) with base 10: '<1'/.test(e)) return 'W pliku jest napis „<1”, a nie liczba. Trends pisze tak wartości mniejsze niż 1. Zamień go na liczbę w funkcji `value`.';
   if (/is not in list|list index out of range|invalid literal for int\(\) with base 10: '[^0-9<]/.test(e)) return 'Funkcja `read_trends_csv` bierze za nagłówek i dane złe wiersze. Plik z Trends zaczyna się od wiersza z kategorią i pustego wiersza.';
   if (/KeyError/.test(e)) return 'Takiego klucza nie ma w słowniku. Wypisz klucze, na przykład `print(list(search))`, i porównaj nazwy.';
@@ -19698,46 +20248,64 @@ function trendsUrl(file) {
 
 // ---------------------------------------------------------------- the CSV as it is
 
-const CELL = /(<1|^0$|%$)/;
+const CELL = /(<1|^0$|%$|^Przebicie$)/;
 
-/** Lines of a file to show: all of a short one; the head, a gap and the tail of a long one. */
-function csvLines(text, head = 8, tail = 3) {
-  const lines = text.replace(/\n$/, '').split('\n');
-  if (lines.length <= head + tail + 1) return { lines: lines.map((l, i) => [i + 1, l]), skipped: 0, total: lines.length };
-  return {
-    lines: [...lines.slice(0, head).map((l, i) => [i + 1, l]), null, ...lines.slice(-tail).map((l, i) => [lines.length - tail + i + 1, l])],
-    skipped: lines.length - head - tail, total: lines.length,
-  };
+/**
+ * Lines of a file to show: all of a short one; of a long one the head, the tail and the lines
+ * that match `focus` (e.g. the second table's name), with a gap marker for each skipped run.
+ * Returns { lines: [[number, text] | {gap: n}], skipped, total }.
+ */
+function csvLines(text, head = 8, tail = 3, focus = null) {
+  const all = text.replace(/\n$/, '').split('\n');
+  // a table's name comes with the line above it and the first two rows under it
+  const SECTION = /^(TOP|RISING)$/;
+  const nearSection = (i) => SECTION.test(all[i + 1] ?? '') || SECTION.test(all[i - 1] ?? '') || SECTION.test(all[i - 2] ?? '');
+  const keep = (i) => all.length <= head + tail + 1 || i < head || i >= all.length - tail || (focus && (focus.test(all[i]) || nearSection(i)));
+  const lines = [];
+  let skipped = 0;
+  let run = 0;
+  all.forEach((l, i) => {
+    if (keep(i)) {
+      if (run) lines.push({ gap: run });
+      run = 0;
+      lines.push([i + 1, l]);
+    } else { run += 1; skipped += 1; }
+  });
+  if (run) lines.push({ gap: run });
+  return { lines, skipped, total: all.length };
 }
 
-/** Split one CSV line into cells (the files here have no quoted commas). */
-const cells = (line) => line.split(/[,;]/);
+/** Split one CSV line into cells; a comma inside quotes stays in its cell. */
+const cells = (line) => line.split(/[,;](?=(?:[^"]*"[^"]*")*[^"]*$)/);
+/** A cell's text with the hard space (U+00A0) of Trends' thousands made visible. */
+const shown = (c) => (c.includes('\u00a0') ? c.split('\u00a0').flatMap((part, i) => [i ? el('span.wy-csv-nbsp', { title: 'twarda spacja (U+00A0)' }, '⍽') : null, part]) : c);
 
+const FOCUS = /^(TOP|RISING)$|\u00a0/;
 function textView(name) {
-  const { lines, skipped } = csvLines(F[name]);
+  const { lines } = csvLines(F[name], 8, 3, FOCUS);
   return el('pre.wy-csv', { 'aria-label': `Plik ${name} jako tekst` }, lines.map((row) => {
-    if (!row) return el('span.wy-csv-gap', `… ${skipped} ${rowsWord(skipped)} ${rowsWord(skipped) === 'wiersze' ? 'pominięte' : 'pominiętych'} …\n`);
+    if (row.gap) return el('span.wy-csv-gap', `… ${row.gap} ${rowsWord(row.gap)} ${rowsWord(row.gap) === 'wiersze' ? 'pominięte' : 'pominiętych'} …\n`);
     const [n, line] = row;
     const kind = n === 1 && line.startsWith('Kategoria') ? 'wy-csv-meta' : line === '' ? 'wy-csv-empty' : n === 3 && name.startsWith('t') ? 'wy-csv-head' : '';
     return el(`span.wy-csv-line${kind ? `.${kind}` : ''}`, el('span.wy-csv-n', String(n).padStart(3, ' ')), ' ',
       line === '' ? el('span.wy-csv-blank', '(pusty wiersz)') : cells(line).flatMap((c, i, all) => [
-        el(CELL.test(c) && i > 0 ? 'span.wy-csv-flag' : 'span', c), i < all.length - 1 ? el('span.wy-csv-sep', line.includes(';') ? ';' : ',') : null]),
+        el(CELL.test(c) && i > 0 ? 'span.wy-csv-flag' : 'span', shown(c)), i < all.length - 1 ? el('span.wy-csv-sep', line.includes(';') ? ';' : ',') : null]),
       '\n');
   }));
 }
 
 const COLS = 'ABCDEFGH';
 function sheetView(name, oneColumn = false) {
-  const { lines, skipped } = csvLines(F[name], 7, 2);
-  const width = oneColumn ? 1 : Math.max(...lines.filter(Boolean).map(([, l]) => cells(l).length));
+  const { lines } = csvLines(F[name], 7, 2, FOCUS);
+  const width = oneColumn ? 1 : Math.max(...lines.filter((r) => !r.gap).map(([, l]) => cells(l).length));
   return el('div.wy-sheet-wrap', el('table.wy-sheet', { 'aria-label': `Plik ${name} w arkuszu` },
     el('thead', el('tr', el('th', ''), [...COLS.slice(0, width)].map((c) => el('th', { scope: 'col' }, c)))),
     el('tbody', lines.map((row) => {
-      if (!row) return el('tr.wy-sheet-gap', el('td', { colspan: String(width + 1) }, `… ${skipped} ${rowsWord(skipped)} …`));
+      if (row.gap) return el('tr.wy-sheet-gap', el('td', { colspan: String(width + 1) }, `… ${row.gap} ${rowsWord(row.gap)} …`));
       const [n, line] = row;
       const parts = oneColumn ? [line] : cells(line);
       return el('tr', el('th', { scope: 'row' }, String(n)),
-        Array.from({ length: width }, (_, i) => el(`td${!oneColumn && i > 0 && CELL.test(parts[i] || '') ? '.wy-csv-flag' : ''}`, parts[i] ?? '')));
+        Array.from({ length: width }, (_, i) => el(`td${!oneColumn && i > 0 && CELL.test(parts[i] || '') ? '.wy-csv-flag' : ''}`, shown(parts[i] ?? ''))));
     }))));
 }
 
@@ -19952,7 +20520,39 @@ function votesFigure({ num: n = 'Rysunek' } = {}) {
     caption(`${SRC} Wyszukiwania z 30 dni przed I turą, łańcuch z kroku 3. ${SRC_PKW}`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "pl": pl };
+// ---------------------------------------------------------------- popular searches
+
+/** Rising related queries of one week, each marked when it is about another president. */
+function risingRows(week, onlyPoland = false) {
+  const R = D.related;
+  const rows = R[week].RISING.map(([q, v]) => ({ q, v, other: R.other.some((w) => q.includes(w)) }));
+  return onlyPoland ? rows.filter((r) => !r.other) : rows;
+}
+
+function trendingFigure({ num: n = 'Rysunek' } = {}) {
+  const state = { week: 'after', only: 'all' };
+  const host = el('div');
+  const WEEKS = { before: 'tydzień przed II turą, 26 maja – 1 czerwca', after: 'tydzień z II turą, 1–7 czerwca' };
+  const draw = () => {
+    const all = risingRows(state.week);
+    const rows = state.only === 'pl' ? all.filter((r) => !r.other) : all;
+    const others = all.filter((r) => r.other).length;
+    mount(host,
+      toggles([['before', 'Przed II turą'], ['after', 'II tura i po niej']], state.week, (w) => { state.week = w; draw(); }),
+      toggles([['all', 'Wszystkie'], ['pl', 'Tylko wybory w Polsce']], state.only, (o) => { state.only = o; draw(); }),
+      el('ol.wy-rising', rows.map((r) => el(`li.wy-rising-row${r.other ? '.wy-rising-other' : ''}`,
+        el('span.wy-rising-q', r.q),
+        r.other ? el('span.wy-rising-tag', 'inny prezydent') : null,
+        el(`span.wy-rising-v${r.v === 'Przebicie' ? '.wy-rising-break' : ''}`, r.v.replace(' ', ' '))))),
+      el('div.sq-read', state.only === 'pl'
+        ? `Zostało ${rows.length} z ${all.length} zapytań. Tak wygląda lista w raporcie Google, przesiana do samych wyborów.`
+        : `Rosnące zapytania z hasłem „prezydent”, ${WEEKS[state.week]}. ${others} z ${all.length} dotyczy innego prezydenta niż prezydent Polski.`));
+  };
+  draw();
+  return frame(n, 'Krok 7. Rosnące zapytania z hasłem „prezydent”', host, caption(`${SRC} Hasło „prezydent”, Polska, powiązane zapytania, tabela RISING.`));
+}
+
+__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "trendingFigure": trendingFigure, "pl": pl };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/chapter2.js ===== */
@@ -19989,13 +20589,14 @@ const sections = [
   step('w2-1', '2.1', 'Raport, który rozbierzemy', [
     { p: `Google publikuje gotowe raporty z Trends. Jeden z nich dotyczy wyborów prezydenckich w Polsce w 2025 r. Otwórz go w drugiej karcie, [Wybory prezydenckie 2025](${REPORT}).` },
     { p: 'Raport wygląda na gotową analizę. Są w nim linie kandydatów, procenty, mapa województw i rosnące zapytania. Nie ma w nim jednak plików z danymi ani opisu zapytań. W tym temacie zbudujesz podobny raport samodzielnie, krok po kroku, z plików CSV.' },
-    { label: 'Sześć kroków', cards: [
+    { label: 'Siedem kroków', cards: [
       { title: 'Krok 1. Linie', text: 'Plik z Trends i wartość 100.', href: '#w2-2' },
       { title: 'Krok 2. Udział', text: 'Procenty, które wyglądają jak sondaż.', href: '#w2-3' },
       { title: 'Krok 3. Kotwica', text: 'Trzynastu kandydatów z trzech zapytań.', href: '#w2-4' },
       { title: 'Krok 4. Hasło czy temat', text: 'Jedno słowo, wielu Braunów.', href: '#w2-5' },
       { title: 'Krok 5. Mapa', text: 'Łączenie Trends z PKW.', href: '#w2-6' },
       { title: 'Krok 6. Głosy', text: 'Czy wyszukiwania mówią o wyniku?', href: '#w2-7' },
+      { title: 'Krok 7. Popularne wyszukiwania', text: 'O co pytano obok słowa „prezydent”?', href: '#w2-8' },
     ] },
     { p: 'Najpierw trzy rzeczy o liczbach z Trends.' },
     { p: 'Trends nie podaje liczby wyszukiwań. Podaje **indeks** od 0 do 100. Setka to najwyższy punkt w wybranym oknie czasu i przy wybranych hasłach. Każda inna liczba to ułamek tego punktu.' },
@@ -20076,8 +20677,19 @@ const sections = [
     { p: 'Wniosek do raportu brzmi więc ostrożnie. Wyszukiwania pokazują, o kim ludzie chcieli się czegoś dowiedzieć. Nie pokazują, na kogo zagłosują.' },
   ]),
 
-  step('w2-8', '2.8', 'Twój raport', [
-    { p: 'Masz sześć paneli i liczby do każdego. Raport analityczny to jednak więcej niż wykresy. Potrzebuje pytania, opisu danych, wyniku, porównania i ograniczeń. To samo czeka Cię w projekcie, który daje 80% oceny.' },
+  step('w2-8', '2.8', 'Krok 7. Popularne wyszukiwania', [
+    { p: 'W raporcie Google jest lista „Popularne wyszukiwania dla «prezydent» w ciągu ostatnich 7 dni”. Każde zapytanie ma obok procent wzrostu. Lista pokazuje, o co ludzie pytali, a nie tylko ile. Wszystkie zapytania na niej dotyczą wyborów.' },
+    { p: 'Trends nazywa to **powiązanymi zapytaniami**. To zapytania, które ludzie wpisywali razem z hasłem. Są dwie tabele. TOP to najczęstsze zapytania, z indeksem od 0 do 100. RISING to zapytania, które najbardziej urosły względem poprzedniego okresu tej samej długości. Gdy wzrost jest bardzo duży, Trends zamiast liczby pisze „Przebicie”.' },
+    { p: `Bierzemy dwa stałe tygodnie dla hasła „prezydent”, [przed drugą turą](${trendsUrl('t9_prezydent_przed.csv')}) i [z drugą turą i po niej](${trendsUrl('t10_prezydent_po.csv')}).` },
+    { figure: 'wycsve' },
+    { exercise: 'tr7', num: 'Lab 7', title: 'Powiązane zapytania. Dwie tabele w jednym pliku', toc: 'Lab 7. Popularne wyszukiwania' },
+    { figure: 'wytrend' },
+    { p: 'Przełącz rysunek {rys:wytrend} na „Tylko wybory w Polsce”. Tak wygląda lista Google. Surowe dane są inne. Hasło „prezydent” łapie prezydenta Francji, Rumunii i Białorusi, a także prezydentów miast. Lista w raporcie została więc przesiana, a raport nie mówi jak. To ten sam problem co z hasłem „braun” w kroku 4.' },
+    { p: 'Procent wzrostu też trzeba czytać ostrożnie. Liczy się go względem poprzedniego tygodnia, więc rzadkie zapytanie łatwo rośnie o setki procent. „Przebicie” mówi tylko, że wzrost był bardzo duży, a nie ile wynosił.' },
+  ]),
+
+  step('w2-9', '2.9', 'Twój raport', [
+    { p: 'Masz siedem paneli i liczby do każdego. Raport analityczny to jednak więcej niż wykresy. Potrzebuje pytania, opisu danych, wyniku, porównania i ograniczeń. To samo czeka Cię w projekcie, który daje 80% oceny.' },
     { discuss: { who: 'w parach', prompts: [
       'Która liczba z raportu Google najbardziej myli bez opisu? Dlaczego?',
       'Co trzeba dopisać pod każdym panelem, żeby ktoś mógł go powtórzyć?',
@@ -20109,7 +20721,8 @@ const CHAPTER = {
     { id: 'tr4', label: 'Lab 4. Hasło czy temat', section: 'w2-5' },
     { id: 'tr5', label: 'Lab 5. Mapa i PKW', section: 'w2-6' },
     { id: 'tr6', label: 'Lab 6. Wyszukiwania a głosy', section: 'w2-7' },
-    { id: 'raport2', label: 'Projekt. Karta raportu z Trends', section: 'w2-8' },
+    { id: 'tr7', label: 'Lab 7. Popularne wyszukiwania', section: 'w2-8' },
+    { id: 'raport2', label: 'Projekt. Karta raportu z Trends', section: 'w2-9' },
   ],
   recap: [
     'Plik z Trends zaczyna się od kategorii i pustego wiersza. Nie mówi, czy kolumna to hasło, czy temat, więc trzeba to zapisać przy pobraniu.',
@@ -20117,6 +20730,7 @@ const CHAPTER = {
     'Udział w wyszukiwaniach zależy od okna i od zestawu kandydatów.',
     '„<1” to nie zero. Każda zamiana na liczbę jest decyzją, którą opisuje się w raporcie.',
     'Wyszukiwania pokazują uwagę, a nie głosy. Sprawdza się je drugim źródłem, tu wynikiem PKW.',
+    'Powiązane zapytania pokazują, o co pytano. Surowa lista łapie inne znaczenia hasła, więc trzeba ją przesiać i opisać jak.',
   ],
   next: 'Temat 3 zaczyna się tam, gdzie kończy się wyszukiwarka. Zobaczymy, co ludzie robią na stronie, gdy już na nią trafią.',
   prep: '',
@@ -20147,7 +20761,7 @@ const { CHAPTER, REPORT_FIELDS } = __modules["../../analiza-trendow-w-internecie
 const { labExercise, labAnswer } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS2, FILES2, explainError2 } = __modules["../../analiza-trendow-w-internecie/src/tasks2.js"];
 const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
-const { csvFigure, linesFigure, sharesFigure, chainFigure, termTopicFigure, regionsFigure, votesFigure } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
+const { csvFigure, linesFigure, sharesFigure, chainFigure, termTopicFigure, regionsFigure, votesFigure, trendingFigure } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
 const FIGURES2 = {
   'wycsva': csvFigure('Krok 1. Plik z Trends, zanim powstanie wykres', ['t1_kandydaci.csv', 't8_kandydaci_dzien_pozniej.csv'], {
     't1_kandydaci.csv': 'Wiersz 1 to kategoria, wiersz 2 jest pusty, a nagłówek jest w wierszu 3. Potem 30 wierszy, po jednym na dzień. Kolumna to imię i nazwisko z dopiskiem regionu. Z pliku nie wynika, że to temat, a nie hasło.',
@@ -20165,12 +20779,17 @@ const FIGURES2 = {
     't7_mapa.csv': 'Nazwy województw są zapisane na trzy sposoby, na przykład „mazowieckie”, „województwo łódzkie” i „Województwo dolnośląskie”. Wartości mają znak %. Kodów regionów w pliku nie ma.',
     'pkw_tura2_pl.csv': 'Ten plik przygotowaliśmy z tabel PKW. Ma polski format, czyli średniki i przecinki dziesiętne.',
   }),
+  'wycsve': csvFigure('Krok 7. Powiązane zapytania, dwie tabele w jednym pliku', ['t10_prezydent_po.csv', 't9_prezydent_przed.csv'], {
+    't10_prezydent_po.csv': 'W wierszu 2 jest hasło i okno w cudzysłowie. Potem tabela TOP, pusty wiersz i tabela RISING. Nazwa RISING jest po angielsku, choć reszta pliku jest po polsku. Wzrost to tekst, „+ 600%” albo „Przebicie”. Tysiące oddziela twarda spacja, zaznaczona tu znakiem ⍽.',
+    't9_prezydent_przed.csv': 'Ten sam układ. W tabeli TOP są też prezydent Francji, Rumunii i Warszawy.',
+  }),
   'wylines': linesFigure,
   'wyshares': sharesFigure,
   'wychain': chainFigure,
   'wyterm': termTopicFigure,
   'wyregions': regionsFigure,
   'wyvotes': votesFigure,
+  'wytrend': trendingFigure,
 };
 
 /** Make the engine topic 2: the course's stores and strings, then this topic's labs, figures and card. */

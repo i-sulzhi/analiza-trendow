@@ -1750,6 +1750,10 @@ textarea.kc-input { resize: vertical; }
 .py-pandas { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; background: var(--bg-panel); }
 .py-pandas summary { cursor: pointer; font-weight: 600; }
 .py-pandas-code { margin: 8px 0 0; padding: 10px 12px; overflow-x: auto; border-radius: var(--radius); background: var(--code-bg); font: 12.5px/1.5 var(--mono); white-space: pre; }
+/* a phone: long code in a message or in "Dla chętnych" must not widen the page */
+.py-pane > *, .py-pandas { min-width: 0; }
+.py-pandas-code { max-width: 100%; }
+.py code.ls-inline { white-space: normal; overflow-wrap: anywhere; }
 
 </style>
 </head>

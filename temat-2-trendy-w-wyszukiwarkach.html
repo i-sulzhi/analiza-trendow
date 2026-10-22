@@ -1730,6 +1730,7 @@ textarea.kc-input { resize: vertical; }
 .wy-dot { position: absolute; top: 3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; border: 1.5px solid var(--bg-panel); }
 .wy-dot-a, .wy-leg-dot.wy-dot-a::before { background: var(--accent); }
 .wy-dot-b, .wy-leg-dot.wy-dot-b::before { background: var(--warn); }
+.wy-leg-note { font-size: 12px; color: var(--ink-soft); }
 .wy-leg-dot { position: static; margin-right: 14px; font-size: 13px; background: none; }
 .wy-leg-dot::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; vertical-align: -1px; }
 @media (max-width: 600px) {
@@ -15386,7 +15387,7 @@ const LABS = {
       return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Znajdź tydzień szczytu Google funkcją `find_peak_week` i podziel obie wartości z tego tygodnia.';
     },
     success(value) {
-      return `Tak. Google pokazał więcej w ${value.weeks_above} z ${GENERATED.lab2.facts.weeks} tygodni, a w tygodniu szczytu ${String(value.ratio).replace('.', ',')} razy więcej niż lekarze. To te same liczby co pod rysunkiem {rys:flu}. Porównanie szczytu ze szczytem dałoby tylko ${String(GENERATED.lab2.facts.peakToPeak).replace('.', ',')}, więc trzeba pisać, co z czym porównujemy.`;
+      return `Tak. Google pokazał więcej w ${value.weeks_above} z ${GENERATED.lab2.facts.weeks} tygodni, a w tygodniu szczytu ${String(value.ratio).replace('.', ',')} ${Number.isInteger(value.ratio) ? 'razy' : 'raza'} więcej niż lekarze. To te same liczby co pod rysunkiem {rys:flu}. Porównanie szczytu ze szczytem dałoby tylko ${String(GENERATED.lab2.facts.peakToPeak).replace('.', ',')}, więc trzeba pisać, co z czym porównujemy.`;
     },
     more: 'Dla chętnych. Zmień `WEEKS` na `"201030-201129"` i uruchom kod jeszcze raz. To sezon, w którym szacunek Google jeszcze działał. Funkcję `find_peak_week` da się też zapisać jednym wierszem, czyli `max(series, key=series.get)`.',
     base: {
@@ -15771,6 +15772,7 @@ const GENERATED2 = {
   "t5_braun_5lat.csv": "Kategoria: Wszystko\n\nTydzień,braun: (Polska),Grzegorz Braun: (Polska),grzegorz braun: (Polska)\n2020-09-27,3,1,<1\n2020-10-04,3,1,1\n2020-10-11,4,2,1\n2020-10-18,4,2,1\n2020-10-25,4,2,1\n2020-11-01,3,1,<1\n2020-11-08,3,1,1\n2020-11-15,4,1,1\n2020-11-22,4,1,<1\n2020-11-29,4,1,<1\n2020-12-06,5,1,1\n2020-12-13,4,1,<1\n2020-12-20,4,1,1\n2020-12-27,4,1,<1\n2021-01-03,3,1,<1\n2021-01-10,3,1,<1\n2021-01-17,3,1,<1\n2021-01-24,3,1,<1\n2021-01-31,3,1,1\n2021-02-07,3,1,<1\n2021-02-14,3,1,<1\n2021-02-21,2,<1,<1\n2021-02-28,3,1,1\n2021-03-07,3,1,1\n2021-03-14,3,1,1\n2021-03-21,3,1,1\n2021-03-28,3,1,<1\n2021-04-04,3,1,<1\n2021-04-11,3,1,1\n2021-04-18,3,1,1\n2021-04-25,3,1,1\n2021-05-02,3,1,1\n2021-05-09,2,1,<1\n2021-05-16,2,1,<1\n2021-05-23,2,<1,<1\n2021-05-30,3,1,1\n2021-06-06,4,2,1\n2021-06-13,3,1,1\n2021-06-20,2,<1,<1\n2021-06-27,2,<1,<1\n2021-07-04,3,1,<1\n2021-07-11,2,<1,<1\n2021-07-18,3,1,<1\n2021-07-25,3,<1,<1\n2021-08-01,3,1,1\n2021-08-08,3,1,<1\n2021-08-15,2,<1,<1\n2021-08-22,2,<1,<1\n2021-08-29,2,<1,<1\n2021-09-05,2,<1,<1\n2021-09-12,8,6,4\n2021-09-19,4,3,1\n2021-09-26,3,2,1\n2021-10-03,2,1,<1\n2021-10-10,2,1,<1\n2021-10-17,2,1,<1\n2021-10-24,2,1,<1\n2021-10-31,3,1,<1\n2021-11-07,3,1,<1\n2021-11-14,3,1,<1\n2021-11-21,4,1,<1\n2021-11-28,4,1,<1\n2021-12-05,3,<1,<1\n2021-12-12,5,1,1\n2021-12-19,4,1,<1\n2021-12-26,3,1,<1\n2022-01-02,3,1,<1\n2022-01-09,3,1,<1\n2022-01-16,3,1,<1\n2022-01-23,3,1,<1\n2022-01-30,3,1,<1\n2022-02-06,3,1,<1\n2022-02-13,3,<1,<1\n2022-02-20,3,1,<1\n2022-02-27,5,4,1\n2022-03-06,3,1,1\n2022-03-13,3,1,1\n2022-03-20,3,1,1\n2022-03-27,3,1,<1\n2022-04-03,3,1,<1\n2022-04-10,3,1,<1\n2022-04-17,3,1,<1\n2022-04-24,2,<1,<1\n2022-05-01,2,1,<1\n2022-05-08,2,1,<1\n2022-05-15,2,<1,<1\n2022-05-22,2,<1,<1\n2022-05-29,2,<1,<1\n2022-06-05,2,<1,<1\n2022-06-12,2,<1,<1\n2022-06-19,3,<1,<1\n2022-06-26,2,<1,<1\n2022-07-03,2,1,<1\n2022-07-10,3,1,<1\n2022-07-17,3,1,<1\n2022-07-24,3,1,<1\n2022-07-31,3,1,<1\n2022-08-07,2,<1,<1\n2022-08-14,2,<1,<1\n2022-08-21,3,<1,<1\n2022-08-28,2,<1,<1\n2022-09-04,2,<1,<1\n2022-09-11,2,<1,<1\n2022-09-18,2,<1,<1\n2022-09-25,3,2,1\n2022-10-02,3,2,1\n2022-10-09,2,1,<1\n2022-10-16,2,1,<1\n2022-10-23,2,<1,<1\n2022-10-30,3,1,<1\n2022-11-06,3,1,<1\n2022-11-13,4,1,<1\n2022-11-20,3,<1,<1\n2022-11-27,3,<1,<1\n2022-12-04,4,<1,<1\n2022-12-11,4,<1,<1\n2022-12-18,4,1,<1\n2022-12-25,4,<1,<1\n2023-01-01,3,<1,<1\n2023-01-08,3,<1,<1\n2023-01-15,2,<1,<1\n2023-01-22,3,1,<1\n2023-01-29,3,1,<1\n2023-02-05,3,<1,<1\n2023-02-12,2,<1,<1\n2023-02-19,2,<1,<1\n2023-02-26,2,<1,<1\n2023-03-05,3,<1,<1\n2023-03-12,2,<1,<1\n2023-03-19,2,<1,<1\n2023-03-26,2,1,<1\n2023-04-02,3,<1,<1\n2023-04-09,2,<1,<1\n2023-04-16,2,<1,<1\n2023-04-23,2,<1,<1\n2023-04-30,2,<1,<1\n2023-05-07,3,<1,<1\n2023-05-14,2,<1,<1\n2023-05-21,2,<1,<1\n2023-05-28,4,2,1\n2023-06-04,3,1,<1\n2023-06-11,3,1,<1\n2023-06-18,3,1,<1\n2023-06-25,3,1,1\n2023-07-02,3,1,<1\n2023-07-09,3,1,<1\n2023-07-16,3,1,<1\n2023-07-23,3,1,<1\n2023-07-30,3,1,<1\n2023-08-06,2,<1,<1\n2023-08-13,3,1,<1\n2023-08-20,3,1,<1\n2023-08-27,3,1,<1\n2023-09-03,3,1,<1\n2023-09-10,3,1,1\n2023-09-17,3,1,<1\n2023-09-24,2,1,<1\n2023-10-01,3,1,<1\n2023-10-08,3,1,1\n2023-10-15,5,3,2\n2023-10-22,3,1,1\n2023-10-29,3,1,<1\n2023-11-05,3,1,<1\n2023-11-12,6,3,1\n2023-11-19,6,2,1\n2023-11-26,6,3,1\n2023-12-03,4,1,1\n2023-12-10,100,85,39\n2023-12-17,15,10,5\n2023-12-24,9,4,2\n2023-12-31,5,2,1\n2024-01-07,5,3,1\n2024-01-14,7,6,2\n2024-01-21,4,2,1\n2024-01-28,4,1,1\n2024-02-04,4,2,1\n2024-02-11,3,1,1\n2024-02-18,3,1,1\n2024-02-25,3,1,1\n2024-03-03,4,2,1\n2024-03-10,3,1,1\n2024-03-17,3,1,<1\n2024-03-24,3,1,<1\n2024-03-31,3,1,1\n2024-04-07,4,2,1\n2024-04-14,4,2,1\n2024-04-21,3,1,<1\n2024-04-28,3,1,1\n2024-05-05,3,1,1\n2024-05-12,3,1,1\n2024-05-19,3,1,1\n2024-05-26,4,1,1\n2024-06-02,5,2,2\n2024-06-09,11,8,5\n2024-06-16,4,1,1\n2024-06-23,4,1,1\n2024-06-30,3,1,<1\n2024-07-07,3,1,1\n2024-07-14,5,2,1\n2024-07-21,4,1,1\n2024-07-28,3,1,<1\n2024-08-04,3,1,<1\n2024-08-11,3,1,<1\n2024-08-18,3,1,<1\n2024-08-25,3,1,<1\n2024-09-01,3,1,<1\n2024-09-08,3,1,<1\n2024-09-15,3,1,<1\n2024-09-22,3,1,<1\n2024-09-29,3,1,<1\n2024-10-06,3,1,<1\n2024-10-13,3,1,<1\n2024-10-20,4,1,<1\n2024-10-27,3,1,<1\n2024-11-03,4,1,1\n2024-11-10,4,1,1\n2024-11-17,5,1,1\n2024-11-24,5,1,1\n2024-12-01,5,1,1\n2024-12-08,6,1,1\n2024-12-15,6,1,1\n2024-12-22,6,3,1\n2024-12-29,4,1,1\n2025-01-05,4,1,1\n2025-01-12,14,13,6\n2025-01-19,7,5,2\n2025-01-26,7,5,2\n2025-02-02,5,2,1\n2025-02-09,5,2,1\n2025-02-16,5,2,1\n2025-02-23,4,2,1\n2025-03-02,4,2,1\n2025-03-09,4,2,1\n2025-03-16,6,4,2\n2025-03-23,5,3,1\n2025-03-30,8,6,3\n2025-04-06,8,6,3\n2025-04-13,17,15,7\n2025-04-20,10,8,3\n2025-04-27,18,14,6\n2025-05-04,16,15,6\n2025-05-11,21,20,8\n2025-05-18,29,30,10\n2025-05-25,12,10,4\n2025-06-01,9,8,3\n2025-06-08,11,9,4\n2025-06-15,6,4,2\n2025-06-22,5,3,1\n2025-06-29,5,3,1\n2025-07-06,10,11,3\n2025-07-13,9,7,2\n2025-07-20,5,3,1\n2025-07-27,5,2,1\n2025-08-03,4,2,1\n2025-08-10,4,1,1\n2025-08-17,4,1,<1\n2025-08-24,4,1,1\n2025-08-31,5,2,1\n2025-09-07,6,3,1\n2025-09-14,4,2,1\n2025-09-21,4,2,1\n2025-09-28,5,2,1\n",
   "t6_stanowski.csv": "Kategoria: Wszystko\n\nDzień,stanowski: (Polska),Krzysztof Stanowski: (Polska),Krzysztof Stanowski: (Polska)\n2025-04-18,15,18,0\n2025-04-19,14,16,0\n2025-04-20,15,17,0\n2025-04-21,10,11,0\n2025-04-22,8,9,0\n2025-04-23,10,11,0\n2025-04-24,10,10,0\n2025-04-25,8,9,0\n2025-04-26,11,12,0\n2025-04-27,11,12,0\n2025-04-28,20,21,0\n2025-04-29,16,17,0\n2025-04-30,26,28,0\n2025-05-01,46,48,0\n2025-05-02,18,20,0\n2025-05-03,15,17,0\n2025-05-04,13,14,0\n2025-05-05,12,15,0\n2025-05-06,13,15,0\n2025-05-07,15,17,0\n2025-05-08,20,22,0\n2025-05-09,21,25,0\n2025-05-10,21,24,0\n2025-05-11,21,25,0\n2025-05-12,76,83,0\n2025-05-13,92,100,0\n2025-05-14,46,52,0\n2025-05-15,42,47,0\n2025-05-16,44,49,0\n2025-05-17,35,39,0\n",
   "t7_mapa.csv": "Kategoria: Wszystko\n\nRegion,Rafał Trzaskowski: (Od 19.05.2025 do 31.05.2025),Karol Nawrocki: (Od 19.05.2025 do 31.05.2025)\nmazowieckie,45%,55%\nwojewództwo łódzkie,48%,52%\npomorskie,43%,57%\nmałopolskie,46%,54%\nśląskie,43%,57%\nświętokrzyskie,45%,55%\nwarmińsko-mazurskie,48%,52%\nWojewództwo dolnośląskie,44%,56%\nopolskie,46%,54%\nwielkopolskie,45%,55%\nkujawsko-pomorskie,45%,55%\npodlaskie,45%,55%\nlubuskie,47%,53%\nWojewództwo zachodniopomorskie,47%,53%\nWojewództwo podkarpackie,43%,57%\nlubelskie,42%,58%\n",
+  "t8_kandydaci_dzien_pozniej.csv": "Kategoria: Wszystko\n\nDzień,Rafał Trzaskowski: (Polska),Karol Nawrocki: (Polska),Sławomir Mentzen: (Polska),Grzegorz Braun: (Polska),Krzysztof Stanowski: (Polska)\n2025-04-18,23,20,22,30,13\n2025-04-19,22,16,23,23,12\n2025-04-20,31,23,36,28,13\n2025-04-21,22,14,27,17,8\n2025-04-22,17,11,16,15,7\n2025-04-23,19,13,18,13,8\n2025-04-24,18,16,21,14,8\n2025-04-25,18,14,20,14,7\n2025-04-26,15,12,21,10,9\n2025-04-27,30,33,17,11,9\n2025-04-28,39,33,32,33,15\n2025-04-29,39,26,32,48,12\n2025-04-30,30,24,23,31,21\n2025-05-01,35,32,30,43,35\n2025-05-02,32,49,25,25,15\n2025-05-03,31,32,28,24,13\n2025-05-04,28,31,27,23,11\n2025-05-05,27,68,19,19,11\n2025-05-06,32,100,22,55,11\n2025-05-07,37,91,26,34,13\n2025-05-08,43,49,25,21,16\n2025-05-09,42,58,29,24,18\n2025-05-10,30,54,32,23,17\n2025-05-11,32,45,23,23,18\n2025-05-12,70,61,52,43,61\n2025-05-13,71,61,48,32,73\n2025-05-14,50,46,41,34,38\n2025-05-15,50,53,45,32,34\n2025-05-16,71,68,55,48,36\n2025-05-17,47,52,56,45,29\n",
   "pkw_tura1.csv": "kandydat,glosy,procent\nTRZASKOWSKI Rafał Kazimierz,6147797,31.36\nNAWROCKI Karol Tadeusz,5790804,29.54\nMENTZEN Sławomir Jerzy,2902448,14.81\nBRAUN Grzegorz Michał,1242917,6.34\nHOŁOWNIA Szymon Franciszek,978901,4.99\nZANDBERG Adrian Tadeusz,952832,4.86\nBIEJAT Magdalena Agnieszka,829361,4.23\nSTANOWSKI Krzysztof Jakub,243479,1.24\nSENYSZYN Joanna,214198,1.09\nJAKUBIAK Marek,150698,0.77\nBARTOSZEWICZ Artur,95640,0.49\nMACIAK Maciej,36371,0.19\nWOCH Marek Marian,18338,0.09\n",
   "pkw_tura2.csv": "kod_pkw,wojewodztwo,trzaskowski,nawrocki,razem,trzaskowski_procent\n20000,dolnośląskie,850305,673218,1523523,55.81\n40000,kujawsko-pomorskie,539860,470660,1010520,53.42\n60000,lubelskie,362053,720119,1082172,33.46\n80000,lubuskie,281477,201982,483459,58.22\n100000,łódzkie,617350,701859,1319209,46.80\n120000,małopolskie,791494,1132733,1924227,41.13\n140000,mazowieckie,1602996,1585019,3188015,50.28\n160000,opolskie,236992,210321,447313,52.98\n180000,podkarpackie,318485,780429,1098914,28.98\n200000,podlaskie,225062,357847,582909,38.61\n220000,pomorskie,754823,521725,1276548,59.13\n240000,śląskie,1172343,1111205,2283548,51.34\n260000,świętokrzyskie,229895,401863,631758,36.39\n280000,warmińsko-mazurskie,343483,320797,664280,51.71\n300000,wielkopolskie,1030175,837129,1867304,55.17\n320000,zachodniopomorskie,496666,359267,855933,58.03\n",
   "search_shares.csv": "candidate,share\nRafał Trzaskowski,14.1\nKarol Nawrocki,16.1\nSławomir Mentzen,12.0\nGrzegorz Braun,11.2\nKrzysztof Stanowski,7.9\nSzymon Hołownia,5.9\nAdrian Zandberg,7.5\nMagdalena Biejat,5.5\nJoanna Senyszyn,7.8\nMarek Jakubiak,3.9\nArtur Bartoszewicz,2.4\nMaciej Maciak,4.2\nMarek Woch,1.6\n",
@@ -16000,6 +16002,16 @@ const GENERATED2 = {
      "/g/11b5v50sld"
     ],
     "date": "2025-05-19 2025-05-31"
+   },
+   "t8_kandydaci_dzien_pozniej.csv": {
+    "q": [
+     "/g/1ym_l538q",
+     "/g/11b5v50sld",
+     "/g/11flvyzg2p",
+     "/g/11vjpd7lk",
+     "/g/11gk8wrdfn"
+    ],
+    "date": "2025-04-18 2025-05-17"
    }
   },
   "regionCodes": {
@@ -18827,6 +18839,258 @@ const GENERATED2 = {
       "58%"
      ]
     ]
+   },
+   "t8_kandydaci_dzien_pozniej.csv": {
+    "header": [
+     "Dzień",
+     "Rafał Trzaskowski: (Polska)",
+     "Karol Nawrocki: (Polska)",
+     "Sławomir Mentzen: (Polska)",
+     "Grzegorz Braun: (Polska)",
+     "Krzysztof Stanowski: (Polska)"
+    ],
+    "rows": [
+     [
+      "2025-04-18",
+      "23",
+      "20",
+      "22",
+      "30",
+      "13"
+     ],
+     [
+      "2025-04-19",
+      "22",
+      "16",
+      "23",
+      "23",
+      "12"
+     ],
+     [
+      "2025-04-20",
+      "31",
+      "23",
+      "36",
+      "28",
+      "13"
+     ],
+     [
+      "2025-04-21",
+      "22",
+      "14",
+      "27",
+      "17",
+      "8"
+     ],
+     [
+      "2025-04-22",
+      "17",
+      "11",
+      "16",
+      "15",
+      "7"
+     ],
+     [
+      "2025-04-23",
+      "19",
+      "13",
+      "18",
+      "13",
+      "8"
+     ],
+     [
+      "2025-04-24",
+      "18",
+      "16",
+      "21",
+      "14",
+      "8"
+     ],
+     [
+      "2025-04-25",
+      "18",
+      "14",
+      "20",
+      "14",
+      "7"
+     ],
+     [
+      "2025-04-26",
+      "15",
+      "12",
+      "21",
+      "10",
+      "9"
+     ],
+     [
+      "2025-04-27",
+      "30",
+      "33",
+      "17",
+      "11",
+      "9"
+     ],
+     [
+      "2025-04-28",
+      "39",
+      "33",
+      "32",
+      "33",
+      "15"
+     ],
+     [
+      "2025-04-29",
+      "39",
+      "26",
+      "32",
+      "48",
+      "12"
+     ],
+     [
+      "2025-04-30",
+      "30",
+      "24",
+      "23",
+      "31",
+      "21"
+     ],
+     [
+      "2025-05-01",
+      "35",
+      "32",
+      "30",
+      "43",
+      "35"
+     ],
+     [
+      "2025-05-02",
+      "32",
+      "49",
+      "25",
+      "25",
+      "15"
+     ],
+     [
+      "2025-05-03",
+      "31",
+      "32",
+      "28",
+      "24",
+      "13"
+     ],
+     [
+      "2025-05-04",
+      "28",
+      "31",
+      "27",
+      "23",
+      "11"
+     ],
+     [
+      "2025-05-05",
+      "27",
+      "68",
+      "19",
+      "19",
+      "11"
+     ],
+     [
+      "2025-05-06",
+      "32",
+      "100",
+      "22",
+      "55",
+      "11"
+     ],
+     [
+      "2025-05-07",
+      "37",
+      "91",
+      "26",
+      "34",
+      "13"
+     ],
+     [
+      "2025-05-08",
+      "43",
+      "49",
+      "25",
+      "21",
+      "16"
+     ],
+     [
+      "2025-05-09",
+      "42",
+      "58",
+      "29",
+      "24",
+      "18"
+     ],
+     [
+      "2025-05-10",
+      "30",
+      "54",
+      "32",
+      "23",
+      "17"
+     ],
+     [
+      "2025-05-11",
+      "32",
+      "45",
+      "23",
+      "23",
+      "18"
+     ],
+     [
+      "2025-05-12",
+      "70",
+      "61",
+      "52",
+      "43",
+      "61"
+     ],
+     [
+      "2025-05-13",
+      "71",
+      "61",
+      "48",
+      "32",
+      "73"
+     ],
+     [
+      "2025-05-14",
+      "50",
+      "46",
+      "41",
+      "34",
+      "38"
+     ],
+     [
+      "2025-05-15",
+      "50",
+      "53",
+      "45",
+      "32",
+      "34"
+     ],
+     [
+      "2025-05-16",
+      "71",
+      "68",
+      "55",
+      "48",
+      "36"
+     ],
+     [
+      "2025-05-17",
+      "47",
+      "52",
+      "56",
+      "45",
+      "29"
+     ]
+    ]
    }
   },
   "pkw1": [
@@ -19009,6 +19273,12 @@ const GENERATED2 = {
    "Maciej Maciak": 4.2,
    "Marek Woch": 1.6
   },
+  "sample": {
+   "cells": 150,
+   "differ": 24,
+   "maxDiff": 1,
+   "samePeak": true
+  },
   "recorded": "2026-10-21",
   "pkwUpdated": "23 września 2025"
  }
@@ -19086,7 +19356,7 @@ const LABS2 = {
       steps: [
         'Zobacz pierwsze trzy wiersze. W pierwszym jest kategoria, drugi jest pusty, nagłówek jest w trzecim.',
         'Policz wiersze z danymi, od czwartego do ostatniego.',
-        'Znajdź komórkę z wartością 100, na przykład funkcją `MAX` (w polskim Excelu `MAX`) dla każdej kolumny.',
+        'Znajdź komórkę z wartością 100, na przykład funkcją `MAX` dla każdej kolumny.',
         'W wierszu tego dnia podziel wartość Nawrockiego przez wartość Trzaskowskiego. Zaokrąglij do jednego miejsca.',
       ],
       fields: [
@@ -19221,7 +19491,7 @@ const LABS2 = {
   tr4: {
     ...common,
     id: 'tr4',
-    intro: 'Hasło „braun” łapie każdego Brauna, także markę golarek. Temat Grzegorz Braun łapie tylko polityka. Plik obejmuje pięć lat. Zamień „<1” na liczbę, policz tygodnie, w których temat ma „<1”, i porównaj hasło z tematem w spokojnym roku 2022 i w kampanii.',
+    intro: 'Hasło „braun” łapie każdego Brauna, także markę depilatorów, golarek i blenderów. Temat Grzegorz Braun łapie tylko polityka. Plik obejmuje pięć lat. Zamień „<1” na liczbę, policz tygodnie, w których temat ma „<1”, i porównaj hasło z tematem w spokojnym roku 2022 i w kampanii.',
     starter: G.tr4.starter,
     files: ['t5_braun_5lat.csv'],
     expect: G.tr4.expect,
@@ -19274,7 +19544,7 @@ const LABS2 = {
   tr5: {
     ...common,
     id: 'tr5',
-    intro: 'Mapa Google pokazuje, który kandydat prowadzi w wyszukiwaniach w każdym województwie. Połącz ją z wynikami drugiej tury z PKW. Najpierw ujednolić nazwy województw, bo Trends zapisuje je na kilka sposobów. Potem policz, w ilu województwach ten sam kandydat prowadzi w wyszukiwaniach i w głosach.',
+    intro: 'Plik z Trends dzieli w każdym województwie wyszukiwania między Trzaskowskiego i Nawrockiego. Połącz go z wynikami drugiej tury z PKW. Najpierw ujednolić nazwy województw, bo Trends zapisuje je na kilka sposobów. Potem policz, w ilu województwach ten sam kandydat prowadzi w wyszukiwaniach i w głosach.',
     starter: G.tr5.starter,
     files: ['t7_mapa.csv', 'pkw_tura2.csv'],
     expect: G.tr5.expect,
@@ -19302,7 +19572,7 @@ const LABS2 = {
       files: ['t7_mapa.csv', 'pkw_tura2_pl.csv'],
       steps: [
         'W pliku z Trends dodaj kolumnę z poprawioną nazwą, na przykład `=PODSTAW(MAŁE.LITERY(A4);"województwo ";"")` (`SUBSTITUTE`, `LOWER`).',
-        'Dodaj kolumnę z udziałem Trzaskowskiego jako liczbą. Usuń znak %, na przykład `=WARTOŚĆ(PODSTAW(B4;"%";""))`.',
+        'Dodaj kolumnę z udziałem Trzaskowskiego w tej samej skali co PKW. Arkusz zwykle zamienia „45%” na liczbę 0,45, więc pomnóż ją przez 100, `=B4*100`. Jeśli został tekst „45%”, użyj `=WARTOŚĆ(PODSTAW(B4;"%";""))`.',
         'Dołącz wynik Trzaskowskiego z PKW funkcją `X.WYSZUKAJ` albo `WYSZUKAJ.PIONOWO` (`XLOOKUP`, `VLOOKUP`). Sprawdź, ile wierszy znalazło parę.',
         'W każdym wierszu sprawdź, czy prowadzi ten sam kandydat, na przykład `=(C4>50)=(D4>50)`. Policz wartości PRAWDA.',
       ],
@@ -19503,7 +19773,8 @@ const dayTicks = (dates, every = 7) => dates.map((d, i) => [i, `${Number(d.slice
 const yearTicks = (dates) => dates.map((d, i) => [i, d]).filter(([i, d]) => i > 0 && dates[i - 1].slice(0, 4) !== d.slice(0, 4)).map(([i, d]) => [i, d.slice(0, 4)]);
 
 function lineChart({ dates, series, res, ticks, aria, marks = [] }) {
-  const W = 640; const H = chartH(220); const L = 36; const R = 10; const T = 14; const B = 22;
+  // a phone draws the tick labels twice as large (book.css), so the left margin must hold "100" at that size
+  const W = 640; const H = chartH(220); const L = 50; const R = 10; const T = 14; const B = 22;
   const n = dates.length;
   const x = (i) => L + (i / (n - 1)) * (W - L - R);
   const y = (v) => T + (1 - v / 100) * (H - T - B);
@@ -19512,7 +19783,7 @@ function lineChart({ dates, series, res, ticks, aria, marks = [] }) {
       svg('text', { x: L - 4, y: y(v) + 4, class: 'sq-tick', 'text-anchor': 'end' }, String(v))]),
     series.map((s) => svg('polyline', { points: s.values.map((v, i) => `${x(i).toFixed(1)},${y(num(v)).toFixed(1)}`).join(' '), class: `wy-line ${s.cls}` })),
     marks.map(([i, v]) => svg('circle', { cx: x(i), cy: y(v), r: 4, class: 'sq-mark' })),
-    ticks.map(([i, label]) => svg('text', { x: x(i), y: H - 6, class: 'sq-tick', 'text-anchor': i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle' }, label)));
+    ticks.map(([i, label]) => svg('text', { x: x(i), y: H - 6, class: 'sq-tick', 'text-anchor': x(i) - L < 40 ? 'start' : W - R - x(i) < 60 ? 'end' : 'middle' }, label)));
   return probe(chart, {
     W, top: T, bottom: H - B, n, x,
     read: (i) => ({
@@ -19625,7 +19896,7 @@ function termTopicFigure({ num: n = 'Rysunek' } = {}) {
       legend(series),
       el('div.sq-wrap', lineChart({ dates, series, res: long ? 'WEEK' : 'DAY', ticks: long ? yearTicks(dates) : dayTicks(dates), aria: 'Hasło i temat w jednym wykresie' })),
       el('div.sq-read', long
-        ? 'Przez większość tygodni hasło jest około trzech razy wyżej niż temat. To inni Braunowie, także marka golarek. W kampanii obie linie prawie się pokrywają.'
+        ? 'Przez większość tygodni hasło jest około trzech razy wyżej niż temat. To inni Braunowie, także marka depilatorów, golarek i blenderów. W kampanii obie linie prawie się pokrywają.'
         : 'W kampanii prawie każde wyszukiwanie słowa „braun” dotyczy polityka, więc hasło i temat idą razem.'));
   };
   draw();
@@ -19648,7 +19919,7 @@ function dots(rows, max, mid = null) {
       el('span.wy-dot.wy-dot-b', { style: `left:${at(r.b)}`, title: `głosy ${one(r.b)}%` })),
     el('span.wy-bar-val', `${Math.round(r.a)} / ${Math.round(r.b)}`))));
 }
-const dotLegend = () => el('div.sq-legend', el('span.wy-leg-dot.wy-dot-a', 'wyszukiwania'), el('span.wy-leg-dot.wy-dot-b', 'głosy'));
+const dotLegend = () => el('div.sq-legend', el('span.wy-leg-dot.wy-dot-a', 'wyszukiwania'), el('span.wy-leg-dot.wy-dot-b', 'głosy'), el('span.wy-leg-note', 'liczby po prawej: wyszukiwania / głosy, w %'));
 
 function regionRows() {
   const { rows } = D.series['t7_mapa.csv'];
@@ -19749,9 +20020,9 @@ const sections = [
   ]),
 
   step('w2-2', '2.2', 'Krok 1. Linie kandydatów', [
-    { p: 'Pierwszy panel raportu to linie kandydatów z „ostatnich 30 dni”. Google nie podaje dat. Ostatnie 30 dni w dniu publikacji to inne dni niż dziś, więc tego wykresu nie da się powtórzyć.' },
+    { p: 'Pierwszy panel raportu to linie kandydatów z „ostatnich 30 dni”. Takie okno przesuwa się w Trends każdego dnia. Raport pokazuje więc inne dni niż w chwili publikacji i tego wykresu nie da się dokładnie powtórzyć.' },
     { p: `Dlatego bierzemy stałe okno, 30 dni przed pierwszą turą, od 18 kwietnia do 17 maja 2025 r. Kandydaci to tematy, a nie hasła. [Otwórz to zapytanie w Trends](${trendsUrl('t1_kandydaci.csv')}).` },
-    { p: 'Zanim powstanie wykres, zobacz plik. Rysunek {rys:wycsva} pokazuje go na trzy sposoby.' },
+    { p: 'Zanim powstanie wykres, zobacz plik. Rysunek {rys:wycsva} pokazuje go na trzy sposoby. Drugi plik to to samo zapytanie pobrane dzień później. Porównaj je i zobacz, ile zmienia próba.' },
     { figure: 'wycsva' },
     { exercise: 'tr1', num: 'Lab 1', title: 'Wczytaj plik z Trends i znajdź szczyt', toc: 'Lab 1. Plik i szczyt' },
     { figure: 'wylines' },
@@ -19784,15 +20055,16 @@ const sections = [
     { exercise: 'tr4', num: 'Lab 4', title: 'Hasło „braun” i temat Grzegorz Braun', toc: 'Lab 4. Hasło czy temat' },
     { figure: 'wyterm' },
     { p: 'Na rysunku {rys:wyterm} hasło i temat rozchodzą się poza kampanią. W kampanii idą razem, więc w krótkim oknie różnica jest mała. Hasło jest wygodne, ale łapie inne znaczenia słowa. Temat jest czystszy, ale Google nie mówi, co dokładnie do niego wlicza. W raporcie podaj, czego użyto, a przy temacie jego kod.' },
+    { p: 'Skąd wiemy, że to inni Braunowie? Trends pokazuje też zapytania powiązane z hasłem. Dla słowa „braun” w tych pięciu latach są wśród nich „depilator braun”, „golarka braun” i „blender braun”. To łatwy sprawdzian każdego hasła przed analizą.' },
   ]),
 
   step('w2-6', '2.6', 'Krok 5. Mapa województw', [
-    { p: 'Mapa w raporcie Google koloruje województwa. Kolor mówi, kto prowadzi w wyszukiwaniach w danym regionie. Wartość regionu to udział w wyszukiwaniach w tym regionie, a nie liczba osób. Duże i małe województwo mają więc tę samą skalę.' },
-    { p: `Zapytanie obejmuje dwa tematy, Trzaskowskiego i Nawrockiego, między turami, od 19 do 31 maja 2025 r. [Otwórz je w Trends](${trendsUrl('t7_mapa.csv')}). Wyniki drugiej tury w województwach pochodzą ze strony PKW.` },
+    { p: 'Mapa w raporcie Google ma podpis „Regiony najczęściej wyszukujące wybory prezydenckie”. Ciemniejszy kolor znaczy, że w tym województwie wybory zajmują większą część wszystkich wyszukiwań. To udział, a nie liczba osób, więc duże i małe województwo mają tę samą skalę. O kandydatach ta mapa nic nie mówi.' },
+    { p: `Czytelnik mapy zapyta jednak, kogo szukano gdzie. Trends odpowiada na to, gdy porównasz dwa tematy w regionach. Każde województwo dzieli wtedy 100% między dwóch kandydatów. Nasze zapytanie obejmuje Trzaskowskiego i Nawrockiego między turami, od 19 do 31 maja 2025 r. [Otwórz je w Trends](${trendsUrl('t7_mapa.csv')}). Wyniki drugiej tury w województwach pochodzą ze strony PKW.` },
     { figure: 'wycsvd' },
     { exercise: 'tr5', num: 'Lab 5', title: 'Połącz mapę z wynikami PKW', toc: 'Lab 5. Mapa i PKW' },
     { figure: 'wyregions' },
-    { p: 'Rysunek {rys:wyregions} pokazuje dwie różne rzeczy. W wyszukiwaniach Nawrocki prowadzi wszędzie, ale z niewielką przewagą. W głosach województwa dzielą się wyraźnie. Mapa z samych wyszukiwań pokazałaby więc jeden kolor tam, gdzie wyborcy zdecydowali różnie.' },
+    { p: 'Rysunek {rys:wyregions} pokazuje dwie różne rzeczy. W wyszukiwaniach Nawrocki prowadzi wszędzie, ale z niewielką przewagą. W głosach województwa dzielą się wyraźnie. Mapa kandydatów z samych wyszukiwań pokazałaby więc jeden kolor tam, gdzie wyborcy zdecydowali różnie.' },
   ]),
 
   step('w2-7', '2.7', 'Krok 6. Wyszukiwania a głosy', [
@@ -19874,10 +20146,12 @@ const { setUp: setUpCourse } = __modules["../../analiza-trendow-w-internecie/src
 const { CHAPTER, REPORT_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter2.js"];
 const { labExercise, labAnswer } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS2, FILES2, explainError2 } = __modules["../../analiza-trendow-w-internecie/src/tasks2.js"];
+const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
 const { csvFigure, linesFigure, sharesFigure, chainFigure, termTopicFigure, regionsFigure, votesFigure } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
 const FIGURES2 = {
-  'wycsva': csvFigure('Krok 1. Plik z Trends, zanim powstanie wykres', ['t1_kandydaci.csv'], {
+  'wycsva': csvFigure('Krok 1. Plik z Trends, zanim powstanie wykres', ['t1_kandydaci.csv', 't8_kandydaci_dzien_pozniej.csv'], {
     't1_kandydaci.csv': 'Wiersz 1 to kategoria, wiersz 2 jest pusty, a nagłówek jest w wierszu 3. Potem 30 wierszy, po jednym na dzień. Kolumna to imię i nazwisko z dopiskiem regionu. Z pliku nie wynika, że to temat, a nie hasło.',
+    't8_kandydaci_dzien_pozniej.csv': `To samo zapytanie pobrane dzień później, 22 października 2026 r. Różni się ${GENERATED2.data.sample.differ} z ${GENERATED2.data.sample.cells} komórek, każda najwyżej o ${GENERATED2.data.sample.maxDiff}. Tak działa próba. Dla całej Polski zmiany są małe, dla jednego województwa albo rzadkiego hasła bywają duże.`,
   }),
   'wycsvb': csvFigure('Krok 3. Dwa kolejne pliki łańcucha', ['t2_lancuch_a.csv', 't3_lancuch_b.csv'], {
     't2_lancuch_a.csv': 'Stanowski jest tu po raz drugi i ma tu swoje 100. W pierwszym pliku tego samego dnia miał mniej, bo setkę miał tam ktoś inny.',

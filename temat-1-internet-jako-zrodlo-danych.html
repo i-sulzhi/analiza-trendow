@@ -1730,6 +1730,7 @@ textarea.kc-input { resize: vertical; }
 .wy-dot { position: absolute; top: 3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; border: 1.5px solid var(--bg-panel); }
 .wy-dot-a, .wy-leg-dot.wy-dot-a::before { background: var(--accent); }
 .wy-dot-b, .wy-leg-dot.wy-dot-b::before { background: var(--warn); }
+.wy-leg-note { font-size: 12px; color: var(--ink-soft); }
 .wy-leg-dot { position: static; margin-right: 14px; font-size: 13px; background: none; }
 .wy-leg-dot::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; vertical-align: -1px; }
 @media (max-width: 600px) {
@@ -15386,7 +15387,7 @@ const LABS = {
       return 'Pierwsza liczba jest dobra. Druga jeszcze nie. Znajdź tydzień szczytu Google funkcją `find_peak_week` i podziel obie wartości z tego tygodnia.';
     },
     success(value) {
-      return `Tak. Google pokazał więcej w ${value.weeks_above} z ${GENERATED.lab2.facts.weeks} tygodni, a w tygodniu szczytu ${String(value.ratio).replace('.', ',')} razy więcej niż lekarze. To te same liczby co pod rysunkiem {rys:flu}. Porównanie szczytu ze szczytem dałoby tylko ${String(GENERATED.lab2.facts.peakToPeak).replace('.', ',')}, więc trzeba pisać, co z czym porównujemy.`;
+      return `Tak. Google pokazał więcej w ${value.weeks_above} z ${GENERATED.lab2.facts.weeks} tygodni, a w tygodniu szczytu ${String(value.ratio).replace('.', ',')} ${Number.isInteger(value.ratio) ? 'razy' : 'raza'} więcej niż lekarze. To te same liczby co pod rysunkiem {rys:flu}. Porównanie szczytu ze szczytem dałoby tylko ${String(GENERATED.lab2.facts.peakToPeak).replace('.', ',')}, więc trzeba pisać, co z czym porównujemy.`;
     },
     more: 'Dla chętnych. Zmień `WEEKS` na `"201030-201129"` i uruchom kod jeszcze raz. To sezon, w którym szacunek Google jeszcze działał. Funkcję `find_peak_week` da się też zapisać jednym wierszem, czyli `max(series, key=series.get)`.',
     base: {

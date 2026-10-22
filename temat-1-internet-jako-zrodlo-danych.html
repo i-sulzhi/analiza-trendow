@@ -15088,8 +15088,10 @@ const STRINGS = {
   'py.netError': 'Zapytanie do API się nie udało, a dla tego adresu nie ma zapisanej kopii. Sprawdź adres w kodzie i połączenie z internetem. Kod 429 w błędzie znaczy, że serwis odrzucił zapytanie, bo skończył się limit. Spróbuj za godzinę albo wróć do adresu z zadania.',
   'py.offline': 'Nie udało się pobrać Pythona. Ta ścieżka wymaga internetu. Bez internetu wybierz ścieżkę „Bez kodu”.',
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
-  'py.pandasTitle': 'Dla chętnych. To samo w pandas',
-  'py.pandasNote': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
+  'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.csv.title': 'Dla chętnych. To samo bez pandas',
+  'py.alt.csv.note': 'Tak wygląda ta praca w czystym Pythonie, modułem `csv`. Widać w niej to, co pandas robi za Ciebie: które wiersze pominąć, co jest nagłówkiem, jak znaleźć największą wartość.',
   'py.baseWrong': 'Do poprawy {k|pole|pola|pól}, zaznaczone na czerwono.',
 };
 
@@ -15673,7 +15675,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
           say(verdict, v.ok ? 'py-right' : 'py-wrong', rich(v.ok ? `${v.text} ${lab.more}` : v.text));
           if (v.ok) {
             finish();
-            if (lab.pandas) mount(pandasBox, el('details.py-pandas', el('summary', t('py.pandasTitle')), el('p.py-note', { html: rich(t('py.pandasNote')) }), el('pre.py-pandas-code', lab.pandas)));
+            if (lab.alt) mount(pandasBox, el('details.py-pandas', el('summary', t(`py.alt.${lab.alt.kind}.title`)), el('p.py-note', { html: rich(t(`py.alt.${lab.alt.kind}.note`)) }), el('pre.py-pandas-code', lab.alt.code)));
           }
         }
       } catch (e) {

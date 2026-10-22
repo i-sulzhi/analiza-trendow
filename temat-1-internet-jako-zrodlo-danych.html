@@ -1747,6 +1747,10 @@ textarea.kc-input { resize: vertical; }
 .wy-rising-other .wy-rising-q { color: var(--ink-soft); text-decoration: line-through; text-decoration-color: var(--ink-faint); }
 .wy-rising-tag { font-size: 11px; padding: 1px 6px; border-radius: 8px; background: var(--warn-bg); color: var(--ink-soft); white-space: nowrap; }
 
+.py-pandas { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; background: var(--bg-panel); }
+.py-pandas summary { cursor: pointer; font-weight: 600; }
+.py-pandas-code { margin: 8px 0 0; padding: 10px 12px; overflow-x: auto; border-radius: var(--radius); background: var(--code-bg); font: 12.5px/1.5 var(--mono); white-space: pre; }
+
 </style>
 </head>
 <body>
@@ -15084,6 +15088,8 @@ const STRINGS = {
   'py.netError': 'Zapytanie do API się nie udało, a dla tego adresu nie ma zapisanej kopii. Sprawdź adres w kodzie i połączenie z internetem. Kod 429 w błędzie znaczy, że serwis odrzucił zapytanie, bo skończył się limit. Spróbuj za godzinę albo wróć do adresu z zadania.',
   'py.offline': 'Nie udało się pobrać Pythona. Ta ścieżka wymaga internetu. Bez internetu wybierz ścieżkę „Bez kodu”.',
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
+  'py.pandasTitle': 'Dla chętnych. To samo w pandas',
+  'py.pandasNote': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
   'py.baseWrong': 'Do poprawy {k|pole|pola|pól}, zaznaczone na czerwono.',
 };
 
@@ -15171,6 +15177,10 @@ async function runPython(code, { files = {} } = {}) {
   py.setStderr({ batched: (s) => out.push(s) });
   // the files are written again before every run, so code that changed one starts clean
   for (const [name, text] of Object.entries(files)) py.FS.writeFile(name, text);
+  // a library the code imports and Pyodide has but has not loaded yet (pandas in topic 2's
+  // "Dla chętnych") is fetched now, on the first run that needs it
+  // its log lines ("Loading pandas", "No new packages to load") stay out of the student's output
+  await py.loadPackagesFromImports(code, { messageCallback: () => {}, errorCallback: () => {} });
   const scope = py.globals.get('dict')();
   try {
     await py.runPythonAsync(code, { globals: scope });
@@ -15635,6 +15645,8 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const out = el('pre.py-out', { 'aria-live': 'polite' });
     const verdict = el('div.py-verdict', { 'aria-live': 'polite' });
     const hintBox = el('div.py-hints');
+    // after success: the same task in pandas, for those who want it (topic 2)
+    const pandasBox = el('div.py-pandas-host');
     const runBtn = el('button.ls-check.py-run', { type: 'button' }, t('py.run'));
     const hintBtn = el('button.fg-toggle', { type: 'button' }, t('py.hint'));
     const resetBtn = el('button.fg-toggle', { type: 'button' }, t('py.reset'));
@@ -15659,7 +15671,10 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
           showOut(res.stdout || t('py.noOutput'));
           const v = checkCode(lab, res.value);
           say(verdict, v.ok ? 'py-right' : 'py-wrong', rich(v.ok ? `${v.text} ${lab.more}` : v.text));
-          if (v.ok) finish();
+          if (v.ok) {
+            finish();
+            if (lab.pandas) mount(pandasBox, el('details.py-pandas', el('summary', t('py.pandasTitle')), el('p.py-note', { html: rich(t('py.pandasNote')) }), el('pre.py-pandas-code', lab.pandas)));
+          }
         }
       } catch (e) {
         showOut('', '');
@@ -15689,7 +15704,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       fileBar,
       area,
       el('div.py-bar', runBtn, hintBtn, resetBtn),
-      hintBox, out, verdict);
+      hintBox, out, verdict, pandasBox);
 
     // ---- no-code path
     const baseVerdict = el('div.py-verdict', { 'aria-live': 'polite' });

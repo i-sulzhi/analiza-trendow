@@ -1747,6 +1747,10 @@ textarea.kc-input { resize: vertical; }
 .wy-rising-other .wy-rising-q { color: var(--ink-soft); text-decoration: line-through; text-decoration-color: var(--ink-faint); }
 .wy-rising-tag { font-size: 11px; padding: 1px 6px; border-radius: 8px; background: var(--warn-bg); color: var(--ink-soft); white-space: nowrap; }
 
+.py-pandas { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; background: var(--bg-panel); }
+.py-pandas summary { cursor: pointer; font-weight: 600; }
+.py-pandas-code { margin: 8px 0 0; padding: 10px 12px; overflow-x: auto; border-radius: var(--radius); background: var(--code-bg); font: 12.5px/1.5 var(--mono); white-space: pre; }
+
 </style>
 </head>
 <body>
@@ -15084,6 +15088,8 @@ const STRINGS = {
   'py.netError': 'Zapytanie do API się nie udało, a dla tego adresu nie ma zapisanej kopii. Sprawdź adres w kodzie i połączenie z internetem. Kod 429 w błędzie znaczy, że serwis odrzucił zapytanie, bo skończył się limit. Spróbuj za godzinę albo wróć do adresu z zadania.',
   'py.offline': 'Nie udało się pobrać Pythona. Ta ścieżka wymaga internetu. Bez internetu wybierz ścieżkę „Bez kodu”.',
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
+  'py.pandasTitle': 'Dla chętnych. To samo w pandas',
+  'py.pandasNote': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
   'py.baseWrong': 'Do poprawy {k|pole|pola|pól}, zaznaczone na czerwono.',
 };
 
@@ -15171,6 +15177,10 @@ async function runPython(code, { files = {} } = {}) {
   py.setStderr({ batched: (s) => out.push(s) });
   // the files are written again before every run, so code that changed one starts clean
   for (const [name, text] of Object.entries(files)) py.FS.writeFile(name, text);
+  // a library the code imports and Pyodide has but has not loaded yet (pandas in topic 2's
+  // "Dla chętnych") is fetched now, on the first run that needs it
+  // its log lines ("Loading pandas", "No new packages to load") stay out of the student's output
+  await py.loadPackagesFromImports(code, { messageCallback: () => {}, errorCallback: () => {} });
   const scope = py.globals.get('dict')();
   try {
     await py.runPythonAsync(code, { globals: scope });
@@ -15635,6 +15645,8 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const out = el('pre.py-out', { 'aria-live': 'polite' });
     const verdict = el('div.py-verdict', { 'aria-live': 'polite' });
     const hintBox = el('div.py-hints');
+    // after success: the same task in pandas, for those who want it (topic 2)
+    const pandasBox = el('div.py-pandas-host');
     const runBtn = el('button.ls-check.py-run', { type: 'button' }, t('py.run'));
     const hintBtn = el('button.fg-toggle', { type: 'button' }, t('py.hint'));
     const resetBtn = el('button.fg-toggle', { type: 'button' }, t('py.reset'));
@@ -15659,7 +15671,10 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
           showOut(res.stdout || t('py.noOutput'));
           const v = checkCode(lab, res.value);
           say(verdict, v.ok ? 'py-right' : 'py-wrong', rich(v.ok ? `${v.text} ${lab.more}` : v.text));
-          if (v.ok) finish();
+          if (v.ok) {
+            finish();
+            if (lab.pandas) mount(pandasBox, el('details.py-pandas', el('summary', t('py.pandasTitle')), el('p.py-note', { html: rich(t('py.pandasNote')) }), el('pre.py-pandas-code', lab.pandas)));
+          }
         }
       } catch (e) {
         showOut('', '');
@@ -15689,7 +15704,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       fileBar,
       area,
       el('div.py-bar', runBtn, hintBtn, resetBtn),
-      hintBox, out, verdict);
+      hintBox, out, verdict, pandasBox);
 
     // ---- no-code path
     const baseVerdict = el('div.py-verdict', { 'aria-live': 'polite' });
@@ -15793,6 +15808,7 @@ const GENERATED2 = {
  },
  "labs": {
   "tr1": {
+   "pandas": "import pandas as pd\n\ndf = pd.read_csv(\"t1_kandydaci.csv\", skiprows=2, index_col=0)   # pomija kategorię i pusty wiersz\ndf.columns = df.columns.str.split(\":\").str[0]                    # \"Karol Nawrocki: (Polska)\" -> \"Karol Nawrocki\"\n\npeak_day, peak_name = df.stack().idxmax()                        # dzień i kolumna wartości 100\ntimes = df.loc[peak_day, \"Karol Nawrocki\"] / df.loc[peak_day, \"Rafał Trzaskowski\"]\n\nresult = {\"rows\": len(df), \"peak_day\": peak_day, \"peak_name\": peak_name, \"times\": round(float(times), 1)}\nprint(result)\n",
    "starter": "import csv\n\nFILE = \"t1_kandydaci.csv\"\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\n\n    Plik zaczyna się od wiersza z kategorią i pustego wiersza.\n    Nagłówek jest dopiero w trzecim wierszu.\n    \"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    header = rows[0]   # tu popraw: nagłówek nie jest w pierwszym wierszu\n    data = rows[1:]    # tu popraw: dane zaczynają się później\n    return header, data\n\n\ndef short_name(column):\n    \"\"\"Zamienia nagłówek \"Karol Nawrocki: (Polska)\" na \"Karol Nawrocki\".\"\"\"\n    return column.split(\":\")[0]\n\n\nheader, data = read_trends_csv(FILE)\nprint(\"Nagłówek:\", header)\nprint(\"Liczba wierszy z danymi:\", len(data))\nprint(\"Pierwszy wiersz:\", data[0])\n\n# Zadanie 1: w którym dniu jest wartość 100 i u kogo?\n# Wartości w pliku są tekstem, więc szukaj napisu \"100\".\npeak_day = \"\"    # tu wpisz swój kod\npeak_name = \"\"   # tu wpisz swój kod, nazwę bez \": (Polska)\"\n\n# Zadanie 2: ile razy więcej szukano Nawrockiego niż Trzaskowskiego w dniu szczytu?\n# Obie liczby muszą pochodzić z tego samego dnia. Przykład: kolumna Trzaskowskiego\nk = header.index(\"Rafał Trzaskowski: (Polska)\")\nprint(\"Trzaskowski, pierwszy dzień:\", data[0][0], data[0][k])\ntimes = 0         # tu wpisz swój kod\n\nresult = {\"rows\": len(data), \"peak_day\": peak_day, \"peak_name\": peak_name, \"times\": round(times, 1)}\nprint(result)\n",
    "expect": {
     "rows": 30,
@@ -15817,6 +15833,7 @@ const GENERATED2 = {
    }
   },
   "tr2": {
+   "pandas": "import pandas as pd\n\ndf = pd.read_csv(\"t1_kandydaci.csv\", skiprows=2, index_col=0)\ndf.columns = df.columns.str.split(\":\").str[0]\n\nlast = df.tail(7).sum()                                          # suma każdej kolumny z 7 dni\nresult = {name: round(float(100 * value / last.sum())) for name, value in last.items()}\nprint(result)\n",
    "starter": "import csv\n\nFILE = \"t1_kandydaci.csv\"\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    return rows[2], rows[3:]\n\n\ndef short_name(column):\n    \"\"\"Zamienia nagłówek \"Karol Nawrocki: (Polska)\" na \"Karol Nawrocki\".\"\"\"\n    return column.split(\":\")[0]\n\n\nheader, data = read_trends_csv(FILE)\nnames = [short_name(column) for column in header[1:]]\nlast_week = data[-7:]\nprint(\"Ostatnie 7 dni:\", last_week[0][0], \"–\", last_week[-1][0])\n\n# Zadanie: udział każdego kandydata w wyszukiwaniach z ostatnich 7 dni, w procentach.\n# Najpierw suma indeksu każdego kandydata z tych 7 dni, potem jego część w sumie wszystkich.\nsums = {}\nfor k, name in enumerate(names, start=1):\n    sums[name] = 0   # tu wpisz swój kod: suma z 7 dni\nprint(\"Sumy:\", sums)\n\nshares = {name: 0 for name in names}   # tu wpisz swój kod: procent z całości, zaokrąglony\n\nresult = shares\nprint(result)\n",
    "expect": {
     "Rafał Trzaskowski": 24,
@@ -15858,6 +15875,7 @@ const GENERATED2 = {
    }
   },
   "tr3": {
+   "pandas": "import pandas as pd\n\n\ndef sums(path):\n    \"\"\"Suma indeksu każdego kandydata z całego okna.\"\"\"\n    df = pd.read_csv(path, skiprows=2, index_col=0)\n    df.columns = df.columns.str.split(\":\").str[0]\n    return df.sum()\n\n\na, b, c = sums(\"t1_kandydaci.csv\"), sums(\"t2_lancuch_a.csv\"), sums(\"t3_lancuch_b.csv\")\nfactor_b = a[\"Krzysztof Stanowski\"] / b[\"Krzysztof Stanowski\"]\nfactor_c = factor_b * b[\"Magdalena Biejat\"] / c[\"Magdalena Biejat\"]\n\n# każdy kandydat raz: kotwic nie bierzemy drugi raz\nscaled = pd.concat([a, b.drop(\"Krzysztof Stanowski\") * factor_b, c.drop(\"Magdalena Biejat\") * factor_c])\nresult = {name: round(float(v), 1) for name, v in (100 * scaled / scaled.sum()).items()}\nprint(result)\n",
    "starter": "import csv\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    return rows[2], rows[3:]\n\n\ndef sums_of(path):\n    \"\"\"Zwraca słownik {kandydat: suma indeksu z całego okna} dla jednego pliku.\"\"\"\n    header, data = read_trends_csv(path)\n    return {column.split(\":\")[0]: sum(int(row[k]) for row in data) for k, column in enumerate(header) if k > 0}\n\n\na = sums_of(\"t1_kandydaci.csv\")      # Trzaskowski, Nawrocki, Mentzen, Braun, Stanowski\nb = sums_of(\"t2_lancuch_a.csv\")      # Stanowski, Hołownia, Zandberg, Biejat, Senyszyn\nc = sums_of(\"t3_lancuch_b.csv\")      # Biejat, Jakubiak, Bartoszewicz, Maciak, Woch\n\n# Kotwica pierwsza: Stanowski jest w plikach a i b.\nfactor_b = a[\"Krzysztof Stanowski\"] / b[\"Krzysztof Stanowski\"]\nprint(\"Mnożnik dla pliku b:\", round(factor_b, 3))\n\n# Kotwica druga: Biejat jest w plikach b i c.\nfactor_c = 1   # tu wpisz swój kod\nprint(\"Mnożnik dla pliku c:\", round(factor_c, 3))\n\nscaled = dict(a)\nfor name, value in b.items():\n    if name not in scaled:\n        scaled[name] = value * factor_b\nfor name, value in c.items():\n    if name not in scaled:\n        scaled[name] = value * factor_c\n\ntotal = sum(scaled.values())\nresult = {name: round(100 * value / total, 1) for name, value in scaled.items()}\nprint(result)\n",
    "expect": {
     "Rafał Trzaskowski": 14.1,
@@ -15900,6 +15918,7 @@ const GENERATED2 = {
    }
   },
   "tr4": {
+   "pandas": "import pandas as pd\n\ndf = pd.read_csv(\"t5_braun_5lat.csv\", skiprows=2, index_col=0)  # kolumny z \"<1\" są tekstem\nlt1 = int((df.iloc[:, 1] == \"<1\").sum())\n\nvalues = df.replace(\"<1\", 0.5).astype(float)\n\n\ndef ratio(part):\n    \"\"\"Średnia hasła podzielona przez średnią tematu.\"\"\"\n    return part.iloc[:, 0].mean() / part.iloc[:, 1].mean()\n\n\nquiet = values[values.index.str.startswith(\"2022\")]\ncampaign = values.loc[\"2025-04-13\":\"2025-05-11\"]\n\nresult = {\"lt1\": lt1, \"quiet\": round(float(ratio(quiet)), 1), \"campaign\": round(float(ratio(campaign)), 1)}\nprint(result)\n",
    "starter": "import csv\n\nFILE = \"t5_braun_5lat.csv\"\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    return rows[2], rows[3:]\n\n\nheader, data = read_trends_csv(FILE)\nprint(\"Kolumny:\", header)\n# kolumna 1 to hasło \"braun\", kolumna 2 to temat Grzegorz Braun\n\n\ndef value(text):\n    \"\"\"Zamienia wartość z Trends na liczbę. \"<1\" znaczy mniej niż 1, więc przyjmujemy 0,5.\"\"\"\n    return float(text)   # tu popraw: float(\"<1\") daje błąd\n\n\ndef ratio(rows):\n    \"\"\"Ile razy średnia hasła jest większa od średniej tematu w podanych wierszach.\"\"\"\n    term = sum(value(row[1]) for row in rows) / len(rows)\n    topic = sum(value(row[2]) for row in rows) / len(rows)\n    return term / topic\n\n\n# Zadanie 1: w ilu tygodniach temat ma wartość \"<1\"?\nlt1 = 0   # tu wpisz swój kod\n\n# Zadanie 2: stosunek hasła do tematu w spokojnym roku 2022 i w kampanii przed pierwszą turą\nquiet = [row for row in data if row[0].startswith(\"2022\")]\ncampaign = [row for row in data if \"2025-04-13\" <= row[0] <= \"2025-05-11\"]\nprint(\"Tygodnie spokojne:\", len(quiet), \"Tygodnie kampanii:\", len(campaign))\n\nresult = {\"lt1\": lt1, \"quiet\": round(ratio(quiet), 1), \"campaign\": round(ratio(campaign), 1)}\nprint(result)\n",
    "expect": {
     "lt1": 52,
@@ -15916,6 +15935,7 @@ const GENERATED2 = {
    }
   },
   "tr5": {
+   "pandas": "import pandas as pd\n\ntrends = pd.read_csv(\"t7_mapa.csv\", skiprows=2)\ntrends[\"key\"] = trends[\"Region\"].str.lower().str.replace(\"województwo \", \"\").str.strip()\ntrends[\"search\"] = trends.iloc[:, 1].str.rstrip(\"%\").astype(float)\n\npkw = pd.read_csv(\"pkw_tura2.csv\").rename(columns={\"wojewodztwo\": \"key\"})\njoined = trends.merge(pkw, on=\"key\")\n\nsame = (joined[\"search\"] > 50) == (joined[\"trzaskowski_procent\"] > 50)\nresult = {\"joined\": len(joined), \"same_leader\": int(same.sum())}\nprint(result)\n",
    "starter": "import csv\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    return rows[2], rows[3:]\n\n\ndef clean_region(name):\n    \"\"\"Sprowadza nazwę województwa do jednej postaci, na przykład \"dolnośląskie\".\"\"\"\n    return name   # tu popraw: w Trends nazwy są zapisane na kilka sposobów\n\n\nheader, trends = read_trends_csv(\"t7_mapa.csv\")\nprint(\"Kolumny Trends:\", header)\nsearch = {}\nfor row in trends:\n    search[clean_region(row[0])] = float(row[1].rstrip(\"%\"))   # udział Trzaskowskiego w wyszukiwaniach\n\nwith open(\"pkw_tura2.csv\", encoding=\"utf-8\") as file:\n    votes = {clean_region(row[\"wojewodztwo\"]): float(row[\"trzaskowski_procent\"]) for row in csv.DictReader(file)}\n\njoined = [name for name in search if name in votes]\nprint(\"Połączone województwa:\", len(joined))\nprint(\"Bez pary:\", [name for name in search if name not in votes])\n\n# Zadanie: w ilu województwach ten sam kandydat prowadzi w wyszukiwaniach i w głosach?\n# Trzaskowski prowadzi tam, gdzie jego udział jest większy niż 50.\nsame_leader = 0   # tu wpisz swój kod\n\nresult = {\"joined\": len(joined), \"same_leader\": same_leader}\nprint(result)\n",
    "expect": {
     "joined": 16,
@@ -15934,6 +15954,7 @@ const GENERATED2 = {
    }
   },
   "tr6": {
+   "pandas": "import pandas as pd\n\nsearch = pd.read_csv(\"search_shares.csv\")\nsearch[\"key\"] = search[\"candidate\"].str.split().str[-1].str.upper()   # \"Rafał Trzaskowski\" -> \"TRZASKOWSKI\"\nvotes = pd.read_csv(\"pkw_tura1.csv\")\nvotes[\"key\"] = votes[\"kandydat\"].str.split().str[0]                    # \"TRZASKOWSKI Rafał Kazimierz\" -> \"TRZASKOWSKI\"\ncandidates = search.merge(votes, on=\"key\")\n\ntrends = pd.read_csv(\"t7_mapa.csv\", skiprows=2)\ntrends[\"key\"] = trends[\"Region\"].str.lower().str.replace(\"województwo \", \"\").str.strip()\ntrends[\"search\"] = trends.iloc[:, 1].str.rstrip(\"%\").astype(float)\nregions = trends.merge(pd.read_csv(\"pkw_tura2.csv\").rename(columns={\"wojewodztwo\": \"key\"}), on=\"key\")\n\nresult = {\"r_candidates\": round(float(candidates[\"share\"].corr(candidates[\"procent\"])), 2),\n          \"r_regions\": round(float(regions[\"search\"].corr(regions[\"trzaskowski_procent\"])), 2)}\nprint(result)\n",
    "starter": "import csv\nfrom statistics import correlation\n\n\ndef read_trends_csv(path):\n    \"\"\"Czyta plik CSV z Google Trends. Zwraca nagłówek i wiersze z danymi.\"\"\"\n    with open(path, encoding=\"utf-8\") as file:\n        rows = list(csv.reader(file))\n    return rows[2], rows[3:]\n\n\ndef clean_region(name):\n    \"\"\"Sprowadza nazwę województwa do jednej postaci, na przykład \"dolnośląskie\".\"\"\"\n    return name.lower().replace(\"województwo \", \"\").strip()\n\n\n# 1. Kandydaci: udział w wyszukiwaniach (wynik kroku 3) i wynik pierwszej tury\nwith open(\"search_shares.csv\", encoding=\"utf-8\") as file:\n    search = {row[\"candidate\"]: float(row[\"share\"]) for row in csv.DictReader(file)}\nwith open(\"pkw_tura1.csv\", encoding=\"utf-8\") as file:\n    # PKW pisze najpierw nazwisko wielkimi literami: \"TRZASKOWSKI Rafał Kazimierz\"\n    votes = {row[\"kandydat\"].split()[0]: float(row[\"procent\"]) for row in csv.DictReader(file)}\nnames = list(search)\nx = [search[name] for name in names]\ny = [votes[name.split()[-1].upper()] for name in names]\nfor name, a, b in zip(names, x, y):\n    print(f\"{name:22} wyszukiwania {a:5.1f}%   głosy {b:5.2f}%\")\n\n# 2. Województwa: udział Trzaskowskiego w wyszukiwaniach i w głosach drugiej tury\nheader, trends = read_trends_csv(\"t7_mapa.csv\")\nregion_search = {clean_region(row[0]): float(row[1].rstrip(\"%\")) for row in trends}\nwith open(\"pkw_tura2.csv\", encoding=\"utf-8\") as file:\n    region_votes = {clean_region(row[\"wojewodztwo\"]): float(row[\"trzaskowski_procent\"]) for row in csv.DictReader(file)}\nregions = sorted(region_search)\n\n# Zadanie 1: korelacja r między wyszukiwaniami a głosami kandydatów\nr_candidates = 0   # tu wpisz swój kod, na przykład correlation(x, y)\n\n# Zadanie 2: korelacja r w województwach. Ułóż dwie listy w tej samej kolejności regionów.\nr_regions = 0      # tu wpisz swój kod\n\nresult = {\"r_candidates\": round(r_candidates, 2), \"r_regions\": round(r_regions, 2)}\nprint(result)\n",
    "expect": {
     "r_candidates": 0.87,
@@ -15951,6 +15972,7 @@ const GENERATED2 = {
    }
   },
   "tr7": {
+   "pandas": "import io\nimport pandas as pd\n\nOTHER = [\"francji\", \"macron\", \"rumunii\", \"rumunia\", \"białorusi\", \"warszawy\", \"bydgoszczy\", \"gliwic\", \"chorzowa\", \"miasta\"]\n\n\ndef table(path, name):\n    \"\"\"Jedna z dwóch tabel pliku (TOP albo RISING) jako DataFrame.\"\"\"\n    lines = open(path, encoding=\"utf-8\").read().split(\"\\n\")\n    start = lines.index(name) + 1\n    end = lines.index(\"\", start)\n    return pd.read_csv(io.StringIO(\"\\n\".join(lines[start:end])), header=None, names=[\"query\", \"value\"])\n\n\nrising = table(\"t10_prezydent_po.csv\", \"RISING\")\nbreakout = int((rising[\"value\"] == \"Przebicie\").sum())\nnumbers = rising.loc[rising[\"value\"] != \"Przebicie\", \"value\"].str.replace(r\"\\D\", \"\", regex=True).astype(int)  # \\D usuwa też twardą spację\n\ntop = table(\"t9_prezydent_przed.csv\", \"TOP\")\nother = top[\"query\"].str.contains(\"|\".join(OTHER))\nresult = {\"breakout\": breakout, \"max_growth\": int(numbers.max()),\n          \"other_share\": round(float(100 * top.loc[other, \"value\"].sum() / top[\"value\"].sum()))}\nprint(result)\n",
    "starter": "import csv\n\nBEFORE = \"t9_prezydent_przed.csv\"   # tydzień przed drugą turą\nAFTER = \"t10_prezydent_po.csv\"      # tydzień z drugą turą i po niej\n\n# Słowa, po których poznać zapytanie o innego prezydenta niż prezydent Polski\nOTHER = [\"francji\", \"macron\", \"rumunii\", \"rumunia\", \"białorusi\", \"warszawy\", \"bydgoszczy\", \"gliwic\", \"chorzowa\", \"miasta\"]\n\n\ndef read_sections(path):\n    \"\"\"Czyta plik powiązanych zapytań z Trends. W jednym pliku są dwie tabele.\n\n    Zwraca słownik {\"TOP\": [[zapytanie, wartość], ...], \"RISING\": [...]}.\n    Tabela zaczyna się od wiersza z jej nazwą, a kończy pustym wierszem.\n    \"\"\"\n    sections = {}\n    current = None\n    with open(path, encoding=\"utf-8\") as file:\n        for row in csv.reader(file):\n            if row in ([\"TOP\"], [\"RISING\"]):\n                current = row[0]\n                sections[current] = []\n            elif not row:\n                current = None\n            elif current:\n                sections[current].append(row)\n    return sections\n\n\nbefore = read_sections(BEFORE)\nafter = read_sections(AFTER)\nprint(\"Tabele:\", list(after), \"wierszy:\", [len(rows) for rows in after.values()])\nprint(\"Pierwsze rosnące:\", after[\"RISING\"][:2])\n\n\ndef growth(text):\n    \"\"\"Zamienia wzrost z Trends na liczbę: \"+ 4 050%\" daje 4050, a \"Przebicie\" daje None.\n\n    Trends pisze \"Przebicie\", gdy wzrost jest bardzo duży. Tysiące oddziela\n    twardą spacją (znak \\xa0), a nie zwykłą.\n    \"\"\"\n    return int(text.strip(\"+% \"))   # tu popraw: ta wersja działa tylko dla \"+ 600%\"\n\n\ndef is_other(query):\n    \"\"\"Czy zapytanie dotyczy innego prezydenta niż prezydent Polski?\"\"\"\n    return False   # tu popraw: sprawdź, czy w zapytaniu jest któreś słowo z listy OTHER\n\n\n# Zadanie 1: ile rosnących zapytań po drugiej turze ma \"Przebicie\"?\nbreakout = 0   # tu wpisz swój kod\n\n# Zadanie 2: jaki jest największy wzrost podany liczbą?\nmax_growth = max(growth(value) for query, value in after[\"RISING\"])\n\n# Zadanie 3: jaka część indeksu w tabeli TOP przed drugą turą dotyczy innych prezydentów?\ntotal = sum(int(value) for query, value in before[\"TOP\"])\nother = sum(int(value) for query, value in before[\"TOP\"] if is_other(query))\nother_share = round(100 * other / total)\n\nresult = {\"breakout\": breakout, \"max_growth\": max_growth, \"other_share\": other_share}\nprint(result)\n",
    "expect": {
     "breakout": 14,
@@ -19809,6 +19831,7 @@ const LABS2 = {
   tr1: {
     ...common,
     id: 'tr1',
+    pandas: G.tr1.pandas,
     intro: 'Plik CSV z Trends nie zaczyna się od danych. Popraw funkcję, która go czyta. Potem znajdź dzień, w którym jest wartość 100, i policz, ile razy więcej szukano tego dnia Nawrockiego niż Trzaskowskiego.',
     starter: G.tr1.starter,
     files: ['t1_kandydaci.csv'],
@@ -19867,6 +19890,7 @@ const LABS2 = {
   tr2: {
     ...common,
     id: 'tr2',
+    pandas: G.tr2.pandas,
     intro: 'Google pokazuje w raporcie **udział w wyszukiwaniach** z ostatnich 7 dni. Policz go z tego samego pliku. Dla każdego kandydata zsumuj indeks z 7 dni i podziel przez sumę wszystkich pięciu.',
     starter: G.tr2.starter,
     files: ['t1_kandydaci.csv'],
@@ -19922,6 +19946,7 @@ const LABS2 = {
   tr3: {
     ...common,
     id: 'tr3',
+    pandas: G.tr3.pandas,
     intro: 'Kandydatów jest 13, a jedno zapytanie mieści 5. Trzy pliki łączy **kotwica**, czyli kandydat obecny w dwóch plikach. Stanowski łączy plik `a` z plikiem `b`, a Biejat plik `b` z plikiem `c`. Dopisz mnożnik trzeciego pliku i policz udział każdego kandydata w całym oknie.',
     starter: G.tr3.starter,
     files: ['t1_kandydaci.csv', 't2_lancuch_a.csv', 't3_lancuch_b.csv'],
@@ -19977,6 +20002,7 @@ const LABS2 = {
   tr4: {
     ...common,
     id: 'tr4',
+    pandas: G.tr4.pandas,
     intro: 'Hasło „braun” łapie każdego Brauna, także markę depilatorów, golarek i blenderów. Temat Grzegorz Braun łapie tylko polityka. Plik obejmuje pięć lat. Zamień „<1” na liczbę, policz tygodnie, w których temat ma „<1”, i porównaj hasło z tematem w spokojnym roku 2022 i w kampanii.',
     starter: G.tr4.starter,
     files: ['t5_braun_5lat.csv'],
@@ -20030,6 +20056,7 @@ const LABS2 = {
   tr5: {
     ...common,
     id: 'tr5',
+    pandas: G.tr5.pandas,
     intro: 'Plik z Trends dzieli w każdym województwie wyszukiwania między Trzaskowskiego i Nawrockiego. Połącz go z wynikami drugiej tury z PKW. Najpierw ujednolić nazwy województw, bo Trends zapisuje je na kilka sposobów. Potem policz, w ilu województwach ten sam kandydat prowadzi w wyszukiwaniach i w głosach.',
     starter: G.tr5.starter,
     files: ['t7_mapa.csv', 'pkw_tura2.csv'],
@@ -20080,6 +20107,7 @@ const LABS2 = {
   tr6: {
     ...common,
     id: 'tr6',
+    pandas: G.tr6.pandas,
     intro: 'Sprawdź ostrzeżenie Google liczbą. Policz korelację **r** między udziałem w wyszukiwaniach a wynikiem wyborów dwa razy, dla 13 kandydatów i dla 16 województw.',
     starter: G.tr6.starter,
     files: ['search_shares.csv', 'pkw_tura1.csv', 't7_mapa.csv', 'pkw_tura2.csv'],
@@ -20127,6 +20155,7 @@ const LABS2 = {
   tr7: {
     ...common,
     id: 'tr7',
+    pandas: G.tr7.pandas,
     intro: 'Google pokazuje w raporcie „Popularne wyszukiwania dla «prezydent»” z rosnącymi procentami. Trends daje te same dane jako **powiązane zapytania**. W jednym pliku są dwie tabele, TOP i RISING. Popraw dwie funkcje i policz trzy rzeczy, „Przebicie” po drugiej turze, największy wzrost podany liczbą i część indeksu, która dotyczy innych prezydentów.',
     starter: G.tr7.starter,
     files: ['t9_prezydent_przed.csv', 't10_prezydent_po.csv'],

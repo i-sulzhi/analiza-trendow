@@ -1755,6 +1755,14 @@ textarea.kc-input { resize: vertical; }
 .py-pandas-code { max-width: 100%; }
 .py code.ls-inline { white-space: normal; overflow-wrap: anywhere; }
 
+.wy-anchor { display: grid; gap: 14px; min-width: 0; }
+.wy-anchor-3 { grid-template-columns: repeat(auto-fit, minmax(min(15em, 100%), 1fr)); }
+.wy-anchor-file { display: grid; gap: 4px; min-width: 0; }
+.wy-anchor-name { font-weight: 700; font-size: 13px; }
+.wy-anchor-file .wy-bar-row { grid-template-columns: minmax(0, 7em) minmax(0, 1fr) 4.2em; }
+.wy-anchor-row .wy-bar-track { outline: 2px solid var(--accent); outline-offset: 1px; }
+.wy-anchor-row .wy-bar-name { font-weight: 700; }
+
 </style>
 </head>
 <body>
@@ -20639,7 +20647,76 @@ function trendingFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Krok 7. Rosnące zapytania z hasłem „prezydent”', host, caption(`${SRC} Hasło „prezydent”, Polska, powiązane zapytania, tabela RISING.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "concerns": concerns, "trendingFigure": trendingFigure, "pl": pl };
+// ---------------------------------------------------------------- how anchors work (before Lab 3)
+
+/** Sums of the three chain files and the factors, for the anchor figure. */
+function anchorSteps() {
+  const files = [['a', 't1_kandydaci.csv'], ['b', 't2_lancuch_a.csv'], ['c', 't3_lancuch_b.csv']];
+  const sums = files.map(([k, f]) => [k, seriesOf(f).map((s) => ({ name: s.name, sum: sum(s.values.map(num)) }))]);
+  const get = (k, name) => sums.find(([x]) => x === k)[1].find((r) => r.name === name).sum;
+  const fb = get('a', 'Krzysztof Stanowski') / get('b', 'Krzysztof Stanowski');
+  const fc = (fb * get('b', 'Magdalena Biejat')) / get('c', 'Magdalena Biejat');
+  return { sums, fb, fc, get };
+}
+
+const ANCHORS = { 'Krzysztof Stanowski': ['a', 'b'], 'Magdalena Biejat': ['b', 'c'] };
+const STEPS = ['Trzy pliki osobno', 'Kotwica Stanowski', 'Kotwica Biejat', 'Jedna skala'];
+
+function anchorFigure({ num: n = 'Rysunek' } = {}) {
+  const st = { step: 0 };
+  const host = el('div');
+  const A = anchorSteps();
+  const draw = () => {
+    const k = st.step;
+    // value of a candidate in a file at this step: own 100 (step 0), or the scale of file a
+    const shown = (file, r) => {
+      const own = Math.max(...A.sums.find(([x]) => x === file)[1].map((q) => q.sum));
+      if (k === 0) return { v: (100 * r.sum) / own, label: String(Math.round((100 * r.sum) / own)) };
+      if (file === 'a') return { v: r.sum, label: String(r.sum) };
+      if (file === 'b') return { v: r.sum * A.fb, label: one(r.sum * A.fb) };
+      if (k === 1) return { v: (r.sum / own) * 1200, label: '', own: true };   // file c keeps its own scale (grey)
+      return { v: r.sum * A.fc, label: '' };   // file c on scale a: the numbers are Lab 3's
+    };
+    const max = k === 0 ? 100 : 1200;
+    let groups;
+    if (k < 3) {
+      groups = A.sums.map(([file, rows]) => el('div.wy-anchor-file',
+        el('div.wy-anchor-name', `Plik ${file}`),
+        rows.map((r) => {
+          const x = shown(file, r);
+          const isAnchor = (ANCHORS[r.name] || []).includes(file) && (k === 0 || (r.name === 'Krzysztof Stanowski' ? k >= 1 : k >= 2));
+          return el(`div.wy-bar-row${isAnchor ? '.wy-anchor-row' : ''}`,
+            el('span.wy-bar-name', r.name.split(' ').pop()),
+            el('span.wy-bar-track', el(`span.wy-bar.${x.own ? 'wy-c5' : file === 'a' ? 'wy-c1' : file === 'b' ? 'wy-c3' : 'wy-c2'}`, { style: `width:${Math.max(0.5, (100 * x.v) / max).toFixed(1)}%` })),
+            el('span.wy-bar-val', x.label));
+        })));
+    } else {
+      const all = [];
+      for (const [file, rows] of A.sums) for (const r of rows) if (!all.some((q) => q.name === r.name)) all.push({ name: r.name, file, v: shown(file, r).v });
+      all.sort((p, q) => q.v - p.v);
+      groups = [el('div.wy-anchor-file', el('div.wy-anchor-name', 'Wszyscy w skali pliku a, każdy raz'),
+        all.map((r) => el('div.wy-bar-row', el('span.wy-bar-name', r.name.split(' ').pop()),
+          el('span.wy-bar-track', el(`span.wy-bar.${r.file === 'a' ? 'wy-c1' : r.file === 'b' ? 'wy-c3' : 'wy-c2'}`, { style: `width:${((100 * r.v) / max).toFixed(1)}%` })),
+          el('span.wy-bar-val', ''))))];
+    }
+    const sa = A.get('a', 'Krzysztof Stanowski'); const sb = A.get('b', 'Krzysztof Stanowski');
+    const READ = [
+      'Każdy plik ma własne 100, czyli swój najwyższy wynik. Biejat ma 100 w pliku c, tak samo jak Nawrocki w pliku a. To nie znaczy, że szukano ich tyle samo. Tych słupków nie wolno porównywać między plikami.',
+      `Stanowski jest w plikach a i b. Ma ${sa} w pliku a i ${sb} w pliku b, a to ta sama osoba w tych samych dniach. Mnożnik pliku b to ${sa} / ${sb} = ${pl(Math.round(A.fb * 1000) / 1000)}. Każda suma z pliku b razy ${pl(Math.round(A.fb * 1000) / 1000)} trafia do skali pliku a. Słupki Stanowskiego w a i b mają teraz tę samą długość. Plik c jest jeszcze w swojej skali, dlatego jest szary.`,
+      `Biejat jest w plikach b i c. W pliku b jest już w skali pliku a, ${one(A.get('b', 'Magdalena Biejat') * A.fb)}. W pliku c ma ${A.get('c', 'Magdalena Biejat')}. Mnożnik pliku c to ${one(A.get('b', 'Magdalena Biejat') * A.fb)} / ${A.get('c', 'Magdalena Biejat')}, czyli ${pl(Math.round(A.fb * 1000) / 1000)} × ${A.get('b', 'Magdalena Biejat')} / ${A.get('c', 'Magdalena Biejat')}. Wynik i liczby pliku c policzysz w Lab 3.`,
+      'Wszyscy są na jednej skali, a każda kotwica występuje raz. Teraz można liczyć udziały. Gdyby kotwice zostały dwa razy, suma byłaby za duża, a wszyscy wyszliby za mali.',
+    ];
+    mount(host,
+      toggles(STEPS.map((t, i) => [i, `${i + 1}. ${t}`]), k, (v) => { st.step = v; draw(); }),
+      el('div.sq-legend', el('span.sq-leg.wy-c1', 'plik a'), el('span.sq-leg.wy-c3', 'plik b'), el('span.sq-leg.wy-c2', 'plik c'), el('span.wy-leg-note', 'obwódka: kotwica')),
+      el(`div.wy-anchor${k < 3 ? '.wy-anchor-3' : ''}`, groups),
+      el('div.sq-read', READ[k]));
+  };
+  draw();
+  return frame(n, 'Krok 3. Jak działa kotwica', host, caption(`${SRC} Sumy indeksu z 30 dni przed I turą.`));
+}
+
+__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "concerns": concerns, "trendingFigure": trendingFigure, "anchorSteps": anchorSteps, "anchorFigure": anchorFigure, "pl": pl };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/examples2.js ===== */
@@ -20903,6 +20980,8 @@ const sections = [
     { p: 'Jedno zapytanie mieści pięć tematów. Każde zapytanie ma własne 100, więc liczb z dwóch plików nie wolno zestawić wprost. Pomaga **kotwica**. To kandydat obecny w dwóch zapytaniach naraz. Jego wartości mówią, jak przeliczyć jeden plik na skalę drugiego.' },
     { p: `Mamy trzy zapytania w tym samym oknie, [pierwsze](${trendsUrl('t1_kandydaci.csv')}), [drugie ze Stanowskim](${trendsUrl('t2_lancuch_a.csv')}) i [trzecie z Biejat](${trendsUrl('t3_lancuch_b.csv')}). Kotwica musi mieć wyraźne wartości w obu plikach. Kandydat, który spada do „<1”, nie nadaje się na kotwicę.` },
     { figure: 'wycsvb' },
+    { p: 'Zanim zaczniesz liczyć, przejdź przez cztery kroki rysunku {rys:wykotwica}. Pokazuje, co mnożnik robi ze słupkami.' },
+    { figure: 'wykotwica' },
     { steps: [
       ['Plik a', 'Trzaskowski, Nawrocki, Mentzen, Braun i **Stanowski**'],
       ['Plik b', '**Stanowski**, Hołownia, Zandberg, **Biejat** i Senyszyn'],
@@ -21048,7 +21127,7 @@ const { CHAPTER, REPORT_FIELDS } = __modules["../../analiza-trendow-w-internecie
 const { labExercise, labAnswer } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS2, FILES2, explainError2 } = __modules["../../analiza-trendow-w-internecie/src/tasks2.js"];
 const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
-const { csvFigure, linesFigure, sharesFigure, chainFigure, termTopicFigure, regionsFigure, votesFigure, trendingFigure } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
+const { csvFigure, linesFigure, sharesFigure, chainFigure, termTopicFigure, regionsFigure, votesFigure, trendingFigure, anchorFigure } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
 const FIGURES2 = {
   'wycsva': csvFigure('Krok 1. Plik z Trends, zanim powstanie wykres', ['t1_kandydaci.csv', 't8_kandydaci_dzien_pozniej.csv'], {
     't1_kandydaci.csv': 'Wiersz 1 to kategoria, wiersz 2 jest pusty, a nagłówek jest w wierszu 3. Potem 30 wierszy, po jednym na dzień. Kolumna to imię i nazwisko z dopiskiem regionu. Z pliku nie wynika, że to temat, a nie hasło.',
@@ -21072,6 +21151,7 @@ const FIGURES2 = {
   }),
   'wylines': linesFigure,
   'wyshares': sharesFigure,
+  'wykotwica': anchorFigure,
   'wychain': chainFigure,
   'wyterm': termTopicFigure,
   'wyregions': regionsFigure,

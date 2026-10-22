@@ -19989,11 +19989,11 @@ const LABS2 = {
     diagnose(value) {
       const { expect, facts } = G.tr4;
       if (!sameKeys(value, expect)) return 'Zmienna `result` powinna mieć trzy pola, `lt1`, `quiet` i `campaign`. Zostaw ostatnie wiersze kodu bez zmian.';
-      if (value.lt1 === 0 && near(value.quiet, expect.quiet, 0.05)) return 'Stosunki są dobre. Zostało pierwsze zadanie. Policz tygodnie, w których kolumna tematu, `row[2]`, ma napis `"<1"`.';
-      if (value.lt1 === facts.lt1Term && value.lt1 !== expect.lt1) return 'To tygodnie z „<1” w kolumnie hasła. Zadanie pyta o temat, czyli o `row[2]`.';
-      if (value.lt1 !== expect.lt1) return 'Liczba tygodni z „<1” jeszcze nie ta. Porównuj napis w kolumnie tematu z `"<1"`.';
+      // the ratio first: the count starts at 0 in the starter, so 0 says "not done yet", not which column
       if (near(value.quiet, facts.quietZero, 0.05)) return '„<1” zamieniono na zero. Wtedy temat wychodzi za mały, a stosunek za duży. Przyjmij 0,5, jak mówi opis funkcji.';
       if (value.quiet > 0 && value.quiet < 1) return 'Stosunek jest odwrócony. Średnią hasła dziel przez średnią tematu.';
+      if (value.lt1 === 0 && near(value.quiet, expect.quiet, 0.05)) return 'Stosunki są dobre. Zostało pierwsze zadanie. Policz tygodnie, w których kolumna tematu, `row[2]`, ma napis `"<1"`.';
+      if (value.lt1 !== expect.lt1) return 'Liczba tygodni z „<1” jeszcze nie ta. Porównuj napis w kolumnie tematu, `row[2]`, z `"<1"`.';
       return 'Jeszcze nie to. Sprawdź funkcję `value`. Dla „<1” ma zwrócić 0,5.';
     },
     success(value) {
@@ -20080,7 +20080,7 @@ const LABS2 = {
   tr6: {
     ...common,
     id: 'tr6',
-    intro: 'Google pisze pod raportem, że zainteresowanie wyszukiwaniem nie mówi o zamiarach wyborców. Sprawdź to liczbą. Policz korelację **r** między udziałem w wyszukiwaniach a wynikiem wyborów dwa razy, dla 13 kandydatów i dla 16 województw.',
+    intro: 'Sprawdź ostrzeżenie Google liczbą. Policz korelację **r** między udziałem w wyszukiwaniach a wynikiem wyborów dwa razy, dla 13 kandydatów i dla 16 województw.',
     starter: G.tr6.starter,
     files: ['search_shares.csv', 'pkw_tura1.csv', 't7_mapa.csv', 'pkw_tura2.csv'],
     expect: G.tr6.expect,
@@ -20194,6 +20194,7 @@ const LABS2 = {
  */
 function explainError2(lab, error) {
   const e = String(error || '');
+  if (/not supported between instances of 'NoneType'/.test(e)) return 'Do `max` trafia `None`, bo tak `growth` oddaje „Przebicie”. Pomiń te wartości, na przykład `if growth(value) is not None`.';
   if (/base 10: 'Przebicie'/.test(e)) return 'W pliku jest napis „Przebicie”, a nie liczba. Tak Trends oznacza bardzo duży wzrost. Funkcja `growth` powinna zwrócić dla niego `None`.';
   if (/base 10: '\d+\\xa0\d+'/.test(e)) return 'Liczba ma w środku twardą spację (znak \\xa0), którą Trends oddziela tysiące. Zostaw w tekście same cyfry.';
   if (/could not convert string to float: '<1'|invalid literal for int\(\) with base 10: '<1'/.test(e)) return 'W pliku jest napis „<1”, a nie liczba. Trends pisze tak wartości mniejsze niż 1. Zamień go na liczbę w funkcji `value`.';
@@ -20516,7 +20517,7 @@ function votesFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Krok 6. Udział w wyszukiwaniach i udział w głosach, I tura',
     dotLegend(),
     dots(rows, 35),
-    el('div.sq-read', `Na górze kolejność się odwraca. Ponad dwa razy więcej wyszukiwań niż głosów mają ${over.join(', ')}.`),
+    el('div.sq-read', `Na górze kolejność się odwraca. Ponad dwa razy więcej wyszukiwań niż głosów mają ${over.slice(0, -1).join(', ')} i ${over[over.length - 1]}.`),
     caption(`${SRC} Wyszukiwania z 30 dni przed I turą, łańcuch z kroku 3. ${SRC_PKW}`));
 }
 
@@ -20528,6 +20529,9 @@ function risingRows(week, onlyPoland = false) {
   const rows = R[week].RISING.map(([q, v]) => ({ q, v, other: R.other.some((w) => q.includes(w)) }));
   return onlyPoland ? rows.filter((r) => !r.other) : rows;
 }
+
+/** Polish agreement after a number: 1 dotyczy, 2–4 dotyczą, 5 dotyczy, 22 dotyczą. */
+const concerns = (n) => ([2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'dotyczą' : 'dotyczy');
 
 function trendingFigure({ num: n = 'Rysunek' } = {}) {
   const state = { week: 'after', only: 'all' };
@@ -20546,13 +20550,13 @@ function trendingFigure({ num: n = 'Rysunek' } = {}) {
         el(`span.wy-rising-v${r.v === 'Przebicie' ? '.wy-rising-break' : ''}`, r.v.replace(' ', ' '))))),
       el('div.sq-read', state.only === 'pl'
         ? `Zostało ${rows.length} z ${all.length} zapytań. Tak wygląda lista w raporcie Google, przesiana do samych wyborów.`
-        : `Rosnące zapytania z hasłem „prezydent”, ${WEEKS[state.week]}. ${others} z ${all.length} dotyczy innego prezydenta niż prezydent Polski.`));
+        : `Rosnące zapytania z hasłem „prezydent”, ${WEEKS[state.week]}. ${others} z ${all.length} ${concerns(others)} innego prezydenta niż prezydent Polski.`));
   };
   draw();
   return frame(n, 'Krok 7. Rosnące zapytania z hasłem „prezydent”', host, caption(`${SRC} Hasło „prezydent”, Polska, powiązane zapytania, tabela RISING.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "trendingFigure": trendingFigure, "pl": pl };
+__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "concerns": concerns, "trendingFigure": trendingFigure, "pl": pl };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/examples2.js ===== */
@@ -20628,8 +20632,8 @@ function step3() {
   return {
     head: ['Krok', 'Obliczenie', 'Wynik'],
     rows: [
-      ['mnożnik pliku 2, kotwica Stanowski', `${sa} / ${sb}`, `**${pl(r3(fb))}**`],
-      ['Hołownia z pliku 2 w skali pliku 1', `${h} × ${pl(r3(fb))}`, `**${pl(r1(h * fb))}**`],
+      ['mnożnik pliku 2, czyli suma Stanowskiego z 30 dni w pliku 1 / w pliku 2', `${sa} / ${sb}`, `**${pl(r3(fb))}**`],
+      ['suma Hołowni z 30 dni, przeniesiona z pliku 2 do skali pliku 1', `${h} × ${pl(r3(fb))}`, `**${pl(r1(h * fb))}**`],
       ['mnożnik pliku 3, kotwica Biejat', `${pl(r3(fb))} × Biejat (plik 2) / Biejat (plik 3)`, 'policzysz w Lab 3'],
     ],
   };
@@ -20791,7 +20795,7 @@ const sections = [
 
   step('w2-2', '2.2', 'Krok 1. Linie kandydatów', [
     { p: 'Pierwszy panel raportu to linie kandydatów z „ostatnich 30 dni”. Takie okno przesuwa się w Trends każdego dnia. Raport pokazuje więc inne dni niż w chwili publikacji i tego wykresu nie da się dokładnie powtórzyć.' },
-    { p: `Dlatego bierzemy stałe okno, 30 dni przed pierwszą turą, od 18 kwietnia do 17 maja 2025 r. Kandydaci to tematy, a nie hasła. [Otwórz to zapytanie w Trends](${trendsUrl('t1_kandydaci.csv')}).` },
+    { p: `Dlatego bierzemy stałe okno, 30 dni przed pierwszą turą, od 18 kwietnia do 17 maja 2025 r. Kandydaci to tematy, a nie hasła, a dlaczego, zobaczysz w kroku 4. [Otwórz to zapytanie w Trends](${trendsUrl('t1_kandydaci.csv')}).` },
     { p: 'Zanim powstanie wykres, zobacz plik. Rysunek {rys:wycsva} pokazuje go na trzy sposoby. Drugi plik to to samo zapytanie pobrane dzień później. Porównaj je i zobacz, ile zmienia próba.' },
     { figure: 'wycsva' },
     { p: 'Liczby z jednego pliku wolno dzielić przez siebie, ale tylko z tego samego wiersza, czyli dnia. **iloraz = wartość A danego dnia / wartość B tego samego dnia**. Przykład na Braunie i Stanowskim.' },
@@ -20814,7 +20818,7 @@ const sections = [
   step('w2-4', '2.4', 'Krok 3. Kotwica dla trzynastu kandydatów', [
     { p: 'Google pokazuje pięciu kandydatów naraz. W wyborach startowało trzynastu, a na liście w raporcie Google jest dwunastu. Brakuje Macieja Maciaka.' },
     { p: 'Jedno zapytanie mieści pięć tematów. Każde zapytanie ma własne 100, więc liczb z dwóch plików nie wolno zestawić wprost. Pomaga **kotwica**. To kandydat obecny w dwóch zapytaniach naraz. Jego wartości mówią, jak przeliczyć jeden plik na skalę drugiego.' },
-    { p: `Mamy trzy zapytania w tym samym oknie, [pierwsze](${trendsUrl('t1_kandydaci.csv')}), [drugie ze Stanowskim](${trendsUrl('t2_lancuch_a.csv')}) i [trzecie z Biejat](${trendsUrl('t3_lancuch_b.csv')}). Kotwica powinna być w środku skali. Kandydat, który spada do „<1”, nie nadaje się na kotwicę.` },
+    { p: `Mamy trzy zapytania w tym samym oknie, [pierwsze](${trendsUrl('t1_kandydaci.csv')}), [drugie ze Stanowskim](${trendsUrl('t2_lancuch_a.csv')}) i [trzecie z Biejat](${trendsUrl('t3_lancuch_b.csv')}). Kotwica musi mieć wyraźne wartości w obu plikach. Kandydat, który spada do „<1”, nie nadaje się na kotwicę.` },
     { figure: 'wycsvb' },
     { steps: [
       ['Plik 1', 'Trzaskowski, Nawrocki, Mentzen, Braun i **Stanowski**'],

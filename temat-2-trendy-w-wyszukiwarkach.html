@@ -20555,6 +20555,160 @@ function trendingFigure({ num: n = 'Rysunek' } = {}) {
 __modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "trendingFigure": trendingFigure, "pl": pl };
 })();
 
+/* ===== ../../analiza-trendow-w-internecie/src/examples2.js ===== */
+(function () {
+/**
+ * Worked examples of topic 2: one formula and one small table per step, so a student sees at a
+ * glance what is computed from what (asked by the author on 2026-10-22, after the index table
+ * of 2.1). Every number is read from the recorded files in generated2.js; only the growth
+ * example of step 7 is invented, and the page says so. test/chapter2.mjs recomputes each row.
+ */
+const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
+const D = GENERATED2.data;
+const L = GENERATED2.labs;
+const num = (v) => (v === '<1' ? 0.5 : Number(String(v).replace('%', '')));
+const pl = (x) => String(x).replace('.', ',');
+const r1 = (x) => Math.round(x * 10) / 10;
+const r3 = (x) => Math.round(x * 1000) / 1000;
+const day = (d) => `${Number(d.slice(8))}.${d.slice(5, 7)}`;
+const EQ = ' = ';
+const short = (col) => col.split(':')[0];
+/** 1 tydzień, 2 tygodnie, 5 tygodni; `inWhich` gives the locative: w 1 tygodniu, w 5 tygodniach. */
+const weeks = (n, inWhich = false) => (inWhich ? (n === 1 ? 'tygodniu' : 'tygodniach') : n === 1 ? 'tydzień' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'tygodnie' : 'tygodni');
+
+/** Column of a recorded file by the candidate's name: [{date, value}] */
+function column(file, name) {
+  const { header, rows } = D.series[file];
+  const k = header.findIndex((h) => short(h) === name);
+  return rows.map((r) => ({ date: r[0], value: r[k] }));
+}
+const sumOf = (file, name) => column(file, name).reduce((a, c) => a + num(c.value), 0);
+
+/**
+ * Step 1: a ratio inside one query, on the same day and, wrongly, peak against peak.
+ * Braun and Stanowski, so the lab's own answer (Nawrocki and Trzaskowski) stays to be found.
+ */
+function step1() {
+  const a = column('t1_kandydaci.csv', 'Grzegorz Braun');
+  const b = column('t1_kandydaci.csv', 'Krzysztof Stanowski');
+  const peak = (c) => c.reduce((best, x) => (num(x.value) > num(best.value) ? x : best));
+  const pb = peak(b);
+  const i = b.indexOf(pb);
+  const pa = peak(a);
+  return {
+    head: ['Co porównujemy', 'Obliczenie', 'Wniosek'],
+    rows: [
+      [`Braun i Stanowski tego samego dnia, ${day(pb.date)}`, `${a[i].value} / ${pb.value}${EQ}**${pl(r1(num(a[i].value) / num(pb.value)))}**`, 'wolno, ta sama skala i ten sam dzień'],
+      [`szczyt Brauna (${day(pa.date)}) i szczyt Stanowskiego (${day(pb.date)})`, `${pa.value} / ${pb.value}${EQ}**${pl(r1(num(pa.value) / num(pb.value)))}**`, 'błąd, to dwa różne dni'],
+    ],
+  };
+}
+
+/** Step 2: share of search over the whole window (the lab asks for the last 7 days). */
+function step2() {
+  const { header } = D.series['t1_kandydaci.csv'];
+  const names = header.slice(1).map(short);
+  const sums = names.map((n) => sumOf('t1_kandydaci.csv', n));
+  const total = sums.reduce((a, b) => a + b, 0);
+  return {
+    head: ['Kandydat', 'Suma z 30 dni', 'Udział'],
+    rows: [
+      ...names.map((n, k) => [n.split(' ').pop(), String(sums[k]), `${sums[k]} / ${total} × 100${EQ}**${Math.round((100 * sums[k]) / total)}%**`]),
+      ['razem', `**${total}**`, ''],
+    ],
+  };
+}
+
+/** Step 3: the first anchor and one candidate carried over; the second factor is the lab's. */
+function step3() {
+  const sa = sumOf('t1_kandydaci.csv', 'Krzysztof Stanowski');
+  const sb = sumOf('t2_lancuch_a.csv', 'Krzysztof Stanowski');
+  const fb = sa / sb;
+  const h = sumOf('t2_lancuch_a.csv', 'Szymon Hołownia');
+  return {
+    head: ['Krok', 'Obliczenie', 'Wynik'],
+    rows: [
+      ['mnożnik pliku 2, kotwica Stanowski', `${sa} / ${sb}`, `**${pl(r3(fb))}**`],
+      ['Hołownia z pliku 2 w skali pliku 1', `${h} × ${pl(r3(fb))}`, `**${pl(r1(h * fb))}**`],
+      ['mnożnik pliku 3, kotwica Biejat', `${pl(r3(fb))} × Biejat (plik 2) / Biejat (plik 3)`, 'policzysz w Lab 3'],
+    ],
+  };
+}
+
+/** Step 4: the term against the topic, with "<1" as 0,5, in 2021 (the lab asks for 2022 and the campaign). */
+function step4() {
+  const { rows } = D.series['t5_braun_5lat.csv'];
+  const rs = rows.filter((r) => r[0].startsWith('2021'));
+  const mean = (k) => rs.reduce((a, r) => a + num(r[k]), 0) / rs.length;
+  // shown with two decimals, and the ratio is taken from the shown numbers, so the row adds up
+  const r2 = (x) => Math.round(x * 100) / 100;
+  const a = r2(mean(1)); const b = r2(mean(2));
+  const lt1 = rs.filter((r) => r[2] === '<1').length;
+  return {
+    head: ['Krok', 'Obliczenie', 'Wynik'],
+    rows: [
+      ['„<1” zamieniamy na liczbę', `w 2021 r. temat ma „<1” w ${lt1} ${weeks(lt1, true)}, każde liczymy jako 0,5`, 'decyzja do opisania'],
+      ['średnia hasła „braun”, 2021', `suma / ${rs.length} ${weeks(rs.length)}`, `**${pl(a)}**`],
+      ['średnia tematu Grzegorz Braun, 2021', `suma / ${rs.length} ${weeks(rs.length)}`, `**${pl(b)}**`],
+      ['stosunek hasła do tematu', `${pl(a)} / ${pl(b)}`, `**${pl(r1(a / b))}**`],
+    ],
+  };
+}
+
+/** Step 5: three spellings of a voivodeship become one key, then meet PKW. */
+function step5() {
+  const { rows } = D.series['t7_mapa.csv'];
+  const pkw = Object.fromEntries(D.pkw2.map(([name, , , pct]) => [name, pct]));
+  const norm = (s) => s.toLowerCase().replace('województwo ', '').trim();
+  const pick = ['mazowieckie', 'województwo łódzkie', 'Województwo dolnośląskie'].map((n) => rows.find((r) => r[0] === n));
+  return {
+    head: ['Nazwa → klucz', 'Trends', 'PKW'],
+    rows: pick.map((r) => [`„${r[0]}” → **${norm(r[0])}**`, `${r[1]} → ${num(r[1])}`, `${pl(pkw[norm(r[0])])}%`]),
+  };
+}
+
+/** Step 6, shown after the lab: three correlations and what each one says. */
+function step6() {
+  const f = L.tr6;
+  return {
+    head: ['Co zestawiamy', 'n', 'r', 'Co to znaczy'],
+    rows: [
+      ['kandydaci', String(f.facts.n), `**${pl(f.expect.r_candidates)}**`, 'duzi są duzi w obu miejscach'],
+      ['kandydaci bez dwóch liderów', String(f.facts.n - 2), `**${pl(f.facts.rNoTop2)}**`, 'część związku robią dwa punkty'],
+      ['województwa, udział Trzaskowskiego', '16', `**${pl(f.expect.r_regions)}**`, 'słaby związek'],
+    ],
+  };
+}
+
+/** Step 7: how growth is computed (invented numbers) and how the file writes it. */
+function step7growth() {
+  const g = (a, b) => Math.round((100 * (b - a)) / a);
+  // Trends separates thousands with a no-break space
+  const th = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  return {
+    head: ['Przedtem', 'Teraz', 'Obliczenie', 'W Trends'],
+    rows: [
+      ['10', '50', `(50 − 10) / 10 × 100${EQ}${g(10, 50)}`, `**+ ${g(10, 50)}%**`],
+      ['2', '50', `(50 − 2) / 2 × 100${EQ}${g(2, 50)}`, `**+ 2 400%**`],
+      ['0,5', '50', `(50 − 0,5) / 0,5 × 100${EQ}${g(0.5, 50)}`, '**Przebicie**, ponad 5000%'],
+    ],
+  };
+}
+
+function step7file() {
+  const after = D.related.after.RISING;
+  // not "+ 4 050%": that one is the answer of Lab 7
+  const pick = ['Przebicie', '+ 600%', '+ 1\u00a0800%'].map((v) => after.find(([, x]) => x === v) || D.related.before.RISING.find(([, x]) => x === v));
+  const asNum = (v) => (v === 'Przebicie' ? null : Number(v.replace(/[^0-9]/g, '')));
+  return {
+    head: ['Zapytanie', 'Tekst w pliku', 'Liczba'],
+    rows: pick.map(([q, v]) => [q, `„${v.replace(' ', '⍽')}”`, asNum(v) == null ? 'brak, tylko „ponad 5000%”' : `**${asNum(v)}**`]),
+  };
+}
+
+__modules["../../analiza-trendow-w-internecie/src/examples2.js"] = { "step1": step1, "step2": step2, "step3": step3, "step4": step4, "step5": step5, "step6": step6, "step7growth": step7growth, "step7file": step7file };
+})();
+
 /* ===== ../../analiza-trendow-w-internecie/src/chapter2.js ===== */
 (function () {
 /**
@@ -20570,6 +20724,7 @@ const { CHAPTER: BASE } = __modules["src/book/chapter2.js"];
 const { COURSE } = __modules["../../analiza-trendow-w-internecie/src/chapter1.js"];
 const { trendsUrl } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
 const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
+const { step1, step2, step3, step4, step5, step6, step7growth, step7file } = __modules["../../analiza-trendow-w-internecie/src/examples2.js"];
 const REPORT = 'https://trends.withgoogle.com/trends/pl/wybory-prezydenckie-2025/';
 const G = GENERATED2.labs;
 
@@ -20639,6 +20794,8 @@ const sections = [
     { p: `Dlatego bierzemy stałe okno, 30 dni przed pierwszą turą, od 18 kwietnia do 17 maja 2025 r. Kandydaci to tematy, a nie hasła. [Otwórz to zapytanie w Trends](${trendsUrl('t1_kandydaci.csv')}).` },
     { p: 'Zanim powstanie wykres, zobacz plik. Rysunek {rys:wycsva} pokazuje go na trzy sposoby. Drugi plik to to samo zapytanie pobrane dzień później. Porównaj je i zobacz, ile zmienia próba.' },
     { figure: 'wycsva' },
+    { p: 'Liczby z jednego pliku wolno dzielić przez siebie, ale tylko z tego samego wiersza, czyli dnia. **iloraz = wartość A danego dnia / wartość B tego samego dnia**. Przykład na Braunie i Stanowskim.' },
+    { table: step1() },
     { exercise: 'tr1', num: 'Lab 1', title: 'Wczytaj plik z Trends i znajdź szczyt', toc: 'Lab 1. Plik i szczyt' },
     { figure: 'wylines' },
     { p: 'Porównaj rysunek {rys:wylines} z pierwszym panelem Google. Kształt jest podobny, ale liczby nie muszą się zgadzać. Google liczył inne dni i miał inną próbę. Do raportu zapisz okno, region, tematy i dzień pobrania. Bez nich nikt nie powtórzy wykresu, także Ty za miesiąc.' },
@@ -20647,6 +20804,8 @@ const sections = [
   step('w2-3', '2.3', 'Krok 2. Udział w wyszukiwaniach', [
     { p: 'Drugi panel to słupki z procentami, udział w wyszukiwaniach z ostatnich 7 dni. Procenty sumują się do 100, więc wyglądają jak wynik sondażu. To jednak tylko podział indeksu między pięć wybranych osób.' },
     { p: 'Plik jest ten sam co w kroku 1. Udział liczysz z sum indeksu.' },
+    { p: '**udział kandydata = jego suma / suma wszystkich pięciu × 100**. Przykład liczy całe 30 dni. W Lab 2 policzysz ostatnie 7 dni, tak jak Google.' },
+    { table: step2() },
     { exercise: 'tr2', num: 'Lab 2', title: 'Policz udział w wyszukiwaniach', toc: 'Lab 2. Udział' },
     { figure: 'wyshares' },
     { p: 'Przełącz okno na rysunku {rys:wyshares}. Ostatni dzień, tydzień i miesiąc dają inną kolejność. Udział zależy też od zestawu. Gdyby w zapytaniu był ktoś inny zamiast Stanowskiego, zmieniłyby się wszystkie procenty. W raporcie podawaj więc okno i pełną listę kandydatów.' },
@@ -20657,6 +20816,13 @@ const sections = [
     { p: 'Jedno zapytanie mieści pięć tematów. Każde zapytanie ma własne 100, więc liczb z dwóch plików nie wolno zestawić wprost. Pomaga **kotwica**. To kandydat obecny w dwóch zapytaniach naraz. Jego wartości mówią, jak przeliczyć jeden plik na skalę drugiego.' },
     { p: `Mamy trzy zapytania w tym samym oknie, [pierwsze](${trendsUrl('t1_kandydaci.csv')}), [drugie ze Stanowskim](${trendsUrl('t2_lancuch_a.csv')}) i [trzecie z Biejat](${trendsUrl('t3_lancuch_b.csv')}). Kotwica powinna być w środku skali. Kandydat, który spada do „<1”, nie nadaje się na kotwicę.` },
     { figure: 'wycsvb' },
+    { steps: [
+      ['Plik 1', 'Trzaskowski, Nawrocki, Mentzen, Braun i **Stanowski**'],
+      ['Plik 2', '**Stanowski**, Hołownia, Zandberg, **Biejat** i Senyszyn'],
+      ['Plik 3', '**Biejat**, Jakubiak, Bartoszewicz, Maciak i Woch'],
+    ] },
+    { p: '**mnożnik = suma kotwicy we wcześniejszym pliku / suma kotwicy w późniejszym pliku**. Wartość przeniesiona do skali pliku 1 to wartość razy mnożnik.' },
+    { table: step3() },
     { exercise: 'tr3', num: 'Lab 3', title: 'Połącz trzy pliki kotwicami', toc: 'Lab 3. Kotwica' },
     { figure: 'wychain' },
     { p: `Porównaj obie wersje rysunku {rys:wychain}. Bez przeliczenia mali kandydaci rosną, bo w swoim pliku są blisko setki. Z kotwicami widać, ile naprawdę ważą. Mnożnik zależy jednak od dnia i od zaokrągleń, więc trzeci plik niesie błąd obu kotwic. Im dłuższy łańcuch, tym mniej pewne są jego końce.` },
@@ -20667,6 +20833,8 @@ const sections = [
     { p: 'Po wpisaniu nazwiska w okienko Trends pojawia się lista. Wiersz z podpisem „Wyszukiwane hasło” to hasło. Wiersze z opisem, na przykład „Poseł do Parlamentu Europejskiego”, to tematy. Dla „Grzegorz Braun” Trends proponuje trzy tematy. Dla „Krzysztof Stanowski” proponuje dwa różne, dziennikarza i byłego wiceministra.' },
     { p: `Tu porównujemy hasło „braun” z tematem Grzegorz Braun, [przez pięć lat](${trendsUrl('t5_braun_5lat.csv')}). Drugi plik zestawia [oba tematy Stanowskiego](${trendsUrl('t6_stanowski.csv')}).` },
     { figure: 'wycsvc' },
+    { p: '**stosunek = średnia hasła / średnia tematu**. Przykład liczy rok 2021. W Lab 4 policzysz rok 2022 i kampanię.' },
+    { table: step4() },
     { exercise: 'tr4', num: 'Lab 4', title: 'Hasło „braun” i temat Grzegorz Braun', toc: 'Lab 4. Hasło czy temat' },
     { figure: 'wyterm' },
     { p: 'Na rysunku {rys:wyterm} hasło i temat rozchodzą się poza kampanią. W kampanii idą razem, więc w krótkim oknie różnica jest mała. Hasło jest wygodne, ale łapie inne znaczenia słowa. Temat jest czystszy, ale Google nie mówi, co dokładnie do niego wlicza. W raporcie podaj, czego użyto, a przy temacie jego kod.' },
@@ -20677,6 +20845,13 @@ const sections = [
     { p: 'Mapa w raporcie Google ma podpis „Regiony najczęściej wyszukujące wybory prezydenckie”. Ciemniejszy kolor znaczy, że w tym województwie wybory zajmują większą część wszystkich wyszukiwań. To udział, a nie liczba osób, więc duże i małe województwo mają tę samą skalę. O kandydatach ta mapa nic nie mówi.' },
     { p: `Czytelnik mapy zapyta jednak, kogo szukano gdzie. Trends odpowiada na to, gdy porównasz dwa tematy w regionach. Każde województwo dzieli wtedy 100% między dwóch kandydatów. Nasze zapytanie obejmuje Trzaskowskiego i Nawrockiego między turami, od 19 do 31 maja 2025 r. [Otwórz je w Trends](${trendsUrl('t7_mapa.csv')}). Wyniki drugiej tury w województwach pochodzą ze strony PKW.` },
     { figure: 'wycsvd' },
+    { steps: [
+      ['Trends', 'nazwa w jednej z trzech postaci i udział ze znakiem %'],
+      ['Klucz', 'małe litery, bez słowa „województwo”, liczba bez %'],
+      ['PKW', 'ten sam klucz i wynik drugiej tury'],
+    ] },
+    { p: 'Przykład dla trzech województw. W kolumnach Trends i PKW jest udział Trzaskowskiego, w wyszukiwaniach i w głosach.' },
+    { table: step5() },
     { exercise: 'tr5', num: 'Lab 5', title: 'Połącz mapę z wynikami PKW', toc: 'Lab 5. Mapa i PKW' },
     { figure: 'wyregions' },
     { p: 'Rysunek {rys:wyregions} pokazuje dwie różne rzeczy. W wyszukiwaniach Nawrocki prowadzi wszędzie, ale z niewielką przewagą. W głosach województwa dzielą się wyraźnie. Mapa kandydatów z samych wyszukiwań pokazałaby więc jeden kolor tam, gdzie wyborcy zdecydowali różnie.' },
@@ -20684,9 +20859,16 @@ const sections = [
 
   step('w2-7', '2.7', 'Krok 6. Wyszukiwania a głosy', [
     { p: 'Pod raportem Google stoi zdanie, że zainteresowania wyszukiwaniem nie należy traktować jako wskazówki co do zamiarów wyborców. To uczciwe ostrzeżenie. Sprawdźmy, jak daleko są od siebie wyszukiwania i głosy.' },
-    { p: 'Korelacja **r** mówi, czy dwie liczby rosną razem. r bliskie 1 znaczy, że tak. r bliskie 0 znaczy, że nie ma związku. Ujemne r znaczy, że jedna rośnie, gdy druga spada.' },
+    { p: 'Korelacja **r** mówi, czy dwie liczby rosną razem.' },
+    { label: 'Jak czytać r', cards: [
+      { title: 'r bliskie 1', text: 'Obie liczby rosną razem.', glyph: 'together' },
+      { title: 'r bliskie 0', text: 'Nie ma związku.', glyph: 'none' },
+      { title: 'r ujemne', text: 'Jedna rośnie, gdy druga spada.', glyph: 'opposite' },
+    ] },
     { exercise: 'tr6', num: 'Lab 6', title: 'Policz r dla kandydatów i dla województw', toc: 'Lab 6. Wyszukiwania a głosy' },
     { figure: 'wyvotes' },
+    { p: 'Trzy korelacje obok siebie pokazują, ile znaczy jedno r. Wszystkie zestawiają udział w wyszukiwaniach z udziałem w głosach, a n to liczba punktów.' },
+    { table: step6() },
     { p: `Wysokie r dla kandydatów łatwo przecenić. Wynika głównie z tego, że duzi kandydaci są duzi w obu miejscach. Przy ${G.tr6.facts.n} punktach jeden kandydat potrafi też mocno zmienić r. A jeśli sprawdzisz wiele okien i wiele haseł, któreś da wysokie r przez przypadek.` },
     { p: 'Wniosek do raportu brzmi więc ostrożnie. Wyszukiwania pokazują, o kim ludzie chcieli się czegoś dowiedzieć. Nie pokazują, na kogo zagłosują.' },
   ]),
@@ -20696,6 +20878,10 @@ const sections = [
     { p: 'Trends nazywa to **powiązanymi zapytaniami**. To zapytania, które ludzie wpisywali razem z hasłem. Są dwie tabele. TOP to najczęstsze zapytania, z indeksem od 0 do 100. RISING to zapytania, które najbardziej urosły względem poprzedniego okresu tej samej długości. Gdy wzrost jest bardzo duży, Trends zamiast liczby pisze „Przebicie”.' },
     { p: `Bierzemy dwa stałe tygodnie dla hasła „prezydent”, [przed drugą turą](${trendsUrl('t9_prezydent_przed.csv')}) i [z drugą turą i po niej](${trendsUrl('t10_prezydent_po.csv')}).` },
     { figure: 'wycsve' },
+    { p: '**wzrost = (ten tydzień − poprzedni tydzień) / poprzedni tydzień × 100**. Liczby w przykładzie są wymyślone. Im mniejsza wartość w poprzednim tygodniu, tym łatwiej o ogromny procent.' },
+    { table: step7growth() },
+    { p: 'W pliku wzrost jest tekstem. Zanim go policzysz, zamień go na liczbę.' },
+    { table: step7file() },
     { exercise: 'tr7', num: 'Lab 7', title: 'Powiązane zapytania. Dwie tabele w jednym pliku', toc: 'Lab 7. Popularne wyszukiwania' },
     { figure: 'wytrend' },
     { p: 'Przełącz rysunek {rys:wytrend} na „Tylko wybory w Polsce”. Tak wygląda lista Google. Surowe dane są inne. Hasło „prezydent” łapie prezydenta Francji, Rumunii i Białorusi, a także prezydentów miast. Lista w raporcie została więc przesiana, a raport nie mówi jak. To ten sam problem co z hasłem „braun” w kroku 4.' },

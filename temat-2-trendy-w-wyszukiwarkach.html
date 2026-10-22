@@ -19956,8 +19956,7 @@ const LABS2 = {
       return 'Jeszcze nie to. Udział kandydata to jego suma z 7 dni podzielona przez sumę wszystkich pięciu, razy 100.';
     },
     success(value) {
-      const sum = Object.values(value).reduce((a, b) => a + b, 0);
-      return `Tak. W ostatnim tygodniu przed pierwszą turą Trzaskowski ma ${pl(value['Rafał Trzaskowski'])}%, a Nawrocki ${pl(value['Karol Nawrocki'])}%. Razem wychodzi ${pl(Math.round(sum * 10) / 10)}%, bo każdy udział jest zaokrąglony. Udział ma sens tylko wewnątrz jednego zapytania. Ci sami kandydaci w innym zestawie dostaną inne procenty.`;
+      return `Tak. W ostatnim tygodniu przed pierwszą turą Trzaskowski ma ${pl(value['Rafał Trzaskowski'])}%, a Nawrocki ${pl(value['Karol Nawrocki'])}%. Udział ma sens tylko wewnątrz jednego zapytania. Ci sami kandydaci w innym zestawie dostaną inne procenty.`;
     },
     more: `Dla chętnych. Policz udziały z całego okna 30 dni. Kolejność na górze się odwraca. Nawrocki ma wtedy ${pl(G.tr2.facts.window['Karol Nawrocki'])}%, a Trzaskowski ${pl(G.tr2.facts.window['Rafał Trzaskowski'])}%. Wybór okna zmienia wniosek, więc trzeba go podać.`,
     base: {
@@ -20062,7 +20061,7 @@ const LABS2 = {
       if (!sameKeys(value, expect)) return 'Zmienna `result` powinna mieć trzy pola, `lt1`, `quiet` i `campaign`. Zostaw ostatnie wiersze kodu bez zmian.';
       if (near(value.quiet, facts.quietNaN, 0.05)) return 'Kod liczy się bez błędu, ale źle. `errors="coerce"` zamienił każde „<1” na NaN, czyli brak, co widać w wierszu „Braki”. `mean()` pomija braki, więc średnia tematu liczy tylko lepsze tygodnie. „<1” to nie brak danych, tylko mało. Zamień je na 0,5.';
       // the ratio first: the count starts at 0 in the starter, so 0 says "not done yet", not which column
-      if (near(value.quiet, facts.quietZero, 0.05)) return '„<1” zamieniono na zero. Wtedy temat wychodzi za mały, a stosunek za duży. Przyjmij 0,5, jak mówi opis funkcji.';
+      if (near(value.quiet, facts.quietZero, 0.05)) return '„<1” zamieniono na zero. Wtedy temat wychodzi za mały, a stosunek za duży. Przyjmij 0,5, bo „<1” to wartość między 0 a 1.';
       if (value.quiet > 0 && value.quiet < 1) return 'Stosunek jest odwrócony. Średnią hasła dziel przez średnią tematu.';
       if (value.lt1 === 0 && near(value.quiet, expect.quiet, 0.05)) return 'Stosunki są dobre. Zostało pierwsze zadanie. Policz tygodnie, w których kolumna tematu ma napis „<1”, `(df.iloc[:, 1] == "<1").sum()`.';
       if (value.lt1 !== expect.lt1) return 'Liczba tygodni z „<1” jeszcze nie ta. Licz tylko w kolumnie tematu, `df.iloc[:, 1]`, i licz w `df`, a nie w `values`, bo tam „<1” już jest liczbą.';

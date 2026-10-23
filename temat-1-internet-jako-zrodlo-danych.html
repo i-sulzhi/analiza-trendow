@@ -1738,7 +1738,10 @@ textarea.kc-input { resize: vertical; }
   .wy-csv { font-size: 11px; }
 }
 
-.wy-csv-nbsp { color: var(--err); font-weight: 700; }
+.wy-csv-nbsp, .wy-sp { display: inline-block; box-sizing: border-box; width: 10px; height: 7px; margin: 0 2px; overflow: hidden; border: 2px solid var(--err); border-top: 0; line-height: 0; color: transparent; vertical-align: baseline; }
+.wy-sp { width: 16px; height: 9px; border-color: var(--ink-faint); }
+.wy-sp-hard { border-color: var(--err); }
+.wy-nowrap { white-space: nowrap; }
 .wy-rising { margin: 0; padding: 0 0 0 1.8em; display: grid; gap: 4px; font-size: 14px; }
 .wy-rising-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; padding: 3px 0; border-bottom: 1px solid var(--line); }
 .wy-rising-q { flex: 1 1 14em; min-width: 0; overflow-wrap: anywhere; }
@@ -1762,6 +1765,30 @@ textarea.kc-input { resize: vertical; }
 .wy-anchor-file .wy-bar-row { grid-template-columns: minmax(0, 7em) minmax(0, 1fr) 4.2em; }
 .wy-anchor-row .wy-bar-track { outline: 2px solid var(--accent); outline-offset: 1px; }
 .wy-anchor-row .wy-bar-name { font-weight: 700; }
+
+/* step 7: the growth meter with the 5000% breakout line, and a growth text character by character */
+.wy-grow-ask { font-size: 13px; color: var(--ink-soft); margin: 4px 0; }
+.wy-meter { display: grid; gap: 4px; margin: 12px 0 8px; padding-right: 16px; min-width: 0; }
+.wy-meter-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+.wy-meter-val { font: 700 18px var(--mono); color: var(--ok); }
+.wy-meter-val-break { color: var(--warn); }
+.wy-meter-track { position: relative; height: 18px; background: var(--bg-sunken); border-radius: 3px; }
+.wy-meter-bar { display: block; height: 100%; background: var(--ok); border-radius: 3px; transition: width .3s; }
+.wy-meter-break { width: calc(100% + 16px) !important; background: var(--warn); border-radius: 3px 0 0 3px;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 25%, calc(100% - 8px) 50%, 100% 75%, calc(100% - 8px) 100%, 0 100%); }
+.wy-meter-cap { position: absolute; right: 0; top: -5px; bottom: -5px; border-left: 2px dashed var(--err); }
+.wy-meter-scale { display: flex; justify-content: space-between; font: 11px var(--mono); color: var(--ink-soft); }
+.wy-meter-cap-label { color: var(--err); }
+.wy-chars { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0 10px; }
+.wy-char { display: grid; justify-items: center; align-content: start; gap: 2px; min-width: 2.1em; padding: 4px 2px; border: 1px solid var(--line); border-radius: 5px; }
+.wy-char b { font: 700 18px var(--mono); }
+.wy-char small { font-size: 10px; line-height: 1.1; color: var(--ink-soft); text-align: center; max-width: 5em; }
+.wy-char-kept { background: var(--ok-bg); border-color: var(--ok); }
+.wy-char-gone { opacity: .45; }
+.wy-char-gone b { text-decoration: line-through; }
+.wy-char b { min-height: 1.3em; display: flex; align-items: flex-end; justify-content: center; }
+.wy-char-nbsp.wy-char-kept { background: var(--err-bg); border-color: var(--err); }
+.wy-chars-code { margin: 6px 0; font-size: 12px; overflow-wrap: anywhere; }
 
 </style>
 </head>

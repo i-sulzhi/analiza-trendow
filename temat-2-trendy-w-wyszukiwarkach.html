@@ -1738,7 +1738,10 @@ textarea.kc-input { resize: vertical; }
   .wy-csv { font-size: 11px; }
 }
 
-.wy-csv-nbsp { color: var(--err); font-weight: 700; }
+.wy-csv-nbsp, .wy-sp { display: inline-block; box-sizing: border-box; width: 10px; height: 7px; margin: 0 2px; overflow: hidden; border: 2px solid var(--err); border-top: 0; line-height: 0; color: transparent; vertical-align: baseline; }
+.wy-sp { width: 16px; height: 9px; border-color: var(--ink-faint); }
+.wy-sp-hard { border-color: var(--err); }
+.wy-nowrap { white-space: nowrap; }
 .wy-rising { margin: 0; padding: 0 0 0 1.8em; display: grid; gap: 4px; font-size: 14px; }
 .wy-rising-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; padding: 3px 0; border-bottom: 1px solid var(--line); }
 .wy-rising-q { flex: 1 1 14em; min-width: 0; overflow-wrap: anywhere; }
@@ -1762,6 +1765,30 @@ textarea.kc-input { resize: vertical; }
 .wy-anchor-file .wy-bar-row { grid-template-columns: minmax(0, 7em) minmax(0, 1fr) 4.2em; }
 .wy-anchor-row .wy-bar-track { outline: 2px solid var(--accent); outline-offset: 1px; }
 .wy-anchor-row .wy-bar-name { font-weight: 700; }
+
+/* step 7: the growth meter with the 5000% breakout line, and a growth text character by character */
+.wy-grow-ask { font-size: 13px; color: var(--ink-soft); margin: 4px 0; }
+.wy-meter { display: grid; gap: 4px; margin: 12px 0 8px; padding-right: 16px; min-width: 0; }
+.wy-meter-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+.wy-meter-val { font: 700 18px var(--mono); color: var(--ok); }
+.wy-meter-val-break { color: var(--warn); }
+.wy-meter-track { position: relative; height: 18px; background: var(--bg-sunken); border-radius: 3px; }
+.wy-meter-bar { display: block; height: 100%; background: var(--ok); border-radius: 3px; transition: width .3s; }
+.wy-meter-break { width: calc(100% + 16px) !important; background: var(--warn); border-radius: 3px 0 0 3px;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 25%, calc(100% - 8px) 50%, 100% 75%, calc(100% - 8px) 100%, 0 100%); }
+.wy-meter-cap { position: absolute; right: 0; top: -5px; bottom: -5px; border-left: 2px dashed var(--err); }
+.wy-meter-scale { display: flex; justify-content: space-between; font: 11px var(--mono); color: var(--ink-soft); }
+.wy-meter-cap-label { color: var(--err); }
+.wy-chars { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0 10px; }
+.wy-char { display: grid; justify-items: center; align-content: start; gap: 2px; min-width: 2.1em; padding: 4px 2px; border: 1px solid var(--line); border-radius: 5px; }
+.wy-char b { font: 700 18px var(--mono); }
+.wy-char small { font-size: 10px; line-height: 1.1; color: var(--ink-soft); text-align: center; max-width: 5em; }
+.wy-char-kept { background: var(--ok-bg); border-color: var(--ok); }
+.wy-char-gone { opacity: .45; }
+.wy-char-gone b { text-decoration: line-through; }
+.wy-char b { min-height: 1.3em; display: flex; align-items: flex-end; justify-content: center; }
+.wy-char-nbsp.wy-char-kept { background: var(--err-bg); border-color: var(--err); }
+.wy-chars-code { margin: 6px 0; font-size: 12px; overflow-wrap: anywhere; }
 
 </style>
 </head>
@@ -20370,7 +20397,7 @@ function csvLines(text, head = 8, tail = 3, focus = null) {
 /** Split one CSV line into cells; a comma inside quotes stays in its cell. */
 const cells = (line) => line.split(/[,;](?=(?:[^"]*"[^"]*")*[^"]*$)/);
 /** A cell's text with the hard space (U+00A0) of Trends' thousands made visible. */
-const shown = (c) => (c.includes('\u00a0') ? c.split('\u00a0').flatMap((part, i) => [i ? el('span.wy-csv-nbsp', { title: 'twarda spacja (U+00A0)' }, '⍽') : null, part]) : c);
+const shown = (c) => (c.includes('\u00a0') ? c.split('\u00a0').flatMap((part, i) => [i ? el('span.wy-csv-nbsp', { title: 'twarda spacja (U+00A0)', 'aria-label': 'twarda spacja' }, '⍽') : null, part]) : c);
 
 const FOCUS = /^(TOP|RISING)$|\u00a0/;
 function textView(name) {
@@ -20716,7 +20743,108 @@ function anchorFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Krok 3. Jak działa kotwica', host, caption(`${SRC} Sumy indeksu z 30 dni przed I turą.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "concerns": concerns, "trendingFigure": trendingFigure, "anchorSteps": anchorSteps, "anchorFigure": anchorFigure, "pl": pl };
+// ---------------------------------------------------------------- growth as Trends writes it (step 7)
+
+/** Trends separates thousands with a no-break space: 2400 -> "2 400". */
+const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const BREAKOUT = 5000;
+const NOW = 50;
+const BEFORE = [25, 10, 5, 2, 1, 0.5];
+
+/** Growth from `before` to NOW and how Trends writes it. Invented numbers, the page says so. */
+function growthRow(before) {
+  const g = Math.round((100 * (NOW - before)) / before);
+  return { before, now: NOW, g, text: g > BREAKOUT ? 'Przebicie' : `+ ${thousands(g)}%` };
+}
+
+/** A growth text in quotes that never breaks between "+" and the number. */
+const quoted = (t) => el('span.wy-nowrap', '„', shown(t), '”');
+
+function growthFigure({ num: n = 'Rysunek' } = {}) {
+  const st = { before: 10 };
+  const host = el('div');
+  const draw = () => {
+    const r = growthRow(st.before);
+    const broke = r.g > BREAKOUT;
+    const near = !broke && r.g > BREAKOUT * 0.9;
+    const bar = (label, v) => el('div.wy-bar-row', el('span.wy-bar-name', label),
+      el('span.wy-bar-track', el('span.wy-bar.wy-c1', { style: `width:${Math.max(0.5, (100 * v) / NOW).toFixed(1)}%` })),
+      el('span.wy-bar-val', pl(v)));
+    mount(host,
+      el('div.wy-grow-ask', 'Indeks w poprzednim tygodniu. W tym tygodniu jest zawsze 50.'),
+      toggles(BEFORE.map((v) => [v, pl(v)]), st.before, (v) => { st.before = v; draw(); }),
+      el('div.wy-bars', bar('przedtem', r.before), bar('teraz', r.now)),
+      el('div.wy-meter',
+        el('div.wy-meter-head', el('span', 'Wzrost'), el(`span.wy-meter-val${broke ? '.wy-meter-val-break' : ''}`, broke ? 'Przebicie' : shown(r.text))),
+        el('div.wy-meter-track',
+          el(`span.wy-meter-bar${broke ? '.wy-meter-break' : ''}`, { style: `width:${broke ? 100 : Math.max(0.5, (100 * r.g) / BREAKOUT).toFixed(1)}%` }),
+          el('span.wy-meter-cap')),
+        el('div.wy-meter-scale', el('span', '0%'), el('span', '2500%'), el('span.wy-meter-cap-label', 'próg 5000%'))),
+      el(`div.sq-read${broke ? '.sq-read-warn' : ''}`,
+        `(${NOW} − ${pl(r.before)}) / ${pl(r.before)} × 100 = ${thousands(r.g)}. `,
+        broke
+          ? 'To ponad 5000%. Trends nie pisze wtedy liczby, tylko słowo „Przebicie”. Wiemy, że wzrost przekroczył próg, ale nie wiemy, o ile. Tak samo wyglądałby wzrost o 6000% i o milion procent.'
+          : near
+            ? ['Tuż pod progiem. W pliku jest jeszcze liczba, ', quoted(r.text), '. Czerwony znak ', shown('\u00a0'), ' to twarda spacja między tysiącami, o niej jest następny rysunek.']
+            : ['W pliku jest ', quoted(r.text), '. Im mniejszy poprzedni tydzień, tym większy procent, choć ten tydzień się nie zmienia.']));
+  };
+  draw();
+  return frame(n, 'Krok 7. Kiedy zamiast liczby jest „Przebicie”', host, caption(['Liczby są wymyślone. Próg 5000% podaje pomoc Google Trends. Czerwony znak ', shown('\u00a0'), ' to twarda spacja.']));
+}
+
+/** What each character of a growth text is, for the character view. */
+const CHAR_NAME = { '+': 'plus', ' ': 'spacja', ' ': 'twarda spacja', '%': 'procent' };
+const CLEAN = {
+  visible: { label: 'Usuń +, % i spację', code: 'str.replace(r"[+% ]", "", regex=True)', drop: (c) => '+% '.includes(c) },
+  digits: { label: 'Zostaw same cyfry', code: 'str.replace(r"\\D", "", regex=True)', drop: (c) => !/[0-9]/.test(c) },
+};
+
+/** Three growth texts from the recorded files; not "+ 4 050%", which Lab 7 asks for. */
+function growthTexts() {
+  const R = D.related;
+  const all = R.after.RISING.concat(R.before.RISING);
+  return ['+ 600%', '+ 1 800%', 'Przebicie'].map((v) => all.find(([, x]) => x === v));
+}
+
+/** The text after cleaning: { kept, number } with number null when it is not a whole number. */
+function cleaned(text, mode) {
+  const kept = [...text].filter((c) => !CLEAN[mode].drop(c)).join('');
+  return { kept, number: /^[0-9]+$/.test(kept) ? Number(kept) : null };
+}
+
+function charsFigure({ num: n = 'Rysunek' } = {}) {
+  const T = growthTexts();
+  const st = { k: 1, mode: 'visible' };
+  const host = el('div');
+  const draw = () => {
+    const [q, text] = T[st.k];
+    const word = /^[^0-9]+$/.test(text);
+    const parts = word ? [text] : [...text];
+    const res = cleaned(text, st.mode);
+    const chip = (c) => {
+      const gone = word ? CLEAN[st.mode].drop(c[0]) : CLEAN[st.mode].drop(c);
+      const name = word ? 'słowo, zero cyfr' : CHAR_NAME[c] || 'cyfra';
+      return el(`span.wy-char${gone ? '.wy-char-gone' : '.wy-char-kept'}${c === ' ' ? '.wy-char-nbsp' : ''}`,
+        el('b', c === ' ' || c === '\u00a0' ? el(`span.wy-sp${c === ' ' ? '' : '.wy-sp-hard'}`) : c), el('small', name));
+    };
+    let read;
+    if (res.number != null) read = [`Zostało ${res.kept}. To liczba, wzrost o ${res.kept}%.`];
+    else if (res.kept === '') read = ['Nie zostało nic. Liczby tu nie ma. Wiemy tylko, że wzrost przekroczył 5000%. Takie wiersze liczy się osobno.'];
+    else if (word) read = ['Słowo zostało całe. To tekst, więc pandas zamieni go na brak liczby. To akurat dobrze, bo żadnej liczby tu nie ma. Takie wiersze liczy się osobno.'];
+    else read = ['Zostało „', shown(res.kept), '”. Twarda spacja wygląda jak zwykła, ale to inny znak, więc [+% ] jej nie usuwa. To nadal tekst. pandas zamieni go na brak liczby, a max pominie go bez żadnego błędu.'];
+    mount(host,
+      toggles(T.map(([, v], i) => [i, shown(v)]), st.k, (v) => { st.k = v; draw(); }),
+      el('div.wy-grow-ask', `Zapytanie „${q}”. Tak wygląda wzrost w pliku, znak po znaku.`),
+      el('div.wy-chars', parts.map(chip)),
+      toggles(Object.entries(CLEAN).map(([k, c]) => [k, c.label]), st.mode, (m) => { st.mode = m; draw(); }),
+      el('div.wy-chars-code', el('code', CLEAN[st.mode].code)),
+      el(`div.sq-read${res.number == null && res.kept !== '' && !word ? '.sq-read-warn' : ''}`, read));
+  };
+  draw();
+  return frame(n, 'Krok 7. Od tekstu do liczby', host, caption(`${SRC} Hasło „prezydent”, tabela RISING. Szary znak znika, kolorowy zostaje.`));
+}
+
+__modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, "rowsWord": rowsWord, "trendsUrl": trendsUrl, "csvLines": csvLines, "cells": cells, "csvFigure": csvFigure, "seriesOf": seriesOf, "datesOf": datesOf, "linesFigure": linesFigure, "sharesOver": sharesOver, "sharesFigure": sharesFigure, "chainShares": chainShares, "chainFigure": chainFigure, "termTopicFigure": termTopicFigure, "regionRows": regionRows, "regionsFigure": regionsFigure, "voteRows": voteRows, "votesFigure": votesFigure, "risingRows": risingRows, "concerns": concerns, "trendingFigure": trendingFigure, "anchorSteps": anchorSteps, "anchorFigure": anchorFigure, "BREAKOUT": BREAKOUT, "NOW": NOW, "BEFORE": BEFORE, "growthRow": growthRow, "growthFigure": growthFigure, "CLEAN": CLEAN, "growthTexts": growthTexts, "cleaned": cleaned, "charsFigure": charsFigure, "pl": pl };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/examples2.js ===== */
@@ -20724,8 +20852,8 @@ __modules["../../analiza-trendow-w-internecie/src/figures2.js"] = { "num": num, 
 /**
  * Worked examples of topic 2: one formula and one small table per step, so a student sees at a
  * glance what is computed from what (asked by the author on 2026-10-22, after the index table
- * of 2.1). Every number is read from the recorded files in generated2.js; only the growth
- * example of step 7 is invented, and the page says so. test/chapter2.mjs recomputes each row.
+ * of 2.1). Every number is read from the recorded files in generated2.js. Step 7 has figures
+ * instead (figures2.js, growthFigure and charsFigure). test/chapter2.mjs recomputes each row.
  */
 const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
 const D = GENERATED2.data;
@@ -20844,33 +20972,7 @@ function step6() {
   };
 }
 
-/** Step 7: how growth is computed (invented numbers) and how the file writes it. */
-function step7growth() {
-  const g = (a, b) => Math.round((100 * (b - a)) / a);
-  // Trends separates thousands with a no-break space
-  const th = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
-  return {
-    head: ['Przedtem', 'Teraz', 'Obliczenie', 'W Trends'],
-    rows: [
-      ['10', '50', `(50 − 10) / 10 × 100${EQ}${g(10, 50)}`, `**+ ${g(10, 50)}%**`],
-      ['2', '50', `(50 − 2) / 2 × 100${EQ}${g(2, 50)}`, `**+ 2 400%**`],
-      ['0,5', '50', `(50 − 0,5) / 0,5 × 100${EQ}${g(0.5, 50)}`, '**Przebicie**, ponad 5000%'],
-    ],
-  };
-}
-
-function step7file() {
-  const after = D.related.after.RISING;
-  // not "+ 4 050%": that one is the answer of Lab 7
-  const pick = ['Przebicie', '+ 600%', '+ 1\u00a0800%'].map((v) => after.find(([, x]) => x === v) || D.related.before.RISING.find(([, x]) => x === v));
-  const asNum = (v) => (v === 'Przebicie' ? null : Number(v.replace(/[^0-9]/g, '')));
-  return {
-    head: ['Zapytanie', 'Tekst w pliku', 'Liczba'],
-    rows: pick.map(([q, v]) => [q, `„${v.replace(' ', '⍽')}”`, asNum(v) == null ? 'brak, tylko „ponad 5000%”' : `**${asNum(v)}**`]),
-  };
-}
-
-__modules["../../analiza-trendow-w-internecie/src/examples2.js"] = { "step1": step1, "step2": step2, "step3": step3, "step4": step4, "step5": step5, "step6": step6, "step7growth": step7growth, "step7file": step7file };
+__modules["../../analiza-trendow-w-internecie/src/examples2.js"] = { "step1": step1, "step2": step2, "step3": step3, "step4": step4, "step5": step5, "step6": step6 };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/chapter2.js ===== */
@@ -20888,7 +20990,7 @@ const { CHAPTER: BASE } = __modules["src/book/chapter2.js"];
 const { COURSE } = __modules["../../analiza-trendow-w-internecie/src/chapter1.js"];
 const { trendsUrl } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
 const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
-const { step1, step2, step3, step4, step5, step6, step7growth, step7file } = __modules["../../analiza-trendow-w-internecie/src/examples2.js"];
+const { step1, step2, step3, step4, step5, step6 } = __modules["../../analiza-trendow-w-internecie/src/examples2.js"];
 const REPORT = 'https://trends.withgoogle.com/trends/pl/wybory-prezydenckie-2025/';
 const G = GENERATED2.labs;
 
@@ -21039,10 +21141,10 @@ const sections = [
     { p: 'Trends nazywa to **powiązanymi zapytaniami**. To zapytania, które ludzie wpisywali razem z hasłem. Są dwie tabele. TOP to najczęstsze zapytania, z indeksem od 0 do 100. RISING to zapytania, które najbardziej urosły względem poprzedniego okresu tej samej długości. Gdy wzrost jest bardzo duży, Trends zamiast liczby pisze „Przebicie”.' },
     { p: `Bierzemy dwa stałe tygodnie dla hasła „prezydent”, [przed drugą turą](${trendsUrl('t9_prezydent_przed.csv')}) i [z drugą turą i po niej](${trendsUrl('t10_prezydent_po.csv')}).` },
     { figure: 'wycsve' },
-    { p: '**wzrost = (ten tydzień − poprzedni tydzień) / poprzedni tydzień × 100**. Liczby w przykładzie są wymyślone. Im mniejsza wartość w poprzednim tygodniu, tym łatwiej o ogromny procent.' },
-    { table: step7growth() },
-    { p: 'W pliku wzrost jest tekstem. Zanim go policzysz, zamień go na liczbę.' },
-    { table: step7file() },
+    { p: '**wzrost = (ten tydzień − poprzedni tydzień) / poprzedni tydzień × 100**. Zmniejszaj poprzedni tydzień na rysunku {rys:wywzrost} i patrz, kiedy liczba zmienia się w „Przebicie”.' },
+    { figure: 'wywzrost' },
+    { p: 'W pliku wzrost jest tekstem. Na rysunku {rys:wytekst} widać go znak po znaku. Sprawdź, co zostaje z „+ 1 800%” po każdym sposobie czyszczenia. Spacja między 1 i 800 nie jest zwykłą spacją.' },
+    { figure: 'wytekst' },
     { exercise: 'tr7', num: 'Lab 7', title: 'Powiązane zapytania. Dwie tabele w jednym pliku', toc: 'Lab 7. Popularne wyszukiwania' },
     { figure: 'wytrend' },
     { p: 'Przełącz rysunek {rys:wytrend} na „Tylko wybory w Polsce”. Tak wygląda lista Google. Surowe dane są inne. Hasło „prezydent” łapie prezydenta Francji, Rumunii i Białorusi, a także prezydentów miast. Lista w raporcie została więc przesiana, a raport nie mówi jak. To ten sam problem co z hasłem „braun” w kroku 4.' },
@@ -21122,7 +21224,7 @@ const { CHAPTER, REPORT_FIELDS } = __modules["../../analiza-trendow-w-internecie
 const { labExercise, labAnswer } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS2, FILES2, explainError2 } = __modules["../../analiza-trendow-w-internecie/src/tasks2.js"];
 const { GENERATED2 } = __modules["../../analiza-trendow-w-internecie/src/generated2.js"];
-const { csvFigure, linesFigure, sharesFigure, chainFigure, termTopicFigure, regionsFigure, votesFigure, trendingFigure, anchorFigure } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
+const { csvFigure, linesFigure, sharesFigure, chainFigure, termTopicFigure, regionsFigure, votesFigure, trendingFigure, anchorFigure, growthFigure, charsFigure } = __modules["../../analiza-trendow-w-internecie/src/figures2.js"];
 const FIGURES2 = {
   'wycsva': csvFigure('Krok 1. Plik z Trends, zanim powstanie wykres', ['t1_kandydaci.csv', 't8_kandydaci_dzien_pozniej.csv'], {
     't1_kandydaci.csv': 'Wiersz 1 to kategoria, wiersz 2 jest pusty, a nagłówek jest w wierszu 3. Potem 30 wierszy, po jednym na dzień. Kolumna to imię i nazwisko z dopiskiem regionu. Z pliku nie wynika, że to temat, a nie hasło.',
@@ -21141,7 +21243,7 @@ const FIGURES2 = {
     'pkw_tura2_pl.csv': 'Ten plik przygotowaliśmy z tabel PKW. Ma polski format, czyli średniki i przecinki dziesiętne.',
   }),
   'wycsve': csvFigure('Krok 7. Powiązane zapytania, dwie tabele w jednym pliku', ['t10_prezydent_po.csv', 't9_prezydent_przed.csv'], {
-    't10_prezydent_po.csv': 'W wierszu 2 jest hasło i okno w cudzysłowie. Potem tabela TOP, pusty wiersz i tabela RISING. Nazwa RISING jest po angielsku, choć reszta pliku jest po polsku. Wzrost to tekst, „+ 600%” albo „Przebicie”. Tysiące oddziela twarda spacja, zaznaczona tu znakiem ⍽.',
+    't10_prezydent_po.csv': 'W wierszu 2 jest hasło i okno w cudzysłowie. Potem tabela TOP, pusty wiersz i tabela RISING. Nazwa RISING jest po angielsku, choć reszta pliku jest po polsku. Wzrost to tekst, „+ 600%” albo „Przebicie”. Tysiące oddziela twarda spacja, zaznaczona tu na czerwono.',
     't9_prezydent_przed.csv': 'Ten sam układ. W tabeli TOP są też prezydent Francji, Rumunii i Warszawy.',
   }),
   'wylines': linesFigure,
@@ -21152,6 +21254,8 @@ const FIGURES2 = {
   'wyregions': regionsFigure,
   'wyvotes': votesFigure,
   'wytrend': trendingFigure,
+  'wywzrost': growthFigure,
+  'wytekst': charsFigure,
 };
 
 /** Make the engine topic 2: the course's stores and strings, then this topic's labs, figures and card. */

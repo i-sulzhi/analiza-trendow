@@ -20399,7 +20399,9 @@ const cells = (line) => line.split(/[,;](?=(?:[^"]*"[^"]*")*[^"]*$)/);
 /** A cell's text with the hard space (U+00A0) of Trends' thousands made visible. */
 const shown = (c) => (c.includes('\u00a0') ? c.split('\u00a0').flatMap((part, i) => [i ? el('span.wy-csv-nbsp', { title: 'twarda spacja (U+00A0)', 'aria-label': 'twarda spacja' }, '⍽') : null, part]) : c);
 
-const FOCUS = /^(TOP|RISING)$|\u00a0/;
+/** Lines to keep in a long file: table names and growth with a hard space, but not Lab 7's answer. */
+const LAB7_MAX = String(GENERATED2.labs.tr7.expect.max_growth).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+const FOCUS = { test: (line) => /^(TOP|RISING)$/.test(line) || (line.includes('\u00a0') && !line.includes(`+ ${LAB7_MAX}%`)) };
 function textView(name) {
   const { lines } = csvLines(F[name], 8, 3, FOCUS);
   return el('pre.wy-csv', { 'aria-label': `Plik ${name} jako tekst` }, lines.map((row) => {
@@ -21149,7 +21151,7 @@ const sections = [
     { exercise: 'tr7', num: 'Lab 7', title: 'Powiązane zapytania. Dwie tabele w jednym pliku', toc: 'Lab 7. Popularne wyszukiwania' },
     { figure: 'wytrend' },
     { p: 'Przełącz rysunek {rys:wytrend} na „Tylko wybory w Polsce”. Tak wygląda lista Google. Surowe dane są inne. Hasło „prezydent” łapie prezydenta Francji, Rumunii i Białorusi, a także prezydentów miast. Lista w raporcie została więc przesiana, a raport nie mówi jak. To ten sam problem co z hasłem „braun” w kroku 4.' },
-    { p: 'Procent wzrostu też trzeba czytać ostrożnie. Liczy się go względem poprzedniego tygodnia, więc rzadkie zapytanie łatwo rośnie o setki procent. „Przebicie” mówi tylko, że wzrost był bardzo duży, a nie ile wynosił.' },
+    { p: 'Procentów wzrostu nie porównuj jak liczby wyszukiwań. Rzadkie zapytanie łatwo rośnie o setki procent, co widać na rysunku {rys:wywzrost}. W raporcie pisz, że to wzrost względem poprzedniego tygodnia, a nie liczba wyszukiwań.' },
   ]),
 
   step('w2-9', '2.9', 'Twój raport', [

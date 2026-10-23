@@ -21145,6 +21145,7 @@ const sections = [
     { figure: 'wywzrost' },
     { p: 'W pliku wzrost jest tekstem. Na rysunku {rys:wytekst} widać go znak po znaku. Sprawdź, co zostaje z „+ 1 800%” po każdym sposobie czyszczenia. Spacja między 1 i 800 nie jest zwykłą spacją.' },
     { figure: 'wytekst' },
+    { p: 'Skąd w pliku twarda spacja? Po polsku przecinek oddziela część dziesiętną, więc tysiące oddziela spacja, 1 800. Żeby liczba nie rozpadła się na końcu wiersza, Google wstawia spację, przy której tekst się nie łamie. Plik z Trends to ten sam tekst co na ekranie, więc ta spacja trafia też do danych. Wygląda jak zwykła, ale ma inny kod, 160 zamiast 32. Dlatego `replace(" ", "")` w Pythonie i `PODSTAW` ze zwykłą spacją w arkuszu jej nie usuwają. Ten sam znak często siedzi w danych skopiowanych ze stron i z eksportów. Gdy liczba wygląda dobrze, a nie chce się policzyć, sprawdź najpierw spacje.' },
     { exercise: 'tr7', num: 'Lab 7', title: 'Powiązane zapytania. Dwie tabele w jednym pliku', toc: 'Lab 7. Popularne wyszukiwania' },
     { figure: 'wytrend' },
     { p: 'Przełącz rysunek {rys:wytrend} na „Tylko wybory w Polsce”. Tak wygląda lista Google. Surowe dane są inne. Hasło „prezydent” łapie prezydenta Francji, Rumunii i Białorusi, a także prezydentów miast. Lista w raporcie została więc przesiana, a raport nie mówi jak. To ten sam problem co z hasłem „braun” w kroku 4.' },

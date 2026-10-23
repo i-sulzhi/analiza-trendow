@@ -9447,10 +9447,15 @@ function writeAll(data) {
 
 const getItem = (id) => readAll()[id] ?? null;
 
+/** Who wants to know that something was saved (the report under the chapter redraws). */
+const watchers = new Set();
+function onSaved(fn) { watchers.add(fn); return () => watchers.delete(fn); }
+
 function setItem(id, value) {
   const all = readAll();
   all[id] = value;
   writeAll(all);
+  for (const fn of watchers) { try { fn(id); } catch { /* a watcher never stops a save */ } }
   return value;
 }
 
@@ -9462,7 +9467,7 @@ function resetBook() {
   try { localStorage.removeItem(personKey(KEY)); } catch { memory = {}; }
 }
 
-__modules["src/book/store.js"] = { "useStore": useStore, "getItem": getItem, "setItem": setItem, "isDone": isDone, "markDone": markDone, "resetBook": resetBook };
+__modules["src/book/store.js"] = { "useStore": useStore, "getItem": getItem, "onSaved": onSaved, "setItem": setItem, "isDone": isDone, "markDone": markDone, "resetBook": resetBook };
 })();
 
 /* ===== src/ui/site.js ===== */
@@ -9785,15 +9790,17 @@ function reportPanel({ course, items, extra = () => [], fileName = 'raport.txt' 
   const draw = () => {
     const name = nameInput.value.replace(/\s+/g, ' ').trim();
     if (!name) { mount(out, el('p.rp-need', t('rep.needName'))); return; }
-    const text = buildReport({ course, name, items: items(), extra: extra() });
+    const fresh = () => buildReport({ course, name, items: items(), extra: extra() });
+    const text = fresh();
     const area = el('textarea.rp-input.rp-text', { readonly: true, rows: '12', 'aria-label': t('rep.title'), spellcheck: 'false' });
     area.value = text;
     const status = el('span.rp-status', { 'aria-live': 'polite' });
     mount(out,
       area,
       el('div.rp-bar',
-        el('button.ls-check', { type: 'button', onClick: async () => { status.textContent = t((await copyText(text, area)) ? 'rep.copied' : 'rep.copyFailed'); } }, t('rep.copy')),
-        el('button.rp-btn', { type: 'button', onClick: () => { if (!download(fileName, `${text}\n`)) status.textContent = t('rep.copyFailed'); } }, t('rep.download')),
+        // Built again on click: what was typed a moment ago is in it, even before the text redraws.
+        el('button.ls-check', { type: 'button', onClick: async () => { const now = fresh(); area.value = now; status.textContent = t((await copyText(now, area)) ? 'rep.copied' : 'rep.copyFailed'); } }, t('rep.copy')),
+        el('button.rp-btn', { type: 'button', onClick: () => { const now = fresh(); area.value = now; if (!download(fileName, `${now}\n`)) status.textContent = t('rep.copyFailed'); } }, t('rep.download')),
         status),
       el('p.rp-say', t('rep.say')));
   };
@@ -12989,7 +12996,7 @@ __modules["src/book/chapter2.js"] = { "QUERY_FIELDS": QUERY_FIELDS, "CHAPTER": C
  * exercises done (class tasks are 20% of the grade) and downloads with the card.
  */
 const { el, mount } = __modules["src/ui/dom.js"];
-const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
+const { getItem, setItem, isDone, markDone, onSaved } = __modules["src/book/store.js"];
 const { download } = __modules["src/ui/download.js"];
 const { reportPanel } = __modules["src/ui/reportbox.js"];
 const { personBox } = __modules["src/ui/people.js"];
@@ -13123,6 +13130,12 @@ function summaryBlock(items, { onRefresh, course = '', fileName = 'raport.txt', 
   mount(host, list, report, personBox());
   draw();
   onRefresh?.(draw);
+  // A card field typed a moment ago must be in the report downloaded now, not after the next exercise.
+  let pending = 0;
+  onSaved(() => {
+    if (pending) return;
+    pending = setTimeout(() => { pending = 0; report.refresh(); }, 150);
+  });
   return host;
 }
 
@@ -14619,7 +14632,7 @@ function reportPlan(chapter, report) {
     worked: pairs.length,
     total: chapter.summary.length,
     unknown,
-    card: !!cardText,
+    card: !!cardText && Object.keys(cardFromText(cardKey, cardText)).length > 0,
     apply,
   };
 }

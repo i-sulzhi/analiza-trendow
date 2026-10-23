@@ -910,6 +910,11 @@ textarea.rp-input { resize: vertical; font: 12.5px/1.5 var(--mono); white-space:
 .who-teacher, .who-link { padding: 0; border: 0; background: none; color: var(--ink-soft); font: inherit; font-size: 13px; text-decoration: underline; text-align: left; cursor: pointer; }
 .who-teacher:hover, .who-link:hover { color: var(--accent); }
 .who-close { justify-self: start; }
+/* "Masz raport z innego komputera?": a student's link, so it stands out from the teacher's */
+.who-bring { color: var(--accent); font-weight: 600; }
+.who-file-label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+.who-file { max-width: 100%; font: inherit; font-size: 14px; font-weight: 400; }
+.who-bring-sum { margin: 6px 0 10px; padding-left: 1.2em; font-size: 14px; }
 .who-line, .who-box { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 8px 6px; font-size: 13px; color: var(--ink-soft); }
 .who-line-name { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
 .who-danger { color: var(--err); font-weight: 700; }
@@ -4699,6 +4704,20 @@ const pl = {
   'who.forgetAsk': "Usunąć postęp i odpowiedzi osoby {name}? Tego nie da się cofnąć.",
   'who.forgetYes': "Tak, usuń",
   'who.forgetNo': "Zostaw",
+  'bring.open': "Masz raport z innego komputera? Wczytaj go i pracuj dalej",
+  'bring.title': "Wczytaj swój raport",
+  'bring.say': "Wybierz plik raportu pobrany na innym komputerze albo wklej jego tekst. Wrócą wykonane ćwiczenia, Twój kod i karta. Raport musi mieć ostatnią linię z kodem kontrolnym.",
+  'bring.file': "Plik raportu (.txt)",
+  'bring.orPaste': "Albo wklej cały tekst raportu.",
+  'bring.placeholder': "Wklej tu swój raport",
+  'bring.date': "· raport z {date}",
+  'bring.found': "Z tej strony wróci {n} z {total} ćwiczeń.",
+  'bring.card': "Karta z raportu też wróci.",
+  'bring.unknown': "Liczba ćwiczeń pominiętych, bo nie ma ich na tej stronie, to {n}.",
+  'bring.nothing': "Raport jest nienaruszony, ale nie ma w nim żadnego ćwiczenia z tej strony.",
+  'bring.otherPage': "To raport z innej strony ({course}). Otwórz tamtą stronę i wczytaj go tam.",
+  'bring.cannotRead': "Nie udało się odczytać pliku. Otwórz go w Notatniku i wklej tekst poniżej.",
+  'bring.go': "Pracuj dalej jako {name}",
   // --- the report for the teacher (ui/report.js, ui/reportbox.js) ---------------------
   'rep.title': "Raport dla prowadzącego",
   'rep.nameLabel': "Imię i nazwisko",
@@ -9618,7 +9637,70 @@ function verifyReports(text) {
   return out;
 }
 
-__modules["src/ui/report.js"] = { "buildReport": buildReport, "verifyReports": verifyReports };
+/**
+ * A student's own report read back in full, so the work can continue on another computer
+ * (the R trainer's "Przywróć postęp", D36 there). Only the last report in the text, and only
+ * when its check code holds: a report edited by hand brings nothing.
+ *
+ * The answers are read from the text as pasted, not from the normalised one, because the
+ * indentation of Python code matters. A downloaded file keeps it; a report pasted through an
+ * LMS may lose it, and then the code comes back flat (still marked done).
+ *
+ * @param {string} text
+ * @param {Object} [o]
+ * @param {string[]} [o.sections]  titles of the further sections (the card), where answers end
+ * @returns {{ok: boolean, reason?: string, name?: string, course?: string, date?: string,
+ *   items?: Array<{n, label, status: 'done'|'seen'|null, doneAt, attempts, hintsUsed, answer}>,
+ *   sections?: Array<{title, text}>}}
+ */
+function readReport(text, { sections = [] } = {}) {
+  const all = verifyReports(text);
+  const last = all[all.length - 1];
+  if (!last) return { ok: false, reason: 'noCode' };
+  if (!last.ok) return last;
+  const clean = (l) => l.replace(/[   \t]/g, ' ').replace(/ +/g, ' ').trim();
+  const raw = String(text).replace(/\r\n?/g, '\n').split('\n');
+  let end = raw.length - 1;
+  while (end >= 0 && !clean(raw[end]).startsWith(t('rep.code'))) end -= 1;
+  let start = end;
+  while (start > 0 && clean(raw[start]) !== t('rep.head')) start -= 1;
+  const body = raw.slice(start, end);
+  const titles = new Set(sections.map(clean));
+  const day = (s) => {
+    const m = s.match(/(\d\d)\.(\d\d)\.(\d{4})/);
+    return m ? new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 12).getTime() : null;
+  };
+  const count = (state, key) => Number(state.match(new RegExp(`${t(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} (\\d+)`))?.[1] || 0);
+  const items = [];
+  const found = [];
+  let into = null;    // the answer lines of the item read last
+  let section = null;
+  for (const line of body) {
+    const c = clean(line);
+    const m = !section && c.match(/^(\d+)\. (.+) → (.+)$/);
+    if (m) {
+      const state = m[3];
+      const done = state.startsWith(t('rep.done'));
+      const seen = !done && state.startsWith(t('rep.started'));
+      into = [];
+      items.push({ n: Number(m[1]), label: m[2], status: done ? 'done' : seen ? 'seen' : null, doneAt: done ? day(state) : null,
+        attempts: count(state, 'rep.attempts'), hintsUsed: count(state, 'rep.hints'), lines: into });
+    } else if (titles.has(c)) {
+      section = { title: c, lines: [] };
+      found.push(section);
+      into = null;
+    } else if (section) section.lines.push(line);
+    else if (into) into.push(line.startsWith('    ') ? line.slice(4) : line.trim() === '' ? '' : line);
+  }
+  const join = (lines) => lines.join('\n').replace(/^\n+|\s+$/g, '');
+  return {
+    ok: true, name: last.name, course: last.course, date: last.date,
+    items: items.map(({ lines, ...it }) => ({ ...it, answer: join(lines) || null })),
+    sections: found.map((s) => ({ title: s.title, text: join(s.lines) })),
+  };
+}
+
+__modules["src/ui/report.js"] = { "buildReport": buildReport, "verifyReports": verifyReports, "readReport": readReport };
 })();
 
 /* ===== src/ui/download.js ===== */
@@ -9755,6 +9837,7 @@ const { el, mount } = __modules["src/ui/dom.js"];
 const { t } = __modules["src/i18n/index.js"];
 const { MAX_NAME, people, enter, choose, forget, person } = __modules["src/ui/person.js"];
 const { checkPanel } = __modules["src/ui/reportbox.js"];
+const { readReport } = __modules["src/ui/report.js"];
 const pad = (n) => String(n).padStart(2, '0');
 const shortDate = (ms) => { const d = new Date(ms); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}`; };
 
@@ -9778,8 +9861,12 @@ function toAnchor() {
  * Show "Kim jesteś?" in `host`, and call `start()` once someone is chosen.
  * @param {Element} host
  * @param {Function} start  builds the page into the same host
+ * @param {Object} [o]
+ * @param {Function} [o.restore]   (report) => reportPlan: lets a student continue from their own
+ *                                 report, made on another computer
+ * @param {string[]} [o.sections]  titles of the report's further sections (the card)
  */
-function gate(host, start) {
+function gate(host, start, { restore = null, sections = [] } = {}) {
   const go = (p) => {
     if (!p) return;
     mount(host);
@@ -9814,6 +9901,7 @@ function gate(host, start) {
         }, input, el('button.ls-check.who-start', { type: 'submit' }, t('who.start'))),
         el('p.who-hint', t('who.hint')),
         back,
+        restore ? el('button.who-teacher.who-bring', { type: 'button', onClick: showBring }, t('bring.open')) : null,
         el('button.who-teacher', { type: 'button', onClick: showCheck }, t('rep.checkTitle')))));
     setTimeout(() => { try { input.focus(); } catch { /* not on the page yet */ } }, 0);
   };
@@ -9822,6 +9910,49 @@ function gate(host, start) {
       el('h1.who-title', t('rep.checkTitle')),
       checkPanel(),
       el('button.rp-btn.who-close', { type: 'button', onClick: showWho }, t('who.backToNames')))));
+  // "Mam raport z innego komputera": a file or pasted text, checked, then continued as its person.
+  const showBring = () => {
+    const verdict = el('div.rp-verdicts', { 'aria-live': 'polite' });
+    const paste = el('textarea.rp-input.rp-paste', { rows: '6', placeholder: t('bring.placeholder'), 'aria-label': t('bring.title'), spellcheck: 'false' });
+    const judge = (text) => {
+      if (!String(text).trim()) { mount(verdict); return; }
+      const report = readReport(text, { sections });
+      if (!report.ok) { mount(verdict, el('div.rp-verdict.rp-bad', t(report.reason === 'noCode' ? 'rep.noCode' : 'rep.bad'))); return; }
+      const plan = restore(report);
+      if (!report.name || !plan.worked) {
+        mount(verdict, el('div.rp-verdict.rp-bad', plan.unknown && report.course ? t('bring.otherPage', { course: report.course }) : t('bring.nothing')));
+        return;
+      }
+      mount(verdict, el('div.rp-verdict.rp-ok',
+        el('b', report.name), ' ', t('bring.date', { date: report.date || '?' }),
+        el('ul.who-bring-sum',
+          el('li', t('bring.found', { n: plan.done, total: plan.total })),
+          plan.card ? el('li', t('bring.card')) : null,
+          plan.unknown ? el('li', t('bring.unknown', { n: plan.unknown })) : null),
+        el('button.ls-check.who-start', {
+          type: 'button',
+          onClick: () => { const p = enter(report.name); plan.apply(); go(p); },
+        }, t('bring.go', { name: report.name }))));
+    };
+    paste.addEventListener('input', () => judge(paste.value));
+    const file = el('input.who-file', {
+      type: 'file', accept: '.txt,text/plain', 'aria-label': t('bring.file'),
+      onChange: () => {
+        const f = file.files?.[0];
+        if (!f) return;
+        f.text().then((text) => { paste.value = text; judge(text); }).catch(() => mount(verdict, el('div.rp-verdict.rp-bad', t('bring.cannotRead'))));
+      },
+    });
+    mount(host, el('div.who',
+      el('div.who-card.who-card-wide', { role: 'dialog', 'aria-label': t('bring.title') },
+        el('h1.who-title', t('bring.title')),
+        el('p.who-say', t('bring.say')),
+        el('label.who-file-label', el('span', t('bring.file')), file),
+        el('p.who-hint', t('bring.orPaste')),
+        paste,
+        verdict,
+        el('button.rp-btn.who-close', { type: 'button', onClick: showWho }, t('who.backToNames')))));
+  };
   showWho();
 }
 
@@ -12887,6 +13018,25 @@ function fieldsText(fields, card) {
 }
 const cardText = (card) => fieldsText(CARD_FIELDS, card);
 
+/**
+ * A card read back from its text in a report: the answer under each label, in the card's order.
+ * A label that is not found leaves its field out; a multi field splits on commas.
+ */
+function cardFromText(key, text) {
+  const { fields } = CARDS[key];
+  const lines = String(text).split('\n');
+  const at = fields.map((f) => lines.findIndex((l) => l.trim() === plain(f.label)));
+  const card = {};
+  fields.forEach((f, i) => {
+    if (at[i] < 0) return;
+    const next = at.slice(i + 1).find((x) => x > at[i]) ?? lines.length;
+    const value = lines.slice(at[i] + 1, next).join('\n').trim();
+    if (!value) return;
+    card[f.id] = f.kind === 'multi' ? value.split(', ').filter((o) => f.options.includes(o)) : value;
+  });
+  return card;
+}
+
 /** The project cards by storage key: fields, the file it downloads as, the title in the file and the report. */
 const CARDS = {
   karta: { fields: CARD_FIELDS, file: 'karta-zrodla.txt', title: () => t('bk.card.fileTitle') },
@@ -12976,7 +13126,7 @@ function summaryBlock(items, { onRefresh, course = '', fileName = 'raport.txt', 
   return host;
 }
 
-__modules["src/book/figures/project.js"] = { "CARD_FIELDS": CARD_FIELDS, "fieldsText": fieldsText, "cardText": cardText, "CARDS": CARDS, "cardExercise": cardExercise, "sourceCard": sourceCard, "queryCard": queryCard, "summaryBlock": summaryBlock };
+__modules["src/book/figures/project.js"] = { "CARD_FIELDS": CARD_FIELDS, "fieldsText": fieldsText, "cardText": cardText, "cardFromText": cardFromText, "CARDS": CARDS, "cardExercise": cardExercise, "sourceCard": sourceCard, "queryCard": queryCard, "summaryBlock": summaryBlock };
 })();
 
 /* ===== src/book/figures/plan.js ===== */
@@ -14351,8 +14501,8 @@ const { rich, setFigureNumbers } = __modules["src/book/rich.js"];
 const { Workbench } = __modules["src/book/workbench.js"];
 const { stepsBlock, cardsBlock, tableBlock } = __modules["src/book/schemes.js"];
 const { lessonById } = __modules["src/lessons/index.js"];
-const { getProgress, reportFacts } = __modules["src/ui/progress.js"];
-const { isDone, getItem } = __modules["src/book/store.js"];
+const { getProgress, reportFacts, setProgress } = __modules["src/ui/progress.js"];
+const { isDone, getItem, setItem } = __modules["src/book/store.js"];
 const { brand, siteNav } = __modules["src/ui/site.js"];
 const { personLine } = __modules["src/ui/people.js"];
 const { tracesFigure } = __modules["src/book/figures/traces.js"];
@@ -14372,7 +14522,7 @@ const { decayFigure } = __modules["src/book/figures/decay.js"];
 const { agentExercise } = __modules["src/book/figures/agent.js"];
 const { traitsFigure, traitsExercise } = __modules["src/book/figures/traits.js"];
 const { ethicsExercise } = __modules["src/book/figures/ethics.js"];
-const { sourceCard, queryCard, summaryBlock } = __modules["src/book/figures/project.js"];
+const { sourceCard, queryCard, summaryBlock, CARDS, cardFromText } = __modules["src/book/figures/project.js"];
 const { courseMap, planFigure } = __modules["src/book/figures/plan.js"];
 const { searchmapFigure, windowFigure, querylogFigure, anchorFigure, breaksExercise } = __modules["src/book/figures/search.js"];
 const { resolutionFigure, pathFigure, dredgingFigure, toolFigure, clicksFigure, trendsUrlFigure } = __modules["src/book/figures/search2.js"];
@@ -14418,6 +14568,67 @@ const FIGURES = {
 
 /** What an exercise puts into the report as its answer, by id: () => text or null. Lessons give their accepted code. */
 const ANSWERS = {};
+/** The other way round: an answer from a report put back, by id: (text) => void. */
+const RESTORE = {};
+
+/**
+ * What a student's own report brings to this chapter, on another computer. Items are matched by
+ * their label, not their number, and the card by its title. Nothing done here is undone: a
+ * finished exercise stays as it is, and a filled card field keeps its text.
+ *
+ * @param {Object} chapter
+ * @param {Object} report  readReport() of a checked report
+ * @returns {{done: number, worked: number, total: number, unknown: number, card: boolean, apply: Function}}
+ *   `apply()` writes it for the person chosen at that moment
+ */
+function reportPlan(chapter, report) {
+  const norm = (s) => String(s).replace(/\s+/g, ' ').trim();
+  const byLabel = new Map(chapter.summary.map((it) => [norm(it.label), it]));
+  const pairs = [];
+  let unknown = 0;
+  for (const line of report.items || []) {
+    if (!line.status) continue;
+    const it = byLabel.get(norm(line.label));
+    if (it) pairs.push([it, line]); else unknown += 1;
+  }
+  const cardKey = chapter.card || 'karta';
+  const cardText = CARDS[cardKey] && (report.sections || []).find((x) => norm(x.title) === norm(CARDS[cardKey].title()))?.text;
+  const apply = () => {
+    for (const [it, line] of pairs) {
+      if (it.lesson) {
+        const p = getProgress(it.lesson);
+        if (p?.status === 'done') continue;
+        setProgress(it.lesson, line.status === 'done'
+          ? { status: 'done', doneAt: line.doneAt || Date.now(), attempts: line.attempts, hintsUsed: line.hintsUsed, solvedCode: line.answer, lastCode: line.answer }
+          : { status: 'seen', attempts: line.attempts, hintsUsed: line.hintsUsed });
+        continue;
+      }
+      if (line.status !== 'done' || isDone(it.id)) continue;
+      if (line.answer) RESTORE[it.id]?.(line.answer);
+      setItem(`done:${it.id}`, line.doneAt || Date.now());
+    }
+    if (cardText) {
+      const have = getItem(cardKey) || {};
+      const empty = (v) => v == null || (Array.isArray(v) ? !v.length : !String(v).trim());
+      const back = cardFromText(cardKey, cardText);
+      setItem(cardKey, { ...back, ...Object.fromEntries(Object.entries(have).filter(([, v]) => !empty(v))) });
+    }
+  };
+  return {
+    done: pairs.filter(([, l]) => l.status === 'done').length,
+    worked: pairs.length,
+    total: chapter.summary.length,
+    unknown,
+    card: !!cardText,
+    apply,
+  };
+}
+
+/** The titles of further report sections in a chapter, where answers end (the card). */
+const reportSections = (chapter) => {
+  const key = chapter.card || 'karta';
+  return CARDS[key] ? [CARDS[key].title()] : [];
+};
 
 const EXERCISES = {
   mapa: quadrantsExercise,
@@ -14628,7 +14839,7 @@ function exerciseHead(b, minutes = true) {
     el('h3.bk-ex-title', b.title));
 }
 
-__modules["src/book/book.js"] = { "FIGURES": FIGURES, "ANSWERS": ANSWERS, "EXERCISES": EXERCISES, "figureNumbers": figureNumbers, "BookApp": BookApp };
+__modules["src/book/book.js"] = { "FIGURES": FIGURES, "ANSWERS": ANSWERS, "RESTORE": RESTORE, "reportPlan": reportPlan, "reportSections": reportSections, "EXERCISES": EXERCISES, "figureNumbers": figureNumbers, "BookApp": BookApp };
 })();
 
 /* ===== src/book/chapter1.js ===== */
@@ -15650,6 +15861,25 @@ function labAnswer(labId) {
   return typed.length ? `${t('py.noCodeAnswer')} ${typed.join('; ')}` : null;
 }
 
+/**
+ * A lab's answer from the student's own report put back, on another computer: the accepted code
+ * into the editor, or the numbers typed on the no-code path into their fields, in order.
+ */
+function restoreLab(labId, text, labs = LABS) {
+  const lab = labs[labId];
+  if (!lab || !text) return;
+  const typed = t('py.noCodeAnswer');
+  if (text.startsWith(typed)) {
+    const values = text.slice(typed.length).trim().split('; ');
+    const answers = Object.fromEntries((lab.base?.fields || []).map((f, i) => [f.id, values[i] ?? '']));
+    setItem(`lab:${labId}`, { path: 'baza', code: '', answers });
+    setItem(`lab:${labId}:solved`, { answers });
+    return;
+  }
+  setItem(`lab:${labId}`, { path: 'kod', code: text, answers: {} });
+  setItem(`lab:${labId}:solved`, { code: text });
+}
+
 /** An error of the `requests` library that reached the student: the API refused and there was no saved copy. */
 const NET_ERROR = /requests\.exceptions\.|HTTPError|ConnectionError|Timeout/;
 
@@ -15785,7 +16015,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
   };
 }
 
-__modules["../../analiza-trendow-w-internecie/src/pylab.js"] = { "labAnswer": labAnswer, "labExercise": labExercise };
+__modules["../../analiza-trendow-w-internecie/src/pylab.js"] = { "labAnswer": labAnswer, "restoreLab": restoreLab, "labExercise": labExercise };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/main.js ===== */
@@ -15796,14 +16026,14 @@ __modules["../../analiza-trendow-w-internecie/src/pylab.js"] = { "labAnswer": la
  * The page is the workshop's textbook shell with this course's chapter, strings and labs.
  * Order matters: the stores and strings are switched before the shell reads anything.
  */
-const { BookApp, EXERCISES, ANSWERS } = __modules["src/book/book.js"];
+const { BookApp, EXERCISES, ANSWERS, RESTORE, reportPlan, reportSections } = __modules["src/book/book.js"];
 const { extend } = __modules["src/i18n/index.js"];
 const { useStore } = __modules["src/book/store.js"];
 const { useProgressStore } = __modules["src/ui/progress.js"];
 const { gate } = __modules["src/ui/people.js"];
 const { CHAPTER } = __modules["../../analiza-trendow-w-internecie/src/chapter1.js"];
 const { STRINGS } = __modules["../../analiza-trendow-w-internecie/src/strings.js"];
-const { labExercise, labAnswer } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
+const { labExercise, labAnswer, restoreLab } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 /** Make the engine this course: own saved state, own strings, the labs as exercises. */
 function setUp() {
   useStore('analiza-trendow.book.v1');
@@ -15812,17 +16042,20 @@ function setUp() {
   EXERCISES.lab1 = labExercise('lab1');
   EXERCISES.lab2 = labExercise('lab2');
   EXERCISES.lab3 = labExercise('lab3');
-  for (const id of ['lab1', 'lab2', 'lab3']) ANSWERS[id] = () => labAnswer(id);
+  for (const id of ['lab1', 'lab2', 'lab3']) { ANSWERS[id] = () => labAnswer(id); RESTORE[id] = (text) => restoreLab(id, text); }
 }
+
+/** "Kim jesteś?" with the way back from a report made on another computer. */
+const restoreOptions = (chapter) => ({ restore: (report) => reportPlan(chapter, report), sections: reportSections(chapter) });
 
 class TopicApp {
   constructor(host) {
     setUp();
-    gate(host, () => { this.book = new BookApp(host, CHAPTER); });
+    gate(host, () => { this.book = new BookApp(host, CHAPTER); }, restoreOptions(CHAPTER));
   }
 }
 
-__modules["../../analiza-trendow-w-internecie/src/main.js"] = { "setUp": setUp, "TopicApp": TopicApp };
+__modules["../../analiza-trendow-w-internecie/src/main.js"] = { "setUp": setUp, "restoreOptions": restoreOptions, "TopicApp": TopicApp };
 })();
 
 const Boot = __modules["../../analiza-trendow-w-internecie/src/main.js"].TopicApp;

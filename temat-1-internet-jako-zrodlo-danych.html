@@ -1858,6 +1858,35 @@ textarea.kc-input { resize: vertical; }
 .yt-bar-val { font: 12px var(--mono); white-space: nowrap; }
 .yt-leg-new::before { background: var(--accent); }
 .yt-leg-rep::before { background: var(--warn); }
+.yt-code { padding: 8px 10px; border-radius: var(--radius); background: var(--code-bg); font: 13px/1.6 var(--mono); overflow-x: auto; }
+.yt-code-line { white-space: pre; }
+.yt-comma { min-width: 1.6em; padding: 0 4px; border: 1px dashed var(--line-strong); border-radius: 4px; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.yt-comma-off { border-color: var(--err); color: var(--err); background: var(--err-bg); }
+.yt-elements { grid-template-columns: repeat(auto-fill, minmax(9em, 1fr)); }
+.yt-q { display: grid; gap: 2px; margin-bottom: 8px; }
+.yt-q-row { display: grid; grid-template-columns: 2em minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 2px 6px; border-left: 4px solid var(--yt-g); border-radius: 3px; background: var(--bg-sunken); }
+.yt-g0 { --yt-g: var(--accent); }
+.yt-g1 { --yt-g: var(--warn); }
+.yt-q-num { font: 11px var(--mono); color: var(--ink-soft); text-align: right; }
+.yt-q-line { font-size: 12px; overflow-wrap: anywhere; }
+.yt-q-tag { font-size: 11px; padding: 0 6px; border-radius: 8px; background: var(--warn-bg); white-space: nowrap; }
+.yt-steps { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; padding: 0; list-style: none; }
+.yt-steps button { padding: 3px 10px; border: 1px solid var(--line-strong); border-radius: 14px; background: transparent; color: var(--ink); font-size: 12px; cursor: pointer; }
+.yt-step-on button { border-color: var(--accent); background: var(--accent); color: var(--bg-panel); }
+.yt-screen { padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.yt-screen p { margin: 4px 0 0; font-size: 14px; }
+.yt-screen-title { font-weight: 700; }
+.yt-why { color: var(--ink-soft); }
+.yt-keep { display: grid; gap: 6px; margin-top: 8px; }
+.yt-keep-q { font-weight: 600; font-size: 14px; }
+.yt-keep .fg-toggle { text-align: left; }
+.fg-toggle.yt-good { border-color: var(--ok); background: var(--ok-bg); }
+.fg-toggle.yt-bad { border-color: var(--err); background: var(--err-bg); }
+.yt-meter { display: grid; gap: 4px; margin: 8px 0; }
+.yt-meter-head { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.yt-meter-head b { font: 600 13px var(--mono); white-space: nowrap; }
+.yt-meter-track { height: 14px; background: var(--bg-sunken); border-radius: 3px; }
+.yt-meter-bar { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
 
 </style>
 </head>
@@ -15638,6 +15667,10 @@ const STRINGS = {
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
   'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.plan.title': 'Dla chętnych. Plan dzień po dniu',
+  'py.alt.plan.note': 'Ta sama liczba dni z pętli, która każdego dnia wysyła tyle wywołań, ile pozwala limit, a resztę zostawia na jutro. Tak pracuje skrypt, który zatrzymuje się na limicie i wznawia pracę następnego dnia.',
+  'py.alt.counts.title': 'Dla chętnych. Powtórki w pandas',
+  'py.alt.counts.note': '`value_counts()` liczy, ile razy każde zapytanie jest na liście, i stawia powtórkę na górze. Jedna linia z `assert` zatrzymałaby pierwszy skrypt, zanim wysłał zapytania. Pierwsze uruchomienie pobiera pandas (kilkanaście MB).',
   'py.alt.table.title': 'Dla chętnych. Te same strony jako tabela pandas',
   'py.alt.table.note': 'Strony i tak pobiera pętla. Potem `pd.json_normalize` robi z nich jedną tabelę, w której łatwo policzyć strony, trafienia i różne filmy. Pierwsze uruchomienie pobiera pandas (kilkanaście MB).',
   'py.alt.csv.title': 'Dla chętnych. To samo bez pandas',
@@ -16268,8 +16301,9 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       say(verdict, '', null);
     });
     // the files the code opens are part of the page; a student can take them to their own computer
-    const fileBar = el('div.py-files', el('span.py-files-label', t('py.files')),
-      lab.files.map((name) => el('button.py-file', { type: 'button', onClick: () => download(name, files[name]) }, name)));
+    // a lab whose data is in the code itself (topic 3, yt2) has no file bar
+    const fileBar = lab.files.length ? el('div.py-files', el('span.py-files-label', t('py.files')),
+      lab.files.map((name) => el('button.py-file', { type: 'button', onClick: () => download(name, files[name]) }, name))) : null;
     const codePane = el('div.py-pane',
       el('p.py-note', { html: rich(lab.note || t('py.note')) }),
       fileBar,

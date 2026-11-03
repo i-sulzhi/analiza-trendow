@@ -1858,6 +1858,35 @@ textarea.kc-input { resize: vertical; }
 .yt-bar-val { font: 12px var(--mono); white-space: nowrap; }
 .yt-leg-new::before { background: var(--accent); }
 .yt-leg-rep::before { background: var(--warn); }
+.yt-code { padding: 8px 10px; border-radius: var(--radius); background: var(--code-bg); font: 13px/1.6 var(--mono); overflow-x: auto; }
+.yt-code-line { white-space: pre; }
+.yt-comma { min-width: 1.6em; padding: 0 4px; border: 1px dashed var(--line-strong); border-radius: 4px; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.yt-comma-off { border-color: var(--err); color: var(--err); background: var(--err-bg); }
+.yt-elements { grid-template-columns: repeat(auto-fill, minmax(9em, 1fr)); }
+.yt-q { display: grid; gap: 2px; margin-bottom: 8px; }
+.yt-q-row { display: grid; grid-template-columns: 2em minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 2px 6px; border-left: 4px solid var(--yt-g); border-radius: 3px; background: var(--bg-sunken); }
+.yt-g0 { --yt-g: var(--accent); }
+.yt-g1 { --yt-g: var(--warn); }
+.yt-q-num { font: 11px var(--mono); color: var(--ink-soft); text-align: right; }
+.yt-q-line { font-size: 12px; overflow-wrap: anywhere; }
+.yt-q-tag { font-size: 11px; padding: 0 6px; border-radius: 8px; background: var(--warn-bg); white-space: nowrap; }
+.yt-steps { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; padding: 0; list-style: none; }
+.yt-steps button { padding: 3px 10px; border: 1px solid var(--line-strong); border-radius: 14px; background: transparent; color: var(--ink); font-size: 12px; cursor: pointer; }
+.yt-step-on button { border-color: var(--accent); background: var(--accent); color: var(--bg-panel); }
+.yt-screen { padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.yt-screen p { margin: 4px 0 0; font-size: 14px; }
+.yt-screen-title { font-weight: 700; }
+.yt-why { color: var(--ink-soft); }
+.yt-keep { display: grid; gap: 6px; margin-top: 8px; }
+.yt-keep-q { font-weight: 600; font-size: 14px; }
+.yt-keep .fg-toggle { text-align: left; }
+.fg-toggle.yt-good { border-color: var(--ok); background: var(--ok-bg); }
+.fg-toggle.yt-bad { border-color: var(--err); background: var(--err-bg); }
+.yt-meter { display: grid; gap: 4px; margin: 8px 0; }
+.yt-meter-head { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.yt-meter-head b { font: 600 13px var(--mono); white-space: nowrap; }
+.yt-meter-track { height: 14px; background: var(--bg-sunken); border-radius: 3px; }
+.yt-meter-bar { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
 
 </style>
 </head>
@@ -15638,6 +15667,10 @@ const STRINGS = {
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
   'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.plan.title': 'Dla chętnych. Plan dzień po dniu',
+  'py.alt.plan.note': 'Ta sama liczba dni z pętli, która każdego dnia wysyła tyle wywołań, ile pozwala limit, a resztę zostawia na jutro. Tak pracuje skrypt, który zatrzymuje się na limicie i wznawia pracę następnego dnia.',
+  'py.alt.counts.title': 'Dla chętnych. Powtórki w pandas',
+  'py.alt.counts.note': '`value_counts()` liczy, ile razy każde zapytanie jest na liście, i stawia powtórkę na górze. Jedna linia z `assert` zatrzymałaby pierwszy skrypt, zanim wysłał zapytania. Pierwsze uruchomienie pobiera pandas (kilkanaście MB).',
   'py.alt.table.title': 'Dla chętnych. Te same strony jako tabela pandas',
   'py.alt.table.note': 'Strony i tak pobiera pętla. Potem `pd.json_normalize` robi z nich jedną tabelę, w której łatwo policzyć strony, trafienia i różne filmy. Pierwsze uruchomienie pobiera pandas (kilkanaście MB).',
   'py.alt.csv.title': 'Dla chętnych. To samo bez pandas',
@@ -16268,8 +16301,9 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       say(verdict, '', null);
     });
     // the files the code opens are part of the page; a student can take them to their own computer
-    const fileBar = el('div.py-files', el('span.py-files-label', t('py.files')),
-      lab.files.map((name) => el('button.py-file', { type: 'button', onClick: () => download(name, files[name]) }, name)));
+    // a lab whose data is in the code itself (topic 3, yt2) has no file bar
+    const fileBar = lab.files.length ? el('div.py-files', el('span.py-files-label', t('py.files')),
+      lab.files.map((name) => el('button.py-file', { type: 'button', onClick: () => download(name, files[name]) }, name))) : null;
     const codePane = el('div.py-pane',
       el('p.py-note', { html: rich(lab.note || t('py.note')) }),
       fileBar,
@@ -16372,9 +16406,63 @@ const GENERATED3 = {
   "search_page7.json": "{\n \"kind\": \"youtube#searchListResponse\",\n \"items\": [\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"qLBr4i7XX28\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCQHeZm7CpzmVGZReXPtrORA\",\n    \"channelTitle\": \"Ulises Figueroa\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"4-0GKe3dWG4\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCcOtHMt1S9Nl4Pycp-FWd8Q\",\n    \"channelTitle\": \"Badger Live Streams\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"LrWphmJh5fE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCxJ1KpEeZyeCQXrDoDQfJdg\",\n    \"channelTitle\": \"Chismecito\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"jvzR-oABpD8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8nTnDVuQkovBNILSnF4iuA\",\n    \"channelTitle\": \"JustPearlsOfWisdom \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"_ZD1rQZ6Qcs\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCJOCZfSUNRu1VpzVx7VlIrg\",\n    \"channelTitle\": \"Isaiah Zakar\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"oRicNpqxTwU\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UChSrSu6Co9SFg7xpsoJLnDg\",\n    \"channelTitle\": \"StreamiCentral\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"iyGzOBWtegc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8nTnDVuQkovBNILSnF4iuA\",\n    \"channelTitle\": \"JustPearlsOfWisdom \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"HvdnbZgdefk\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCwK09Cqa-j_BdKy06EFSkGQ\",\n    \"channelTitle\": \"Alfanización\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"8CmbC0Pr03c\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCk2NR63vgSVfZ_D4Csd61XQ\",\n    \"channelTitle\": \"Zandland™\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"RkgJDGJUnrA\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8nTnDVuQkovBNILSnF4iuA\",\n    \"channelTitle\": \"JustPearlsOfWisdom \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"hTx7IuwY28A\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCApbg9nlax0UZ4AWsIed3gQ\",\n    \"channelTitle\": \"Vice City Mafia\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"QACMUiEa7jE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC9rpjNIrG2WddGGrLYWsyNg\",\n    \"channelTitle\": \"Marston Quinn\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"-kTzUih6_Bc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UClVRXJlkKCkORsD9-CdpY5w\",\n    \"channelTitle\": \"Psych Legal Pop Podcast\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"6pqcNvZtesE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8nTnDVuQkovBNILSnF4iuA\",\n    \"channelTitle\": \"JustPearlsOfWisdom \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"07WiTmfrDps\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCEjuo_bxDesd87MfVHQgR9A\",\n    \"channelTitle\": \"Más Allá de Marte Podcast\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"AVJs0y9b6bg\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCXxyynFIIszB0pSQfbAOkmA\",\n    \"channelTitle\": \"Life, take two!\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"X1xem4-nDwY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCGj6lOrZ22iJ4OkU8p1s8cQ\",\n    \"channelTitle\": \"Latin Afterdeath 3.0\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"iWTYloasdds\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCT8n00IRMc9XxayVdXJNbXA\",\n    \"channelTitle\": \"Modo Equivocadas\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"z9cJuCxPWH8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCzskBp4UZkHvjGqI6PFTBsg\",\n    \"channelTitle\": \"Thelauvmachine\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"N0V-4fxkymY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UClwJNmTNL21MVHkn8nwXUBQ\",\n    \"channelTitle\": \"Jeremy Vine & Daytime on 5\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"e4FD1Vr69FQ\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8nTnDVuQkovBNILSnF4iuA\",\n    \"channelTitle\": \"JustPearlsOfWisdom \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"GI-kYDxPV9Q\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCda8mRZo_N7AZ7CP4U_nd-g\",\n    \"channelTitle\": \"The Unfiltered Republic\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Def4_0EQNjU\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCeCs-PAf7FJwqrkT4nWpt5w\",\n    \"channelTitle\": \"The Daily Rundown \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"brDekAzIyo8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCu-5QqfiE0PUJWNkaQ5Bthw\",\n    \"channelTitle\": \"GHOSTMAS PAST\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"1LEhatjqD1E\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC13QukyXaDc_NcjAX-nnmjA\",\n    \"channelTitle\": \"Oliver Niehaus\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"TwDeklLjCPk\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlHDXmG5yBQX_3LfS_8Obg\",\n    \"channelTitle\": \"Gadget\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Dc8ATXW4qJw\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCwK09Cqa-j_BdKy06EFSkGQ\",\n    \"channelTitle\": \"Alfanización\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"1g1J3H99i8g\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC5LXPqm2ahcBBAzm5pDCvTg\",\n    \"channelTitle\": \"Huni\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"mZXwRssojQg\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlHDXmG5yBQX_3LfS_8Obg\",\n    \"channelTitle\": \"Gadget\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"qi7LFTLIucU\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCT1DjqgY6LE-U0xR4Rr9-bA\",\n    \"channelTitle\": \"EscuelaRedPill 2\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"_lwbP3U-q0Y\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC4kTcVi-b_9qQnMCRG9WggA\",\n    \"channelTitle\": \"A.G. Hayden\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"D9JQFpquzXY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC0cBEUT1vDRR-ZefjoLfzPg\",\n    \"channelTitle\": \"Julie Theis M.S. \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"1Fvm8V6IwnA\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCSb3pHNzdGdGUVp6xWJFKRA\",\n    \"channelTitle\": \"The Conscious Radical\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"ykCIu6pLxAw\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCgFzF1xzbJZeKjrE-k2aQwA\",\n    \"channelTitle\": \"EmbassyOfCriticalThinking\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"G6WndZSsf5c\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCj9BO4KOKckmkJZxlv4g3VQ\",\n    \"channelTitle\": \"Enseñanzas para hombres y mujeres\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"3CRyqQaWItE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC3sHzlApV5ZxrE9jpHwgwHQ\",\n    \"channelTitle\": \"Aleks Darez\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"0LJpFe88O54\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Ewf1gwk7eZc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCWhRXfUj8cOZXnBPqi1V1uQ\",\n    \"channelTitle\": \"Call It Like I See It podcast\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"W01HW8fQ0SM\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCvkYwZypHsQsEsm8qq05Baw\",\n    \"channelTitle\": \"The Tiffany Marie Brannon Show\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"6jwXxtBRzJE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCdRS-pG3VAjmXFPHKw0HrVw\",\n    \"channelTitle\": \"Cursed Conservative \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"mS-W-kIMyFw\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCOtJnUPnmgpTkBpe0gjUGYQ\",\n    \"channelTitle\": \"Bliss Babe\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"N8gcs0mcgz8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlHDXmG5yBQX_3LfS_8Obg\",\n    \"channelTitle\": \"Gadget\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"chGUlje0R8Q\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC9rpjNIrG2WddGGrLYWsyNg\",\n    \"channelTitle\": \"Marston Quinn\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"XJ8nMlYQUvw\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCF8WjWJr2EYN2YXDCBOzp6g\",\n    \"channelTitle\": \"Third Eye Champagne Psychic Kirsten Langston\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"LZflyZJCqPo\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCzqm0PNzhwjIhJ8vmBKG5ow\",\n    \"channelTitle\": \"Beat Six\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"J46L45f6a_I\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCcOtHMt1S9Nl4Pycp-FWd8Q\",\n    \"channelTitle\": \"Badger Live Streams\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"w4noipiPCb0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCbTQg5mPymqhm9oeTPgfFqA\",\n    \"channelTitle\": \"Blessed Mindset\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"qFr5s9G1FnM\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCHbpssWMX3-TLKAWQMtZsbw\",\n    \"channelTitle\": \"LETSTALKREALMEN\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"vlGIMzFYUo0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCfnVUohecx1vag7p4F1ULKw\",\n    \"channelTitle\": \"Darrel Long l SimpGod | SettingTh RecordStraight\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"pSfMYOKr8aY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCshMDsfuo3HOBto66u0hJbg\",\n    \"channelTitle\": \"Sultan Of Savage\"\n   }\n  }\n ],\n \"nextPageToken\": \"PAGE8\"\n}\n",
   "search_page8.json": "{\n \"kind\": \"youtube#searchListResponse\",\n \"items\": [\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"hTE0KUXaaqE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCOtJnUPnmgpTkBpe0gjUGYQ\",\n    \"channelTitle\": \"Bliss Babe\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Lgx5sZ4pyLo\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8nTnDVuQkovBNILSnF4iuA\",\n    \"channelTitle\": \"JustPearlsOfWisdom \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"PqPMYwPF-94\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCk8ydh7Ah4ANCAlNtMOIFPA\",\n    \"channelTitle\": \"Astronauta\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"3qzgeZiXOEU\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCD6w359cDjzl77AWO3nDcXA\",\n    \"channelTitle\": \"neverciasto\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"I56z8ddxXmI\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC12Gr-HyB560zDG-gMjpe1w\",\n    \"channelTitle\": \"Mamamia Out Loud\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"6blbzNpRiuw\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC6eKDThY0Ep8fcSAqGcc2LA\",\n    \"channelTitle\": \"clipper_king\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"jyWiVo6aBis\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCC1kfsMJko54AqxtcFECt-A\",\n    \"channelTitle\": \"Urbana Play 104.3 FM\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"0-xWpj3L820\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC6LBMZ6JZ5Nc6wvPde3m9lw\",\n    \"channelTitle\": \"The New Chrizos\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"S2LAOwQiPrM\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCGsZMmfTM8XZOCedA9qm75Q\",\n    \"channelTitle\": \"Parhelio Podcast\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"xZjjX2gED3s\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCx8YHqSe6yo8Ztj4LDZrNrg\",\n    \"channelTitle\": \"The Natural Effect Podcast \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"pV_sBBDwxnk\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCg2yCsXjCR3HMmYa2Qu8HkQ\",\n    \"channelTitle\": \"BEHOLD FLYER \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"JWDyLqp5CdY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCuV8fchmNqEljq3wcTCjxeA\",\n    \"channelTitle\": \"Dead Men Talking\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"y8GWVueb2Eg\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCIyzGtnHxpEf1LWY7L-LdcQ\",\n    \"channelTitle\": \"ThatGuyCraig\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"dHaRYqSDDV0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCmLxjTWOFuch7pGiGMQwlBw\",\n    \"channelTitle\": \"Earl James Glitterman\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"hWe_27kDmeU\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC0YIbCZJoYV1BeZ5qHDIJyQ\",\n    \"channelTitle\": \"Stirling Cooper\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"N1erL3MiYyc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC9jL7Gv2LsmonIGbVGdiVXw\",\n    \"channelTitle\": \"Entretenimiento Bananero\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"AeE_VGcWca8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCfnVUohecx1vag7p4F1ULKw\",\n    \"channelTitle\": \"Darrel Long l SimpGod | SettingTh RecordStraight\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"slOM8IPk6WQ\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC9ZCtS7uhxcX74viLF7bwPw\",\n    \"channelTitle\": \"Sher Lescano \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"eGLHbyW3hO0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCMfiucR7nDqyfBUm0YTWnhQ\",\n    \"channelTitle\": \"ABOLISH ABORTION AUSTRALIA\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"aGVeQj_HRcU\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCfnVUohecx1vag7p4F1ULKw\",\n    \"channelTitle\": \"Darrel Long l SimpGod | SettingTh RecordStraight\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"tYt9A3EM-Io\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCa_LB0vukk24Z1bUYyIG9kQ\",\n    \"channelTitle\": \"Fundación Complutense\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"OgFBnVqC558\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlWsNSU-tuEnifm8QzsgMg\",\n    \"channelTitle\": \"LEAP Legal Software\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"WddKcadEObM\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCSUzmGA2fxReC28yClkqtlQ\",\n    \"channelTitle\": \"PINKIE's Perception\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"xm6Vi9uz76E\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC7mMqTg6oHBXXnky1F4W7gQ\",\n    \"channelTitle\": \"Steve Whittle\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"dlN8jmvWCbw\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlHDXmG5yBQX_3LfS_8Obg\",\n    \"channelTitle\": \"Gadget\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Iyf4xg4BcO4\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlHDXmG5yBQX_3LfS_8Obg\",\n    \"channelTitle\": \"Gadget\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"J6SZMvaowtE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"V3dEclPa7w8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCWUwEXMzqs37ID-SC5E4O4Q\",\n    \"channelTitle\": \"Faith Liss\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"7VXgwDiDWfY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCmLxjTWOFuch7pGiGMQwlBw\",\n    \"channelTitle\": \"Earl James Glitterman\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"9cPXRhe7Jqo\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Q8A1Ward52w\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCFWSU5-CGM_mxHxOCC_3jcQ\",\n    \"channelTitle\": \"Pod Save the UK\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"b6VD-I8fNto\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"WvTAd-IVGVQ\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCL9bbSy0Dxf-TS6JOLZeIXQ\",\n    \"channelTitle\": \"Rational Male Shorts\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"E_C0_OIXVJE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC56aiqj1qF5NuK0JemanYOQ\",\n    \"channelTitle\": \"Nayy2D\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Qvg0DDeCL3c\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCEsFVn8wlZztC20Vocb0zrA\",\n    \"channelTitle\": \"The 12 Gates\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"exoeBk2UxLA\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC2UjsmTlsL1IhqiRt2oKvXA\",\n    \"channelTitle\": \"Dr. Trish Leigh\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"KLU4uh-AcsY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCSZjKTzAgOn1_66nuFiPQcg\",\n    \"channelTitle\": \"Raquell Menezes\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"N5bZp4NQ1Sc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCO_-W8USiC65xXi9oq46pRg\",\n    \"channelTitle\": \"Logic on Steroids\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"W6DzOmy38DY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCJkZLKiNUXeqI9AXxg0Ewog\",\n    \"channelTitle\": \"Columbia SIPA\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"LCHyzXOGVSA\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"JWTk3FYygc8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlHDXmG5yBQX_3LfS_8Obg\",\n    \"channelTitle\": \"Gadget\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"l326FUAkt7o\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"CdewdXR5DRc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCXUiiOfuutiPONBjC00Q3FQ\",\n    \"channelTitle\": \"Slam Beegad\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"m6ShrcMCAFs\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"E8I16Eu9eCY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"GkKuYcZvTxc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCAV9Kq6zQ9mGbkNdZ3Hzg1Q\",\n    \"channelTitle\": \"Psic. Elia Paulina González\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"8XQm18d3oMU\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"APaynHCNlcs\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCU4ltgu81iqXNSVFdzTKL7w\",\n    \"channelTitle\": \"Kent ES Larwill\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"qIlrD5-U1ag\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCoW1OGyi0U4qmpXwloGGPkA\",\n    \"channelTitle\": \"Jewish Crash Out\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"hxnOyHcUARA\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UChD33itfHMfy2MftupgzE1Q\",\n    \"channelTitle\": \"Sarah Cassim\"\n   }\n  }\n ],\n \"nextPageToken\": \"PAGE9\"\n}\n",
   "search_page9.json": "{\n \"kind\": \"youtube#searchListResponse\",\n \"items\": [\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"2F0s6y9yTxE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eXAQ8m7E3CVnaOTeiMbHw\",\n    \"channelTitle\": \"Men Gone Rogue\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"YxtWlxGfSSY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCVlHDXmG5yBQX_3LfS_8Obg\",\n    \"channelTitle\": \"Gadget\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"TQuEP2bzm4c\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCe9OrGNZdtfzhHRzNMbnLtg\",\n    \"channelTitle\": \"This Is Ridiculous News\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"tYt9A3EM-Io\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCa_LB0vukk24Z1bUYyIG9kQ\",\n    \"channelTitle\": \"Fundación Complutense\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"7992ldrCsTI\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCO_-W8USiC65xXi9oq46pRg\",\n    \"channelTitle\": \"Logic on Steroids\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"PqPMYwPF-94\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCk8ydh7Ah4ANCAlNtMOIFPA\",\n    \"channelTitle\": \"Astronauta\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"E_C0_OIXVJE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC56aiqj1qF5NuK0JemanYOQ\",\n    \"channelTitle\": \"Nayy2D\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"-VTYAXDnVRc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCazT8b9fnamr3s24X0kHfUQ\",\n    \"channelTitle\": \"Game Global\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"yvOJWOyPZC8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCrKBXDmTnUE2-pYE_fZ9_HA\",\n    \"channelTitle\": \"Emblenik\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Qvg0DDeCL3c\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCEsFVn8wlZztC20Vocb0zrA\",\n    \"channelTitle\": \"The 12 Gates\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"mk7Hi6AtlEY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"RAA8LgBnkiA\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"jyWiVo6aBis\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCC1kfsMJko54AqxtcFECt-A\",\n    \"channelTitle\": \"Urbana Play 104.3 FM\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"ra2nsLU7w3g\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC0j8LiqwgJFLQC2KQm_Pvmg\",\n    \"channelTitle\": \"Dr. Dennis “Ausar” Winkler (DAW) \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"E73UVQYMRfI\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCfnVUohecx1vag7p4F1ULKw\",\n    \"channelTitle\": \"Darrel Long l SimpGod | SettingTh RecordStraight\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"_FxThSQCVR8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCWN-1_2dsUKTdAnKK3jl5DQ\",\n    \"channelTitle\": \"Pop Culture Rocks\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"FsgRzE9JBqA\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCeBVx-dH0wV4Lrp3-l0cz8Q\",\n    \"channelTitle\": \"Lexus Exodus\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"NEKiUVJ8vok\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCypbmzkAakByFvgorSqLZrg\",\n    \"channelTitle\": \"LEVELING UP MANOSPHERE \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"i5ogl75WP4E\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCypbmzkAakByFvgorSqLZrg\",\n    \"channelTitle\": \"LEVELING UP MANOSPHERE \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"jklDz4kIGoI\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"0VtYsRIxwMc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"kY9cK0pr7i0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC72wLvHK6AytpQpx5pZLB9g\",\n    \"channelTitle\": \"MazFit Gonzalo Alonso \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"V3dEclPa7w8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCWUwEXMzqs37ID-SC5E4O4Q\",\n    \"channelTitle\": \"Faith Liss\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"d3C_tT4Fuxc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC0uO3IgxaHRBNsjXJw6Px9g\",\n    \"channelTitle\": \"Oxford Internet Institute, University of Oxford\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"8jorZM_BMXI\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCjLodFMtOrJj-NgkjdqN_oQ\",\n    \"channelTitle\": \"EbonyMackey\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"8ZvkOW6MRvM\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"slg-8M28mbc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC4wsS0UHs7hyq0oeLas0NCw\",\n    \"channelTitle\": \"janghinaro\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Um-I8MUXFyE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCdI8fsJdQGt1rbqH9ihJ7ig\",\n    \"channelTitle\": \"Men used to go to war... Now we make podcasts\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"k7gWarzB7Sw\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCK4gi_zzc8L2Zlrv4Dw3TWA\",\n    \"channelTitle\": \"Behatibeauty \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"tY8ZG02vHEk\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC6Y6TFhdrSk4lY3MsbfI9-g\",\n    \"channelTitle\": \"Rummage with D\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"s4U8ukM1rMM\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCT4kJCZyg26egbPAuJVj2kA\",\n    \"channelTitle\": \"Dr Myriam François\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"TypfIy2EcMo\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"w3Q0pq8IwK0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC-XPlihHgM7z7Uxnm7kvRDw\",\n    \"channelTitle\": \"La Fiscalía Del Espectáculo \"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"e9yajHftGWo\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCayJhZEbMd4TGR2C9o5Jg8g\",\n    \"channelTitle\": \"NommaD79\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"PoDc5xqsn78\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCk8ydh7Ah4ANCAlNtMOIFPA\",\n    \"channelTitle\": \"Astronauta\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"T3OymYhhuho\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"Vja47kXvN08\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"4JuQo9Z8Cak\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCP4zbl0_BApwKdRI22t146Q\",\n    \"channelTitle\": \"Aries Van Damme\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"x6L2gMQqtSM\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCmLxjTWOFuch7pGiGMQwlBw\",\n    \"channelTitle\": \"Earl James Glitterman\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"XcqaFoVY3Qc\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCAlVRoYjDbgLx7j6O2N8-2g\",\n    \"channelTitle\": \"Men Are Good!\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"koU4FJr8Dt0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"0A69o0QsHf4\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"aI8ysq102AY\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"cBKWzsH4l6I\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"PO2j4MtzPak\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"rg5CJIDTrgE\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UCwK09Cqa-j_BdKy06EFSkGQ\",\n    \"channelTitle\": \"Alfanización\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"4rlcveY1MR0\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC0LKGCfjezJaaH1JPUphkbA\",\n    \"channelTitle\": \"stoicfactsdaily\"\n   }\n  },\n  {\n   \"id\": {\n    \"kind\": \"youtube#video\",\n    \"videoId\": \"I7Hau4s-kP8\"\n   },\n   \"snippet\": {\n    \"channelId\": \"UC8eLDzfH6YfZRDbDuMsNWiA\",\n    \"channelTitle\": \"The Rational Male\"\n   }\n  }\n ]\n}\n",
-  "trafienia_pl.csv": "strona;pozycja;video_id\n1;1;hFw5cl0iwO0\n1;2;hUp-H519HaY\n1;3;dD8ihWEuUHQ\n1;4;iWDR-DVUhJw\n1;5;3ESMKnOoZO8\n1;6;T8qPFuWnNsY\n1;7;teVzG7Gc44g\n1;8;4w9LhVU7huw\n1;9;HTWEGS8Wt8M\n1;10;xPsQtTXZe_k\n1;11;6Vx5ih8pB7E\n1;12;aRbZK15V7rE\n1;13;ofbr227I7MQ\n1;14;q9hBbjoHz1A\n1;15;PQgqaKVtRmw\n1;16;9LAY-nmUzos\n1;17;BR_iA9UeNDE\n1;18;suO-6qCSZUA\n1;19;nYkECU-uGeQ\n1;20;nb7_7vvC4t8\n1;21;HxfHb2sXUk0\n1;22;sYPxgxpPnig\n1;23;gocWWz16zlA\n1;24;Cdy9FDXOMHQ\n1;25;pRONCR0_InU\n1;26;2tB1vPaQTnc\n1;27;2AdkAV0k7Bc\n1;28;XCo3d6miIhc\n1;29;m0pnTrglmSM\n1;30;HyBik5FcXJE\n1;31;TnyGoQgofTs\n1;32;uXskRxE6V5s\n1;33;C_ngZ-YixVs\n1;34;sMeak7IsmtU\n1;35;5lMWEzwDOG0\n1;36;xURrmgKWTCQ\n1;37;v7E5aDJwGpk\n1;38;QuVgrsnsn1o\n1;39;rwoDKbJaRC4\n1;40;Y_vFeLtosoM\n1;41;LAPGPsPUgJA\n1;42;n4l-FLUiHVk\n1;43;Evdcvb7o5II\n1;44;_BeHNyfi6qA\n1;45;goPfTgybHRI\n1;46;t50M2LQ7YQY\n1;47;UV686fGNlus\n1;48;iBBBYQbHRco\n1;49;6AJ4i8b6KQg\n1;50;gvD1rE2jGe0\n1;51;ZxRcSJVzZj4\n1;52;TXtWQTJCcvg\n1;53;8HksS9cizJg\n2;1;X06lvIMGf4M\n2;2;t50M2LQ7YQY\n2;3;kmOOsbPcsrA\n2;4;TWTVUwg5eiA\n2;5;rPgUcvUcf1Q\n2;6;f1LgmtbK20A\n2;7;5459GsQtu6s\n2;8;4SvBJvGAbA4\n2;9;D1pHN7vjlwA\n2;10;hif7qDyM4fo\n2;11;gOK76Icp4wU\n2;12;db5_4XZYlAo\n2;13;pYurPeLwwtM\n2;14;F8C8SFHRBh8\n2;15;8dZNkDRucvs\n2;16;37joxVTAXT8\n2;17;ZKSaCr5ng-Q\n2;18;iBBBYQbHRco\n2;19;d-MPjz-KUvw\n2;20;kWiT4jIOFGM\n2;21;VQtImhBDzwU\n2;22;cdKCRUKoV34\n2;23;T7XLLq5AlcM\n2;24;2YKcEtqpYnA\n2;25;4JxpymvVH74\n2;26;R5IHt1P-7F0\n2;27;8rTVyzPOcSM\n2;28;lO7P0C_5S1Y\n2;29;woAGZXjD8-o\n2;30;mVMRpiFY0QA\n2;31;52JPreIbXnw\n2;32;dCNiNGlac-I\n2;33;r6S2S9Ghnjw\n2;34;rcbpb1U7cG0\n2;35;ZjLFQ8g8C40\n2;36;snjwPN7d7sQ\n2;37;3Xph886c7tI\n2;38;ZG0FUBvABPA\n2;39;GWF6XBXEvzU\n2;40;g7_fPQSXwq4\n2;41;CzoeR5JBFR0\n2;42;3UU5hDDmafo\n2;43;CWly-ga9xa0\n2;44;A6rmruzJh0E\n2;45;tiQOvqmGi1c\n2;46;ITcsrcm376c\n2;47;1smZo7IsYY4\n2;48;hT_9EkitSBM\n2;49;nF5G3KP_FgM\n2;50;pT4AyfCoICY\n3;1;pT4AyfCoICY\n3;2;2uMy_zyM2vY\n3;3;c6KkWog2LZs\n3;4;fhjbua478gA\n3;5;vKIVGu2xb2U\n3;6;stkfkN3RSc4\n3;7;JmYjeBPvY0c\n3;8;w6SXGQWVq3Y\n3;9;k9VyCPfLxrM\n3;10;wIr-8pzmZ5o\n3;11;ECDJoYIQ77w\n3;12;WTxGPGSd5LY\n3;13;uwTmttPEjUk\n3;14;gAr9d1_iI0Q\n3;15;WX8JWXRmEhw\n3;16;ne0szHx6Mnc\n3;17;q1iwwzI_6hM\n3;18;OtT8nqDGZYY\n3;19;Hw_neaqW6G8\n3;20;yFDHXHvmUUU\n3;21;4BYJUgu4Yvs\n3;22;IgtLd3oMvYA\n3;23;5VXpS1OKI7c\n3;24;K155UXoLm8g\n3;25;e8xkUE1v1WI\n3;26;O_X44ymWlak\n3;27;JdTk7kPHIAI\n3;28;J66qDTJP58Q\n3;29;uk99uKBD_bg\n3;30;Q5-j4nEuAn8\n3;31;3H9XRGDwLEs\n3;32;p-WfpMvcvsk\n3;33;DAbwacFS7I8\n3;34;3TlhBcRRwJ4\n3;35;njK9n0hIWyE\n3;36;8xrlfdUo4ow\n3;37;9kn5w_luSls\n3;38;6T9XxUVU9w4\n3;39;0Xmdkpl2r7s\n3;40;x-lPcfxk7ec\n3;41;k0eB4wQiFQ0\n3;42;r0189FNWGbg\n3;43;eGEavk1hdB0\n3;44;BVqs2KddA7M\n3;45;BuwamX344pI\n3;46;FOhhbiZEDIk\n3;47;2KE7poDqFaQ\n3;48;8IOXBZ6al70\n3;49;9gjBJ4oetTU\n3;50;dPmGnsJpE1Q\n4;1;tTfrUUXx2FM\n4;2;ju-sicQqrBs\n4;3;6M2yIF_iZ30\n4;4;c68_ToSAU_0\n4;5;WtGcFCynBQw\n4;6;-XXRSRcQV3I\n4;7;Vr043IG3e8U\n4;8;tVSVSIcOe3E\n4;9;GWjbIgSMWyQ\n4;10;mEL1luBHJNA\n4;11;y5_aSeihba4\n4;12;ErdMsvZDvbg\n4;13;7kFj6uioH3M\n4;14;_1huNXuvKoY\n4;15;rcbpb1U7cG0\n4;16;0rGpHJuvyd8\n4;17;tiQOvqmGi1c\n4;18;Wy8BsX58qJw\n4;19;lHHPuyblCiA\n4;20;BAP--1HM18M\n4;21;fQEjWLjMyZ4\n4;22;FX6UoImBRGs\n4;23;2vY0HdHAs5M\n4;24;8R2j5rbsUu0\n4;25;BuwamX344pI\n4;26;fmhUNy9tglY\n4;27;gAr9d1_iI0Q\n4;28;czkij-Rc4PA\n4;29;a8zTdG5Rodg\n4;30;CLM1AwendfA\n4;31;iq6R-KFqd34\n4;32;BpC3By3RHlg\n4;33;sMeak7IsmtU\n4;34;pQAWJdCD1E8\n4;35;8dZNkDRucvs\n4;36;op2VyUO4Mzk\n4;37;d0zUvD3GQRw\n4;38;uY7EHu3-NQg\n4;39;WTxGPGSd5LY\n4;40;fhjbua478gA\n4;41;EyYo18dNqp8\n4;42;A0D7Nm1rHeU\n4;43;3FaUrL0FBfg\n4;44;O9LXu4JR0RU\n4;45;KwrgjuQBN1Q\n4;46;mUtEpKbX9YU\n4;47;3UU5hDDmafo\n4;48;e3fWKTCMcAM\n4;49;siC_HQNLdMU\n4;50;tFaXajdZAFY\n5;1;6MFz8WK4Tu4\n5;2;0rGpHJuvyd8\n5;3;siC_HQNLdMU\n5;4;fQEjWLjMyZ4\n5;5;FX6UoImBRGs\n5;6;uoAmMClRZ_s\n5;7;lHHPuyblCiA\n5;8;tFaXajdZAFY\n5;9;PzJPDm4K1HA\n5;10;7kFj6uioH3M\n5;11;tTfrUUXx2FM\n5;12;S46wXcpLiHw\n5;13;d0zUvD3GQRw\n5;14;x2Z4c1Sm2b8\n5;15;jEQV5nR4Q-Q\n5;16;iq6R-KFqd34\n5;17;JCRYWcnLpuE\n5;18;KwrgjuQBN1Q\n5;19;Wy8BsX58qJw\n5;20;F2rz97gC46A\n5;21;ju-sicQqrBs\n5;22;yfCNLXxM3QI\n5;23;WtGcFCynBQw\n5;24;m-aS7TcRYZI\n5;25;czkij-Rc4PA\n5;26;2vY0HdHAs5M\n5;27;VnmpTc9yuVU\n5;28;A0D7Nm1rHeU\n5;29;4Y9pZC8_YLc\n5;30;CLM1AwendfA\n5;31;D0kDxkG0ixU\n5;32;LUXNivcu-PM\n5;33;YjTv3f8uOHU\n5;34;uY7EHu3-NQg\n5;35;7qoeGCLqAcY\n5;36;BidZVtMy-k0\n5;37;_1huNXuvKoY\n5;38;xhQEWR00Tqo\n5;39;mUtEpKbX9YU\n5;40;jSMXtt89XI0\n5;41;Eh6-WqHwwNY\n5;42;5947tCQK6-k\n5;43;0fKr0UIeWIU\n5;44;Y_gkl9n_yi8\n5;45;04IAdi_68Jk\n5;46;rhS1xkD7h5w\n5;47;jbx11aZGpxQ\n5;48;3FaUrL0FBfg\n5;49;kjozJ_IidcI\n5;50;pQAWJdCD1E8\n6;1;LIYkZHZ27CI\n6;2;FjKJfaw4tXk\n6;3;b4Z24rGX_7E\n6;4;iDfUD31ruhc\n6;5;g6uOCd80rNE\n6;6;eX3JMIw4EpI\n6;7;1i9mqOF0VCo\n6;8;5DqCp31T-z8\n6;9;DdWifk89pZQ\n6;10;Iqc6DTN3qNo\n6;11;fJkAhL-INgg\n6;12;xX-LsU1ZUe4\n6;13;tAFZZXA3HtE\n6;14;wpXvNOfbSM0\n6;15;qYfG1hFX8WQ\n6;16;fwGV5iOji3c\n6;17;K_ozl8DyPYY\n6;18;r5_Xd48AdHM\n6;19;Z3fOk1jGy4g\n6;20;Snq9hXH0sRE\n6;21;vWOJpt6_-ho\n6;22;m_ik74e2tKs\n6;23;EyYo18dNqp8\n6;24;t7JfqmWH-v0\n6;25;EHgCSDKznWc\n6;26;mPinlQF-GW0\n6;27;mZz86zkf2cE\n6;28;2etCB-ZhDHE\n6;29;8R2j5rbsUu0\n6;30;2Of6CIILSeA\n6;31;w_l3LCL72Hc\n6;32;lqOHvsZqHSc\n6;33;j4IPE838v1s\n6;34;0ffXFCRqTuo\n6;35;4AXgDtJbHLU\n6;36;L3r8ZIf5jjs\n6;37;6q3bx9pl3Mw\n6;38;_lwK11PL8Cg\n6;39;5ANMCjhC5Uw\n6;40;MB5SPcZEAG8\n6;41;pStvXhbF7Zg\n6;42;GMWqSrcruO8\n6;43;oAz8Q8n02AQ\n6;44;FROl9h6Y1zE\n6;45;_TeE68dPRjA\n6;46;IjZbRNqLSSM\n6;47;UHBn218hKvs\n6;48;E755CEbDApo\n6;49;NLxAur-Upb4\n6;50;FjjMa9nTwfs\n7;1;qLBr4i7XX28\n7;2;4-0GKe3dWG4\n7;3;LrWphmJh5fE\n7;4;jvzR-oABpD8\n7;5;_ZD1rQZ6Qcs\n7;6;oRicNpqxTwU\n7;7;iyGzOBWtegc\n7;8;HvdnbZgdefk\n7;9;8CmbC0Pr03c\n7;10;RkgJDGJUnrA\n7;11;hTx7IuwY28A\n7;12;QACMUiEa7jE\n7;13;-kTzUih6_Bc\n7;14;6pqcNvZtesE\n7;15;07WiTmfrDps\n7;16;AVJs0y9b6bg\n7;17;X1xem4-nDwY\n7;18;iWTYloasdds\n7;19;z9cJuCxPWH8\n7;20;N0V-4fxkymY\n7;21;e4FD1Vr69FQ\n7;22;GI-kYDxPV9Q\n7;23;Def4_0EQNjU\n7;24;brDekAzIyo8\n7;25;1LEhatjqD1E\n7;26;TwDeklLjCPk\n7;27;Dc8ATXW4qJw\n7;28;1g1J3H99i8g\n7;29;mZXwRssojQg\n7;30;qi7LFTLIucU\n7;31;_lwbP3U-q0Y\n7;32;D9JQFpquzXY\n7;33;1Fvm8V6IwnA\n7;34;ykCIu6pLxAw\n7;35;G6WndZSsf5c\n7;36;3CRyqQaWItE\n7;37;0LJpFe88O54\n7;38;Ewf1gwk7eZc\n7;39;W01HW8fQ0SM\n7;40;6jwXxtBRzJE\n7;41;mS-W-kIMyFw\n7;42;N8gcs0mcgz8\n7;43;chGUlje0R8Q\n7;44;XJ8nMlYQUvw\n7;45;LZflyZJCqPo\n7;46;J46L45f6a_I\n7;47;w4noipiPCb0\n7;48;qFr5s9G1FnM\n7;49;vlGIMzFYUo0\n7;50;pSfMYOKr8aY\n8;1;hTE0KUXaaqE\n8;2;Lgx5sZ4pyLo\n8;3;PqPMYwPF-94\n8;4;3qzgeZiXOEU\n8;5;I56z8ddxXmI\n8;6;6blbzNpRiuw\n8;7;jyWiVo6aBis\n8;8;0-xWpj3L820\n8;9;S2LAOwQiPrM\n8;10;xZjjX2gED3s\n8;11;pV_sBBDwxnk\n8;12;JWDyLqp5CdY\n8;13;y8GWVueb2Eg\n8;14;dHaRYqSDDV0\n8;15;hWe_27kDmeU\n8;16;N1erL3MiYyc\n8;17;AeE_VGcWca8\n8;18;slOM8IPk6WQ\n8;19;eGLHbyW3hO0\n8;20;aGVeQj_HRcU\n8;21;tYt9A3EM-Io\n8;22;OgFBnVqC558\n8;23;WddKcadEObM\n8;24;xm6Vi9uz76E\n8;25;dlN8jmvWCbw\n8;26;Iyf4xg4BcO4\n8;27;J6SZMvaowtE\n8;28;V3dEclPa7w8\n8;29;7VXgwDiDWfY\n8;30;9cPXRhe7Jqo\n8;31;Q8A1Ward52w\n8;32;b6VD-I8fNto\n8;33;WvTAd-IVGVQ\n8;34;E_C0_OIXVJE\n8;35;Qvg0DDeCL3c\n8;36;exoeBk2UxLA\n8;37;KLU4uh-AcsY\n8;38;N5bZp4NQ1Sc\n8;39;W6DzOmy38DY\n8;40;LCHyzXOGVSA\n8;41;JWTk3FYygc8\n8;42;l326FUAkt7o\n8;43;CdewdXR5DRc\n8;44;m6ShrcMCAFs\n8;45;E8I16Eu9eCY\n8;46;GkKuYcZvTxc\n8;47;8XQm18d3oMU\n8;48;APaynHCNlcs\n8;49;qIlrD5-U1ag\n8;50;hxnOyHcUARA\n9;1;2F0s6y9yTxE\n9;2;YxtWlxGfSSY\n9;3;TQuEP2bzm4c\n9;4;tYt9A3EM-Io\n9;5;7992ldrCsTI\n9;6;PqPMYwPF-94\n9;7;E_C0_OIXVJE\n9;8;-VTYAXDnVRc\n9;9;yvOJWOyPZC8\n9;10;Qvg0DDeCL3c\n9;11;mk7Hi6AtlEY\n9;12;RAA8LgBnkiA\n9;13;jyWiVo6aBis\n9;14;ra2nsLU7w3g\n9;15;E73UVQYMRfI\n9;16;_FxThSQCVR8\n9;17;FsgRzE9JBqA\n9;18;NEKiUVJ8vok\n9;19;i5ogl75WP4E\n9;20;jklDz4kIGoI\n9;21;0VtYsRIxwMc\n9;22;kY9cK0pr7i0\n9;23;V3dEclPa7w8\n9;24;d3C_tT4Fuxc\n9;25;8jorZM_BMXI\n9;26;8ZvkOW6MRvM\n9;27;slg-8M28mbc\n9;28;Um-I8MUXFyE\n9;29;k7gWarzB7Sw\n9;30;tY8ZG02vHEk\n9;31;s4U8ukM1rMM\n9;32;TypfIy2EcMo\n9;33;w3Q0pq8IwK0\n9;34;e9yajHftGWo\n9;35;PoDc5xqsn78\n9;36;T3OymYhhuho\n9;37;Vja47kXvN08\n9;38;4JuQo9Z8Cak\n9;39;x6L2gMQqtSM\n9;40;XcqaFoVY3Qc\n9;41;koU4FJr8Dt0\n9;42;0A69o0QsHf4\n9;43;aI8ysq102AY\n9;44;cBKWzsH4l6I\n9;45;PO2j4MtzPak\n9;46;rg5CJIDTrgE\n9;47;4rlcveY1MR0\n9;48;I7Hau4s-kP8\n"
+  "trafienia_pl.csv": "strona;pozycja;video_id\n1;1;hFw5cl0iwO0\n1;2;hUp-H519HaY\n1;3;dD8ihWEuUHQ\n1;4;iWDR-DVUhJw\n1;5;3ESMKnOoZO8\n1;6;T8qPFuWnNsY\n1;7;teVzG7Gc44g\n1;8;4w9LhVU7huw\n1;9;HTWEGS8Wt8M\n1;10;xPsQtTXZe_k\n1;11;6Vx5ih8pB7E\n1;12;aRbZK15V7rE\n1;13;ofbr227I7MQ\n1;14;q9hBbjoHz1A\n1;15;PQgqaKVtRmw\n1;16;9LAY-nmUzos\n1;17;BR_iA9UeNDE\n1;18;suO-6qCSZUA\n1;19;nYkECU-uGeQ\n1;20;nb7_7vvC4t8\n1;21;HxfHb2sXUk0\n1;22;sYPxgxpPnig\n1;23;gocWWz16zlA\n1;24;Cdy9FDXOMHQ\n1;25;pRONCR0_InU\n1;26;2tB1vPaQTnc\n1;27;2AdkAV0k7Bc\n1;28;XCo3d6miIhc\n1;29;m0pnTrglmSM\n1;30;HyBik5FcXJE\n1;31;TnyGoQgofTs\n1;32;uXskRxE6V5s\n1;33;C_ngZ-YixVs\n1;34;sMeak7IsmtU\n1;35;5lMWEzwDOG0\n1;36;xURrmgKWTCQ\n1;37;v7E5aDJwGpk\n1;38;QuVgrsnsn1o\n1;39;rwoDKbJaRC4\n1;40;Y_vFeLtosoM\n1;41;LAPGPsPUgJA\n1;42;n4l-FLUiHVk\n1;43;Evdcvb7o5II\n1;44;_BeHNyfi6qA\n1;45;goPfTgybHRI\n1;46;t50M2LQ7YQY\n1;47;UV686fGNlus\n1;48;iBBBYQbHRco\n1;49;6AJ4i8b6KQg\n1;50;gvD1rE2jGe0\n1;51;ZxRcSJVzZj4\n1;52;TXtWQTJCcvg\n1;53;8HksS9cizJg\n2;1;X06lvIMGf4M\n2;2;t50M2LQ7YQY\n2;3;kmOOsbPcsrA\n2;4;TWTVUwg5eiA\n2;5;rPgUcvUcf1Q\n2;6;f1LgmtbK20A\n2;7;5459GsQtu6s\n2;8;4SvBJvGAbA4\n2;9;D1pHN7vjlwA\n2;10;hif7qDyM4fo\n2;11;gOK76Icp4wU\n2;12;db5_4XZYlAo\n2;13;pYurPeLwwtM\n2;14;F8C8SFHRBh8\n2;15;8dZNkDRucvs\n2;16;37joxVTAXT8\n2;17;ZKSaCr5ng-Q\n2;18;iBBBYQbHRco\n2;19;d-MPjz-KUvw\n2;20;kWiT4jIOFGM\n2;21;VQtImhBDzwU\n2;22;cdKCRUKoV34\n2;23;T7XLLq5AlcM\n2;24;2YKcEtqpYnA\n2;25;4JxpymvVH74\n2;26;R5IHt1P-7F0\n2;27;8rTVyzPOcSM\n2;28;lO7P0C_5S1Y\n2;29;woAGZXjD8-o\n2;30;mVMRpiFY0QA\n2;31;52JPreIbXnw\n2;32;dCNiNGlac-I\n2;33;r6S2S9Ghnjw\n2;34;rcbpb1U7cG0\n2;35;ZjLFQ8g8C40\n2;36;snjwPN7d7sQ\n2;37;3Xph886c7tI\n2;38;ZG0FUBvABPA\n2;39;GWF6XBXEvzU\n2;40;g7_fPQSXwq4\n2;41;CzoeR5JBFR0\n2;42;3UU5hDDmafo\n2;43;CWly-ga9xa0\n2;44;A6rmruzJh0E\n2;45;tiQOvqmGi1c\n2;46;ITcsrcm376c\n2;47;1smZo7IsYY4\n2;48;hT_9EkitSBM\n2;49;nF5G3KP_FgM\n2;50;pT4AyfCoICY\n3;1;pT4AyfCoICY\n3;2;2uMy_zyM2vY\n3;3;c6KkWog2LZs\n3;4;fhjbua478gA\n3;5;vKIVGu2xb2U\n3;6;stkfkN3RSc4\n3;7;JmYjeBPvY0c\n3;8;w6SXGQWVq3Y\n3;9;k9VyCPfLxrM\n3;10;wIr-8pzmZ5o\n3;11;ECDJoYIQ77w\n3;12;WTxGPGSd5LY\n3;13;uwTmttPEjUk\n3;14;gAr9d1_iI0Q\n3;15;WX8JWXRmEhw\n3;16;ne0szHx6Mnc\n3;17;q1iwwzI_6hM\n3;18;OtT8nqDGZYY\n3;19;Hw_neaqW6G8\n3;20;yFDHXHvmUUU\n3;21;4BYJUgu4Yvs\n3;22;IgtLd3oMvYA\n3;23;5VXpS1OKI7c\n3;24;K155UXoLm8g\n3;25;e8xkUE1v1WI\n3;26;O_X44ymWlak\n3;27;JdTk7kPHIAI\n3;28;J66qDTJP58Q\n3;29;uk99uKBD_bg\n3;30;Q5-j4nEuAn8\n3;31;3H9XRGDwLEs\n3;32;p-WfpMvcvsk\n3;33;DAbwacFS7I8\n3;34;3TlhBcRRwJ4\n3;35;njK9n0hIWyE\n3;36;8xrlfdUo4ow\n3;37;9kn5w_luSls\n3;38;6T9XxUVU9w4\n3;39;0Xmdkpl2r7s\n3;40;x-lPcfxk7ec\n3;41;k0eB4wQiFQ0\n3;42;r0189FNWGbg\n3;43;eGEavk1hdB0\n3;44;BVqs2KddA7M\n3;45;BuwamX344pI\n3;46;FOhhbiZEDIk\n3;47;2KE7poDqFaQ\n3;48;8IOXBZ6al70\n3;49;9gjBJ4oetTU\n3;50;dPmGnsJpE1Q\n4;1;tTfrUUXx2FM\n4;2;ju-sicQqrBs\n4;3;6M2yIF_iZ30\n4;4;c68_ToSAU_0\n4;5;WtGcFCynBQw\n4;6;-XXRSRcQV3I\n4;7;Vr043IG3e8U\n4;8;tVSVSIcOe3E\n4;9;GWjbIgSMWyQ\n4;10;mEL1luBHJNA\n4;11;y5_aSeihba4\n4;12;ErdMsvZDvbg\n4;13;7kFj6uioH3M\n4;14;_1huNXuvKoY\n4;15;rcbpb1U7cG0\n4;16;0rGpHJuvyd8\n4;17;tiQOvqmGi1c\n4;18;Wy8BsX58qJw\n4;19;lHHPuyblCiA\n4;20;BAP--1HM18M\n4;21;fQEjWLjMyZ4\n4;22;FX6UoImBRGs\n4;23;2vY0HdHAs5M\n4;24;8R2j5rbsUu0\n4;25;BuwamX344pI\n4;26;fmhUNy9tglY\n4;27;gAr9d1_iI0Q\n4;28;czkij-Rc4PA\n4;29;a8zTdG5Rodg\n4;30;CLM1AwendfA\n4;31;iq6R-KFqd34\n4;32;BpC3By3RHlg\n4;33;sMeak7IsmtU\n4;34;pQAWJdCD1E8\n4;35;8dZNkDRucvs\n4;36;op2VyUO4Mzk\n4;37;d0zUvD3GQRw\n4;38;uY7EHu3-NQg\n4;39;WTxGPGSd5LY\n4;40;fhjbua478gA\n4;41;EyYo18dNqp8\n4;42;A0D7Nm1rHeU\n4;43;3FaUrL0FBfg\n4;44;O9LXu4JR0RU\n4;45;KwrgjuQBN1Q\n4;46;mUtEpKbX9YU\n4;47;3UU5hDDmafo\n4;48;e3fWKTCMcAM\n4;49;siC_HQNLdMU\n4;50;tFaXajdZAFY\n5;1;6MFz8WK4Tu4\n5;2;0rGpHJuvyd8\n5;3;siC_HQNLdMU\n5;4;fQEjWLjMyZ4\n5;5;FX6UoImBRGs\n5;6;uoAmMClRZ_s\n5;7;lHHPuyblCiA\n5;8;tFaXajdZAFY\n5;9;PzJPDm4K1HA\n5;10;7kFj6uioH3M\n5;11;tTfrUUXx2FM\n5;12;S46wXcpLiHw\n5;13;d0zUvD3GQRw\n5;14;x2Z4c1Sm2b8\n5;15;jEQV5nR4Q-Q\n5;16;iq6R-KFqd34\n5;17;JCRYWcnLpuE\n5;18;KwrgjuQBN1Q\n5;19;Wy8BsX58qJw\n5;20;F2rz97gC46A\n5;21;ju-sicQqrBs\n5;22;yfCNLXxM3QI\n5;23;WtGcFCynBQw\n5;24;m-aS7TcRYZI\n5;25;czkij-Rc4PA\n5;26;2vY0HdHAs5M\n5;27;VnmpTc9yuVU\n5;28;A0D7Nm1rHeU\n5;29;4Y9pZC8_YLc\n5;30;CLM1AwendfA\n5;31;D0kDxkG0ixU\n5;32;LUXNivcu-PM\n5;33;YjTv3f8uOHU\n5;34;uY7EHu3-NQg\n5;35;7qoeGCLqAcY\n5;36;BidZVtMy-k0\n5;37;_1huNXuvKoY\n5;38;xhQEWR00Tqo\n5;39;mUtEpKbX9YU\n5;40;jSMXtt89XI0\n5;41;Eh6-WqHwwNY\n5;42;5947tCQK6-k\n5;43;0fKr0UIeWIU\n5;44;Y_gkl9n_yi8\n5;45;04IAdi_68Jk\n5;46;rhS1xkD7h5w\n5;47;jbx11aZGpxQ\n5;48;3FaUrL0FBfg\n5;49;kjozJ_IidcI\n5;50;pQAWJdCD1E8\n6;1;LIYkZHZ27CI\n6;2;FjKJfaw4tXk\n6;3;b4Z24rGX_7E\n6;4;iDfUD31ruhc\n6;5;g6uOCd80rNE\n6;6;eX3JMIw4EpI\n6;7;1i9mqOF0VCo\n6;8;5DqCp31T-z8\n6;9;DdWifk89pZQ\n6;10;Iqc6DTN3qNo\n6;11;fJkAhL-INgg\n6;12;xX-LsU1ZUe4\n6;13;tAFZZXA3HtE\n6;14;wpXvNOfbSM0\n6;15;qYfG1hFX8WQ\n6;16;fwGV5iOji3c\n6;17;K_ozl8DyPYY\n6;18;r5_Xd48AdHM\n6;19;Z3fOk1jGy4g\n6;20;Snq9hXH0sRE\n6;21;vWOJpt6_-ho\n6;22;m_ik74e2tKs\n6;23;EyYo18dNqp8\n6;24;t7JfqmWH-v0\n6;25;EHgCSDKznWc\n6;26;mPinlQF-GW0\n6;27;mZz86zkf2cE\n6;28;2etCB-ZhDHE\n6;29;8R2j5rbsUu0\n6;30;2Of6CIILSeA\n6;31;w_l3LCL72Hc\n6;32;lqOHvsZqHSc\n6;33;j4IPE838v1s\n6;34;0ffXFCRqTuo\n6;35;4AXgDtJbHLU\n6;36;L3r8ZIf5jjs\n6;37;6q3bx9pl3Mw\n6;38;_lwK11PL8Cg\n6;39;5ANMCjhC5Uw\n6;40;MB5SPcZEAG8\n6;41;pStvXhbF7Zg\n6;42;GMWqSrcruO8\n6;43;oAz8Q8n02AQ\n6;44;FROl9h6Y1zE\n6;45;_TeE68dPRjA\n6;46;IjZbRNqLSSM\n6;47;UHBn218hKvs\n6;48;E755CEbDApo\n6;49;NLxAur-Upb4\n6;50;FjjMa9nTwfs\n7;1;qLBr4i7XX28\n7;2;4-0GKe3dWG4\n7;3;LrWphmJh5fE\n7;4;jvzR-oABpD8\n7;5;_ZD1rQZ6Qcs\n7;6;oRicNpqxTwU\n7;7;iyGzOBWtegc\n7;8;HvdnbZgdefk\n7;9;8CmbC0Pr03c\n7;10;RkgJDGJUnrA\n7;11;hTx7IuwY28A\n7;12;QACMUiEa7jE\n7;13;-kTzUih6_Bc\n7;14;6pqcNvZtesE\n7;15;07WiTmfrDps\n7;16;AVJs0y9b6bg\n7;17;X1xem4-nDwY\n7;18;iWTYloasdds\n7;19;z9cJuCxPWH8\n7;20;N0V-4fxkymY\n7;21;e4FD1Vr69FQ\n7;22;GI-kYDxPV9Q\n7;23;Def4_0EQNjU\n7;24;brDekAzIyo8\n7;25;1LEhatjqD1E\n7;26;TwDeklLjCPk\n7;27;Dc8ATXW4qJw\n7;28;1g1J3H99i8g\n7;29;mZXwRssojQg\n7;30;qi7LFTLIucU\n7;31;_lwbP3U-q0Y\n7;32;D9JQFpquzXY\n7;33;1Fvm8V6IwnA\n7;34;ykCIu6pLxAw\n7;35;G6WndZSsf5c\n7;36;3CRyqQaWItE\n7;37;0LJpFe88O54\n7;38;Ewf1gwk7eZc\n7;39;W01HW8fQ0SM\n7;40;6jwXxtBRzJE\n7;41;mS-W-kIMyFw\n7;42;N8gcs0mcgz8\n7;43;chGUlje0R8Q\n7;44;XJ8nMlYQUvw\n7;45;LZflyZJCqPo\n7;46;J46L45f6a_I\n7;47;w4noipiPCb0\n7;48;qFr5s9G1FnM\n7;49;vlGIMzFYUo0\n7;50;pSfMYOKr8aY\n8;1;hTE0KUXaaqE\n8;2;Lgx5sZ4pyLo\n8;3;PqPMYwPF-94\n8;4;3qzgeZiXOEU\n8;5;I56z8ddxXmI\n8;6;6blbzNpRiuw\n8;7;jyWiVo6aBis\n8;8;0-xWpj3L820\n8;9;S2LAOwQiPrM\n8;10;xZjjX2gED3s\n8;11;pV_sBBDwxnk\n8;12;JWDyLqp5CdY\n8;13;y8GWVueb2Eg\n8;14;dHaRYqSDDV0\n8;15;hWe_27kDmeU\n8;16;N1erL3MiYyc\n8;17;AeE_VGcWca8\n8;18;slOM8IPk6WQ\n8;19;eGLHbyW3hO0\n8;20;aGVeQj_HRcU\n8;21;tYt9A3EM-Io\n8;22;OgFBnVqC558\n8;23;WddKcadEObM\n8;24;xm6Vi9uz76E\n8;25;dlN8jmvWCbw\n8;26;Iyf4xg4BcO4\n8;27;J6SZMvaowtE\n8;28;V3dEclPa7w8\n8;29;7VXgwDiDWfY\n8;30;9cPXRhe7Jqo\n8;31;Q8A1Ward52w\n8;32;b6VD-I8fNto\n8;33;WvTAd-IVGVQ\n8;34;E_C0_OIXVJE\n8;35;Qvg0DDeCL3c\n8;36;exoeBk2UxLA\n8;37;KLU4uh-AcsY\n8;38;N5bZp4NQ1Sc\n8;39;W6DzOmy38DY\n8;40;LCHyzXOGVSA\n8;41;JWTk3FYygc8\n8;42;l326FUAkt7o\n8;43;CdewdXR5DRc\n8;44;m6ShrcMCAFs\n8;45;E8I16Eu9eCY\n8;46;GkKuYcZvTxc\n8;47;8XQm18d3oMU\n8;48;APaynHCNlcs\n8;49;qIlrD5-U1ag\n8;50;hxnOyHcUARA\n9;1;2F0s6y9yTxE\n9;2;YxtWlxGfSSY\n9;3;TQuEP2bzm4c\n9;4;tYt9A3EM-Io\n9;5;7992ldrCsTI\n9;6;PqPMYwPF-94\n9;7;E_C0_OIXVJE\n9;8;-VTYAXDnVRc\n9;9;yvOJWOyPZC8\n9;10;Qvg0DDeCL3c\n9;11;mk7Hi6AtlEY\n9;12;RAA8LgBnkiA\n9;13;jyWiVo6aBis\n9;14;ra2nsLU7w3g\n9;15;E73UVQYMRfI\n9;16;_FxThSQCVR8\n9;17;FsgRzE9JBqA\n9;18;NEKiUVJ8vok\n9;19;i5ogl75WP4E\n9;20;jklDz4kIGoI\n9;21;0VtYsRIxwMc\n9;22;kY9cK0pr7i0\n9;23;V3dEclPa7w8\n9;24;d3C_tT4Fuxc\n9;25;8jorZM_BMXI\n9;26;8ZvkOW6MRvM\n9;27;slg-8M28mbc\n9;28;Um-I8MUXFyE\n9;29;k7gWarzB7Sw\n9;30;tY8ZG02vHEk\n9;31;s4U8ukM1rMM\n9;32;TypfIy2EcMo\n9;33;w3Q0pq8IwK0\n9;34;e9yajHftGWo\n9;35;PoDc5xqsn78\n9;36;T3OymYhhuho\n9;37;Vja47kXvN08\n9;38;4JuQo9Z8Cak\n9;39;x6L2gMQqtSM\n9;40;XcqaFoVY3Qc\n9;41;koU4FJr8Dt0\n9;42;0A69o0QsHf4\n9;43;aI8ysq102AY\n9;44;cBKWzsH4l6I\n9;45;PO2j4MtzPak\n9;46;rg5CJIDTrgE\n9;47;4rlcveY1MR0\n9;48;I7Hau4s-kP8\n",
+  "zapytania_v2_pl.csv": "nr;linia_kodu\n1;\"\"\"red pill polska\"\",\"\n2;\"\"\"manosfera\"\",\"\n3;\"\"\"mgtow polska\"\",\"\n4;\"\"\"incel polska\"\",\"\n5;\"\"\"przegryw\"\",\"\n6;\"\"\"samiec alfa\"\"\"\n7;\"\"\"black pill polska\"\"\"\n8;\"\"\"pua polska\"\"\"\n9;\"\"\"samiec alfa\"\"\"\n10;\"\"\"męskość\"\"\"\n11;\"\"\"wzorce męskości\"\"\"\n12;\"\"\"relacje damsko-męskie\"\"\"\n13;\"\"\"prawa mężczyzn\"\"\"\n14;\"\"\"samiec sigma\"\"\"\n15;\"\"\"samiec beta\"\",\"\n"
  },
  "labs": {
+  "yt1": {
+   "alt": {
+    "kind": "plan",
+    "code": "QUERIES = 14\nMONTHS = 82\nPAGES = 2\nSEARCH_PER_DAY = 100\n\n# Plan dzień po dniu: każdego dnia skrypt wysyła tyle wywołań, ile pozwala limit,\n# a resztę zostawia na następny dzień. Tak działa skrypt, który wznawia pracę.\nleft = QUERIES * MONTHS * PAGES\ncalls, days = 0, 0\nwhile left > 0:\n    today = min(SEARCH_PER_DAY, left)\n    calls += today\n    left -= today\n    days += 1\n    if days in (1, 2) or left == 0:\n        print(f\"dzień {days}: {today} wywołań, zostało {left}\")\n\nresult = {\"calls\": calls, \"days\": days}\nprint(result)\n"
+   },
+   "starter": "# Plan pełnego zbierania danych w projekcie: każde zapytanie w każdym miesiącu.\nQUERIES = 14          # różne zapytania z poprzedniego kroku\nMONTHS = 82           # od stycznia 2020 r. do października 2026 r.\nPAGES = 2             # średnio tyle stron wyników na zapytanie i miesiąc\nSEARCH_PER_DAY = 100  # domyślny dzienny limit wywołań search.list\n\n# Jedno wywołanie search.list oddaje jedną stronę wyników.\ncalls = QUERIES * MONTHS          # tu popraw: ile wywołań search.list?\ndays = calls / SEARCH_PER_DAY     # tu popraw: ile dni, liczonych w całości?\n\nresult = {\"calls\": calls, \"days\": days}\nprint(result)\n",
+   "expect": {
+    "calls": 2296,
+    "days": 23
+   },
+   "starterError": null,
+   "starterValue": {
+    "calls": 1148,
+    "days": 11.48
+   },
+   "facts": {
+    "noPages": 1148,
+    "noMonths": 28,
+    "oldUnits": 229600,
+    "notRounded": 22.96,
+    "byUnits": 0.2296,
+    "perDay": 100,
+    "unitsPerDay": 10000,
+    "oldCost": 100,
+    "queries": 14,
+    "months": 82,
+    "pages": 2
+   }
+  },
+  "yt2": {
+   "alt": {
+    "kind": "counts",
+    "code": "import pandas as pd\n\nSEARCH_QUERIES = [\n    \"red pill polska\",\n    \"manosfera\",\n    \"mgtow polska\",\n    \"incel polska\",\n    \"przegryw\",\n    \"samiec alfa\",\n    \"black pill polska\",\n    \"pua polska\",\n    \"samiec alfa\",\n    \"męskość\",\n    \"wzorce męskości\",\n    \"relacje damsko-męskie\",\n    \"prawa mężczyzn\",\n    \"samiec sigma\",\n    \"samiec beta\",\n]\n\n# value_counts pokazuje, ile razy każde zapytanie jest na liście. Powtórka jest na górze.\ncounts = pd.Series(SEARCH_QUERIES).value_counts()\nprint(counts.head(3))\n\n# Ta linia zatrzymałaby pierwszy skrypt przed wysłaniem zapytań.\n# assert counts.max() == 1, \"na liście są powtórki\"\n\nresult = {\"in_list\": int(counts.sum()), \"distinct\": len(counts)}\nprint(result)\n"
+   },
+   "starter": "# Lista zapytań z pierwszej wersji skryptu projektu (v2), przepisana bez zmian.\nSEARCH_QUERIES = [\n    \"red pill polska\",\n    \"manosfera\",\n    \"mgtow polska\",\n    \"incel polska\",\n    \"przegryw\",\n    \"samiec alfa\"\n    \"black pill polska\"\n    \"pua polska\"\n    \"samiec alfa\"\n    \"męskość\"\n    \"wzorce męskości\"\n    \"relacje damsko-męskie\"\n    \"prawa mężczyzn\"\n    \"samiec sigma\"\n    \"samiec beta\",\n]\n\n# Skrypt wysyła do API każdy element listy jako osobne zapytanie.\nprint(\"Elementów na liście:\", len(SEARCH_QUERIES))\nfor query in SEARCH_QUERIES:\n    print(repr(query))\n\n# Zadanie: popraw listę i policz różne zapytania.\n# in_list: ile elementów ma lista, distinct: ile jest różnych zapytań\nresult = {\"in_list\": len(SEARCH_QUERIES), \"distinct\": len(SEARCH_QUERIES)}\nprint(result)\n",
+   "expect": {
+    "in_list": 15,
+    "distinct": 14
+   },
+   "starterError": null,
+   "starterValue": {
+    "in_list": 6,
+    "distinct": 6
+   },
+   "facts": {
+    "elements": 6,
+    "glued": "samiec alfablack pill polskapua polskasamiec alfamęskośćwzorce męskościrelacje damsko-męskieprawa mężczyznsamiec sigmasamiec beta",
+    "gluedLines": 10,
+    "duplicates": [
+     "samiec alfa"
+    ]
+   }
+  },
   "yt3": {
    "alt": {
     "kind": "table",
@@ -16402,6 +16490,76 @@ const GENERATED3 = {
   }
  },
  "data": {
+  "queryLines": [
+   {
+    "line": "\"red pill polska\",",
+    "group": 0
+   },
+   {
+    "line": "\"manosfera\",",
+    "group": 1
+   },
+   {
+    "line": "\"mgtow polska\",",
+    "group": 2
+   },
+   {
+    "line": "\"incel polska\",",
+    "group": 3
+   },
+   {
+    "line": "\"przegryw\",",
+    "group": 4
+   },
+   {
+    "line": "\"samiec alfa\"",
+    "group": 5
+   },
+   {
+    "line": "\"black pill polska\"",
+    "group": 5
+   },
+   {
+    "line": "\"pua polska\"",
+    "group": 5
+   },
+   {
+    "line": "\"samiec alfa\"",
+    "group": 5
+   },
+   {
+    "line": "\"męskość\"",
+    "group": 5
+   },
+   {
+    "line": "\"wzorce męskości\"",
+    "group": 5
+   },
+   {
+    "line": "\"relacje damsko-męskie\"",
+    "group": 5
+   },
+   {
+    "line": "\"prawa mężczyzn\"",
+    "group": 5
+   },
+   {
+    "line": "\"samiec sigma\"",
+    "group": 5
+   },
+   {
+    "line": "\"samiec beta\",",
+    "group": 5
+   }
+  ],
+  "queryElements": [
+   "red pill polska",
+   "manosfera",
+   "mgtow polska",
+   "incel polska",
+   "przegryw",
+   "samiec alfablack pill polskapua polskasamiec alfamęskośćwzorce męskościrelacje damsko-męskieprawa mężczyznsamiec sigmasamiec beta"
+  ],
   "pages": [
    {
     "page": 1,
@@ -16464,7 +16622,12 @@ const GENERATED3 = {
    "2026-05-01"
   ],
   "recorded": "2026-10-30",
-  "quotaSearch": 900
+  "quotaSearch": 900,
+  "testSearchCalls": 9,
+  "testOtherUnits": 642,
+  "testScriptUnits": 1542,
+  "searchPerDay": 100,
+  "unitsPerDay": 10000
  }
 };
 
@@ -16521,12 +16684,30 @@ const sections = [
     ] },
   ]),
 
+  step('w3-2', '3.2', 'Lista zapytań', [
+    { p: 'Zanim skrypt cokolwiek pobierze, ktoś decyduje, o co pyta. W tym projekcie to lista słów, takich jak „manosfera” czy „przegryw”. Skrypt wysyła do API każdy element listy jako osobne zapytanie.' },
+    { p: 'Lista w Pythonie to napisy oddzielone przecinkami. Rysunek {rys:ytsklejanie} pokazuje, co się dzieje, gdy przecinka zabraknie.' },
+    { figure: 'ytsklejanie' },
+    { exercise: 'yt2', num: 'Lab 1', title: 'Ile zapytań naprawdę poszło?', toc: 'Lab 1. Lista zapytań' },
+    { figure: 'ytzapytania' },
+    { p: 'Na rysunku {rys:ytzapytania} widać całą listę pierwszego skryptu. Poszła tylko część zapytań, a reszta zniknęła bez śladu. Druga wersja skryptu ma tę samą listę z przecinkami i bez powtórki. Listę sprawdza się przed startem, bo potem zgubione zapytanie widać tylko po tym, czego brakuje.' },
+  ]),
+
+  step('w3-3', '3.3', 'Klucz i limit', [
+    { p: 'Skrypt pyta YouTube w imieniu projektu. Do tego potrzebny jest klucz API, czyli coś w rodzaju hasła projektu. Rysunek {rys:ytklucz} pokazuje drogę do klucza krok po kroku.' },
+    { figure: 'ytklucz' },
+    { p: 'Klucz ma dzienny limit. Od czerwca 2026 r. YouTube liczy go w dwóch pulach. Wyszukiwanie, czyli `search.list`, ma domyślnie 100 wywołań dziennie. Pozostałe metody, na przykład komentarze i statystyki filmów, mają razem 10 000 jednostek, zwykle 1 za wywołanie. Obie pule odnawiają się o północy czasu pacyficznego, czyli około 9 rano w Polsce.' },
+    { exercise: 'yt1', num: 'Lab 2', title: 'Ile dni potrwa zbieranie?', toc: 'Lab 2. Klucz i limit' },
+    { figure: 'ytlimit' },
+    { p: 'Rysunek {rys:ytlimit} pokazuje obie pule. Test z kwietnia zmieścił się w jednym dniu, a pełny plan wymaga tygodni. Większy limit można dostać od Google na wniosek. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
+  ]),
+
   step('w3-4', '3.4', 'Strony wyników', [
     { p: 'Wyszukiwarka YouTube w API nie oddaje wszystkiego naraz. Jedna odpowiedź to jedna strona, najwyżej około 50 elementów. Jeśli wyników jest więcej, odpowiedź ma pole `nextPageToken`. Ten token wysyłasz w następnym pytaniu i dostajesz kolejną stronę.' },
     { p: 'Rysunek {rys:ytstrony} pokazuje to na trzech wymyślonych stronach. Pobierz je po kolei i patrz na dwie liczby na dole.' },
     { figure: 'ytstrony' },
     { p: 'Pierwszy skrypt projektu brał jedną stronę na zapytanie. Wyglądało to dobrze, bo strona była pełna. Sprawdź, ile to jest z całości.' },
-    { exercise: 'yt3', num: 'Lab', title: 'Pobierz wszystkie strony wyników', toc: 'Lab. Strony wyników' },
+    { exercise: 'yt3', num: 'Lab 3', title: 'Pobierz wszystkie strony wyników', toc: 'Lab 3. Strony wyników' },
     { figure: 'ytstronyreal' },
     { p: `Na rysunku {rys:ytstronyreal} powtórki są na ${REPEAT_PAGES} z ${D.pages.length - 1} dalszych stron. API nie mówi, skąd się biorą, i nie ostrzega przed nimi. Dlatego liczy się różne identyfikatory filmów. Zapisz w karcie korpusu, ile było trafień i ile z nich zostało różnych filmów.` },
   ]),
@@ -16547,14 +16728,18 @@ const CHAPTER = {
   siteNav: ['home'],
   sections,
   summary: [
-    { id: 'yt3', label: 'Lab. Strony wyników', section: 'w3-4' },
+    { id: 'yt2', label: 'Lab 1. Lista zapytań', section: 'w3-2' },
+    { id: 'yt1', label: 'Lab 2. Klucz i limit', section: 'w3-3' },
+    { id: 'yt3', label: 'Lab 3. Strony wyników', section: 'w3-4' },
   ],
   recap: [
+    'Brak przecinka na liście nie daje błędu, tylko mniej zapytań. Listę zapytań sprawdza się przed startem skryptu.',
+    'Klucz API trzyma się poza kodem. Limit wyszukiwań to domyślnie 100 wywołań dziennie, więc plan liczy się w dniach.',
     'Jedna odpowiedź API to jedna strona. Kolejne strony pobiera się tokenem, dopóki odpowiedź go ma.',
     'Ten sam film może przyjść dwa razy. Korpus to różne filmy, a nie wszystkie trafienia.',
     'Licz to, co przyszło, a nie to, o co proszono. Strona może mieć więcej elementów niż `maxResults`.',
   ],
-  next: 'Dalsze kroki tego tematu są w budowie. Będą o kluczu i limicie, liście zapytań, komentarzach, języku, kanałach i liczbach na film.',
+  next: 'Dalsze kroki tego tematu są w budowie. Będą o komentarzach i odpowiedziach, języku, kanałach i liczbach na film.',
   prep: '',
   datasets: [
     { name: 'YouTube Data API v3', url: 'https://developers.google.com/youtube/v3/docs/search/list', what: 'Wyszukiwanie filmów, strony wyników, tokeny.', licence: 'Warunki korzystania z YouTube API.' },
@@ -16590,7 +16775,122 @@ const IMPORT = 'W polskim Excelu plik otworzy się dwuklikiem, bo ma średniki. 
 
 const PAGES = Array.from({ length: GENERATED3.data.pages.length }, (_, i) => `search_page${i + 1}.json`);
 
+const glued = (s) => `${s.slice(0, 30)}…`;
+
+const near = (a, b, tol = 0) => typeof a === 'number' && Math.abs(a - b) <= tol + 1e-9;
+const dec = (x) => String(x).replace('.', ',');
+
 const LABS3 = {
+  yt1: {
+    ...common,
+    note: 'To zwykły Python, bez plików i bez sieci. Pierwsze uruchomienie pobiera Pythona (około 25 MB) i trwa do pół minuty.',
+    id: 'yt1',
+    alt: G.yt1.alt,
+    intro: 'Pełny plan projektu to każde z różnych zapytań w każdym miesiącu od 2020 r. Wyszukiwanie ma własny limit, 100 wywołań dziennie. Policz, ile wywołań potrzeba i ile dni to zajmie.',
+    starter: G.yt1.starter,
+    files: [],
+    expect: G.yt1.expect,
+    tol: 0,
+    hints: [
+      'Jedno wywołanie to jedna strona. Pomnóż zapytania, miesiące i strony.',
+      'Dni liczy się w całości. `math.ceil` zaokrągla w górę, na początku dopisz `import math`.',
+    ],
+    diagnose(value) {
+      const { expect, facts } = G.yt1;
+      if (!sameKeys(value, expect)) return 'Zmienna `result` powinna mieć dwa pola, `calls` i `days`. Zostaw ostatnie wiersze kodu bez zmian.';
+      if (value.calls === facts.noPages) return 'Brakuje stron. Na jedno zapytanie w miesiącu przypadają średnio dwie strony, a każda to osobne wywołanie.';
+      if (value.calls === facts.noMonths) return 'Brakuje miesięcy. Skrypt pyta o każde zapytanie osobno w każdym miesiącu.';
+      if (value.calls === facts.oldUnits) return `To jednostki według dawnej zasady, ${facts.oldCost} za wyszukiwanie. Od czerwca 2026 r. wyszukiwania liczy się w wywołaniach.`;
+      if (value.calls !== expect.calls) return 'Wywołań jeszcze nie tyle. Pomnóż zapytania, miesiące i strony.';
+      if (near(value.days, facts.notRounded, 0.005)) return `Wyszło ${dec(facts.notRounded)}. Ostatni niepełny dzień też trzeba przeczekać. Zaokrąglij w górę, \`math.ceil\`.`;
+      if (near(value.days, facts.byUnits, 0.005)) return `Podzielono przez ${n(facts.unitsPerDay)}. To limit jednostek dla innych metod. Wyszukiwanie ma własny, ${facts.perDay} wywołań dziennie.`;
+      return 'Wywołania są dobre. Dni jeszcze nie. Podziel wywołania przez dzienny limit i zaokrąglij w górę.';
+    },
+    success(value) {
+      const f = G.yt1.facts;
+      return `Tak. ${n(value.calls)} wywołań wyszukiwania to ${value.days} dni przy domyślnym limicie. Komentarze i statystyki filmów idą z osobnej puli ${n(f.unitsPerDay)} jednostek, więc nie zabierają wyszukiwań. Plan trzeba policzyć, zanim skrypt ruszy.`;
+    },
+    more: `Dla chętnych. Do czerwca 2026 r. wyszukiwanie kosztowało ${G.yt1.facts.oldCost} jednostek z tej samej puli ${n(G.yt1.facts.unitsPerDay)}, co komentarze. Też wychodziło najwyżej ${G.yt1.facts.perDay} wyszukiwań dziennie, ale każde zabierało miejsce komentarzom. Skrypt projektu liczy jeszcze po staremu.`,
+    base: {
+      say: `Policz to samo w arkuszu albo na kalkulatorze. Plan to ${G.yt1.facts.queries} zapytań, ${G.yt1.facts.months} miesiące i średnio ${G.yt1.facts.pages} strony na zapytanie w miesiącu. Limit to ${G.yt1.facts.perDay} wywołań wyszukiwania dziennie.`,
+      files: [],
+      steps: [
+        'Pomnóż zapytania, miesiące i strony. Każda strona to jedno wywołanie.',
+        'Podziel wynik przez dzienny limit i zaokrąglij w górę, `ZAOKR.W.GÓRĘ` (`ROUNDUP`).',
+      ],
+      fields: [
+        { id: 'calls', label: 'Ile wywołań wyszukiwania?', expect: G.yt1.expect.calls, tol: 0 },
+        { id: 'days', label: 'Ile dni przy domyślnym limicie?', expect: G.yt1.expect.days, tol: 0 },
+      ],
+      wrong: {
+        calls(v) {
+          if (v === G.yt1.facts.noPages) return 'Pierwsza liczba nie liczy stron. Pomnóż jeszcze przez 2.';
+          if (v === G.yt1.facts.oldUnits) return 'Pierwsza liczba to jednostki według dawnej zasady. Policz wywołania.';
+          return 'Pierwsza liczba jeszcze nie. Pomnóż zapytania, miesiące i strony.';
+        },
+        days(v) {
+          if (near(v, G.yt1.facts.notRounded, 0.005)) return 'Druga liczba nie jest zaokrąglona. Ostatni niepełny dzień też się liczy.';
+          return 'Druga liczba jeszcze nie. Podziel wywołania przez 100 i zaokrąglij w górę.';
+        },
+      },
+      success: 'Tak. Limit wyszukiwań decyduje o tym, ile dni trwa zbieranie danych. Plan liczy się przed startem skryptu.',
+    },
+  },
+
+  yt2: {
+    ...common,
+    id: 'yt2',
+    alt: G.yt2.alt,
+    note: 'To zwykły Python. Pierwsze uruchomienie pobiera Pythona (około 25 MB) i trwa do pół minuty. Lista zapytań jest w kodzie, tak jak w skrypcie badawczym. Nic nie jest wysyłane do YouTube.',
+    intro: 'Lista zapytań z pierwszej wersji skryptu ma 15 linii. Skrypt wysyła każdy element listy jako osobne zapytanie. Uruchom kod i zobacz, co naprawdę jest na liście. Popraw ją i policz różne zapytania.',
+    starter: G.yt2.starter,
+    files: [],
+    expect: G.yt2.expect,
+    tol: 0,
+    hints: [
+      'Popatrz na wypisane elementy. W którym miejscu dwa zapytania stały się jednym napisem?',
+      'Każda linia listy, także przedostatnia, musi kończyć się przecinkiem.',
+      'Różne zapytania policzysz zbiorem, `len(set(SEARCH_QUERIES))`.',
+    ],
+    diagnose(value) {
+      const { expect, facts } = G.yt2;
+      if (!sameKeys(value, expect)) return 'Zmienna `result` powinna mieć dwa pola, `in_list` i `distinct`. Zostaw ostatnie wiersze kodu bez zmian.';
+      if (value.in_list === facts.elements) return `Lista ma ${facts.elements} elementów, bo ${facts.gluedLines} linii skleiło się w jedną, „${glued(facts.glued)}”. Dopisz brakujące przecinki.`;
+      if (value.in_list !== expect.in_list) return 'Elementów jeszcze nie tyle, ile linii. Sprawdź przecinek na końcu każdej linii.';
+      if (value.distinct === expect.in_list) return `Przecinki są. Jedno zapytanie, „${facts.duplicates[0]}”, jest na liście dwa razy. Policz różne, \`len(set(...))\`.`;
+      return 'Lista jest dobra. Różnych zapytań jeszcze nie tyle. Policz zbiorem, `len(set(SEARCH_QUERIES))`.';
+    },
+    success(value) {
+      const f = G.yt2.facts;
+      return `Tak. ${value.in_list} linii, ${value.distinct} różnych zapytań. Pierwszy skrypt wysłał tylko ${f.elements} zapytań, a jedno z nich było sklejonym napisem z ${f.gluedLines} linii. Python nie zgłosił błędu, bo dwa napisy obok siebie to dla niego jeden napis.`;
+    },
+    more: 'Dla chętnych. Jedna linia `assert len(set(SEARCH_QUERIES)) == len(SEARCH_QUERIES)` zatrzymałaby skrypt przy powtórce. Na sklejenie pomaga druga, która sprawdza, że żadne zapytanie nie jest dłuższe niż kilka słów.',
+    base: {
+      say: `Policz to samo w arkuszu na pliku \`zapytania_v2_pl.csv\`. W kolumnie B jest każda linia listy, tak jak w kodzie, z cudzysłowami i przecinkami. ${IMPORT}`,
+      files: ['zapytania_v2_pl.csv'],
+      steps: [
+        'Zapytanie kończy się tam, gdzie linia kończy się przecinkiem. Policz takie linie, `=LICZ.JEŻELI(B2:B16;"*,")` (`COUNTIF`). Tyle zapytań wysłał skrypt.',
+        'Dodaj kolumnę C z samym tekstem zapytania, bez cudzysłowów i przecinków, na przykład `=PODSTAW(PODSTAW(B2;"""";"");",";"")` (`SUBSTITUTE`).',
+        'Policz różne wartości w kolumnie C, `=ILE.NIEPUSTYCH(UNIKATOWE(C2:C16))` (`COUNTA(UNIQUE(...))`).',
+      ],
+      fields: [
+        { id: 'sent', label: 'Ile zapytań wysłał pierwszy skrypt?', expect: G.yt2.facts.elements, tol: 0 },
+        { id: 'distinct', label: 'Ile różnych zapytań jest na liście?', expect: G.yt2.expect.distinct, tol: 0 },
+      ],
+      wrong: {
+        sent(v) {
+          if (v === G.yt2.expect.in_list) return 'Pierwsza liczba to linie. Skrypt wysłał mniej, bo linie bez przecinka skleiły się z następną. Policz linie z przecinkiem na końcu.';
+          return 'Pierwsza liczba jeszcze nie. Policz linie, które kończą się przecinkiem.';
+        },
+        distinct(v) {
+          if (v === G.yt2.expect.in_list) return 'Druga liczba liczy powtórkę dwa razy. Jedno zapytanie jest na liście dwa razy.';
+          return 'Druga liczba jeszcze nie. Policz różne wartości w kolumnie C.';
+        },
+      },
+      success: 'Tak. Brak przecinka nie daje błędu, tylko mniej zapytań. Dlatego listę zapytań sprawdza się, zanim skrypt cokolwiek wyśle.',
+    },
+  },
+
   yt3: {
     ...common,
     id: 'yt3',
@@ -16681,6 +16981,127 @@ const D = GENERATED3.data;
 const caption = (text) => el('div.fg-caption', text);
 const SRC = `Źródło: testowy przebieg skryptu v3, zapytanie „${D.query}”, filmy z kwietnia 2026 r., pobrane ${D.recorded.split('-').reverse().join('.')}.`;
 
+// ---------------------------------------------------------------- yt1: the key and the limit
+
+// Drawn after Google's docs read on 2026-11-03 (developers.google.com/youtube/v3/getting-started,
+// docs.cloud.google.com/docs/authentication/api-keys). Schematic on purpose: the console changes.
+const KEY_STEPS = [
+  ['Projekt', 'W Google Cloud Console tworzysz projekt. Do niego należy klucz i limit.', 'Limit liczy się na projekt, nie na osobę.'],
+  ['Włącz API', 'W bibliotece API wybierasz YouTube Data API v3 i klikasz Włącz.', 'Bez tego klucz działa, ale YouTube odpowie błędem.'],
+  ['Utwórz klucz', 'W danych logowania wybierasz Utwórz dane logowania, a potem Klucz API.', 'Klucz to długi ciąg znaków. Kto go ma, zużywa Twój limit.'],
+  ['Ogranicz klucz', 'Ustawiasz, że klucz działa tylko z YouTube Data API v3, i najlepiej tylko z Twojego komputera albo serwera.', 'Google pisze wprost, że klucz bez ograniczeń nie jest bezpieczny.'],
+  ['Schowaj klucz', 'Masz klucz. Skrypt musi go znaleźć przy każdym uruchomieniu. Zdecyduj, gdzie będzie leżał.', 'Kod można pokazać innym. Klucza nie.'],
+];
+const KEEP = [
+  ['W kodzie skryptu', false, 'Skrypt trafia do kolegów, do zipa, do repozytorium. Klucz razem z nim.'],
+  ['W pliku .env, który jest w .gitignore', true, 'Skrypt czyta klucz przy starcie. Pliku nie ma w repozytorium.'],
+  ['W zmiennej środowiskowej', true, 'Klucz jest tylko na Twoim komputerze, w ustawieniach systemu albo terminala.'],
+  ['W czacie z asystentem albo we wspólnym dokumencie', false, 'Tekst z czatu i dokumentu czytają inni ludzie i programy.'],
+];
+
+function keyFigure({ num: n = 'Rysunek' } = {}) {
+  const state = { step: 0, pick: null };
+  const host = el('div');
+  const draw = () => {
+    const last = state.step === KEY_STEPS.length - 1;
+    const [title, what, why] = KEY_STEPS[state.step];
+    mount(host,
+      el('ol.yt-steps', KEY_STEPS.map(([t], k) => el(`li${k === state.step ? '.yt-step-on' : ''}`,
+        el('button', { type: 'button', 'aria-current': k === state.step ? 'step' : null, onClick: () => { state.step = k; draw(); } }, `${k + 1}. ${t}`)))),
+      el('div.yt-screen', el('div.yt-screen-title', title), el('p', what), el('p.yt-why', why)),
+      last ? el('div.yt-keep', el('div.yt-keep-q', 'Gdzie trzymać klucz?'),
+        KEEP.map(([label, good], k) => el(`button.fg-toggle${state.pick === k ? (good ? '.yt-good' : '.yt-bad') : ''}`, { type: 'button', onClick: () => { state.pick = k; draw(); } }, label)),
+        state.pick == null ? null : el('div.sq-read', `${KEEP[state.pick][1] ? 'Dobrze.' : 'Nie.'} ${KEEP[state.pick][2]}`)) : null,
+      el('div.fg-toggles',
+        state.step > 0 ? el('button.fg-toggle', { type: 'button', onClick: () => { state.step -= 1; draw(); } }, '‹ Wstecz') : null,
+        last ? null : el('button.fg-toggle', { type: 'button', onClick: () => { state.step += 1; draw(); } }, 'Dalej ›')));
+  };
+  draw();
+  return frame(n, 'Droga do klucza API', host, caption('Schemat według dokumentacji Google z listopada 2026 r. Nazwy przycisków w konsoli mogą się zmieniać.'));
+}
+
+/** After yt1: the two daily buckets, for the test run and for the full plan. */
+function limitFigure({ num: n = 'Rysunek' } = {}) {
+  const G1 = GENERATED3.labs.yt1;
+  const state = { v: 'test' };
+  const host = el('div');
+  const meter = (label, used, cap, text) => el('div.yt-meter',
+    el('div.yt-meter-head', el('span', label), el('b', text)),
+    el('div.yt-meter-track', el('span.yt-meter-bar', { style: `width:${Math.min(100, (100 * used) / cap)}%` })));
+  const draw = () => {
+    const test = state.v === 'test';
+    const calls = test ? D.testSearchCalls : G1.expect.calls;
+    mount(host,
+      el('div.fg-toggles', [['test', 'Test z kwietnia'], ['plan', 'Pełny plan']].map(([v, label]) => el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+      meter('Wyszukiwanie, pierwszy dzień', Math.min(calls, D.searchPerDay), D.searchPerDay, `${Math.min(calls, D.searchPerDay)} z ${D.searchPerDay} wywołań`),
+      test ? meter('Pozostałe metody, jednostki', D.testOtherUnits, D.unitsPerDay, `${fmt(D.testOtherUnits)} z ${fmt(D.unitsPerDay)}`) : null,
+      el('div.sq-read', test
+        ? `Test zajął ${D.testSearchCalls} wywołań wyszukiwania i ${units(D.testOtherUnits)} na komentarze i statystyki. Zmieścił się w jednym dniu.`
+        : `Pełny plan to ${fmt(calls)} wywołań wyszukiwania. Pula kończy się pierwszego dnia, więc skrypt czeka na nową i pracuje ${G1.expect.days} dni.`));
+  };
+  draw();
+  return frame(n, 'Dwie pule limitu na jeden dzień', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
+}
+
+const fmt = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+/** Polish plural: 1 jednostka, 2 jednostki, 5 jednostek, 642 jednostki, 1 012 jednostek. */
+const plural = (x, one, few, many) => (x === 1 ? one : [2, 3, 4].includes(x % 10) && ![12, 13, 14].includes(x % 100) ? few : many);
+const units = (x) => `${fmt(x)} ${plural(x, 'jednostka', 'jednostki', 'jednostek')}`;
+
+// ---------------------------------------------------------------- yt2: glued strings
+
+// an invented list, so the figure shows the mechanism and not the lab's answer
+const CITIES = ['Kraków', 'Gdańsk', 'Poznań', 'Lublin'];
+
+function gluedFigure({ num: n = 'Rysunek' } = {}) {
+  const state = { comma: [true, false, true, true] };  // the second line has lost its comma
+  const host = el('div');
+  const draw = () => {
+    const elements = [];
+    let cur = '';
+    CITIES.forEach((c, k) => { cur += c; if (state.comma[k]) { elements.push(cur); cur = ''; } });
+    if (cur) elements.push(cur);
+    const lines = CITIES.map((c, k) => el('div.yt-code-line',
+      el('span', `    "${c}"`),
+      el(`button.yt-comma${state.comma[k] ? '' : '.yt-comma-off'}`, {
+        type: 'button', 'aria-pressed': state.comma[k] ? 'true' : 'false',
+        'aria-label': state.comma[k] ? `usuń przecinek po ${c}` : `dodaj przecinek po ${c}`,
+        onClick: () => { state.comma[k] = !state.comma[k]; draw(); },
+      }, state.comma[k] ? ',' : '␣')));
+    const glued = elements.filter((e) => !CITIES.includes(e));
+    mount(host,
+      el('div.yt-code', el('div.yt-code-line', 'CITIES = ['), lines, el('div.yt-code-line', ']')),
+      el('div.yt-count', `len(CITIES) = ${elements.length}`),
+      el('ul.yt-items.yt-elements', elements.map((e) => el(`li.yt-item${CITIES.includes(e) ? '' : '.yt-again'}`, `"${e}"`))),
+      el('div.sq-read', glued.length
+        ? `Bez przecinka Python skleja dwa napisy w jeden, „${glued[0]}”. Błędu nie ma. Kliknij miejsce po przecinku, żeby go dodać albo usunąć.`
+        : 'Każda linia ma przecinek, więc każde miasto to osobny element. Kliknij przecinek, żeby go usunąć.'));
+  };
+  draw();
+  return frame(n, 'Brakujący przecinek', host, caption('Lista jest wymyślona. Ostatnia linia może mieć przecinek albo nie, Python to akceptuje.'));
+}
+
+/** After yt2: the real list of the first script, each line coloured by the element it ends in. */
+function realQueriesFigure({ num: n = 'Rysunek' } = {}) {
+  const lines = D.queryLines;
+  const elements = D.queryElements;
+  const words = lines.map((l) => l.line.replace(/[",]/g, ''));
+  const twice = new Set(words.filter((w, i) => words.indexOf(w) !== i));
+  // a line is glued when its element is made of more than one line
+  const size = (g) => lines.filter((l) => l.group === g).length;
+  const rows = lines.map((l, k) => el(`div.yt-q-row.yt-g${size(l.group) > 1 ? 1 : 0}`,
+    el('span.yt-q-num', String(k + 1)),
+    el('code.yt-q-line', l.line),
+    twice.has(words[k]) ? el('span.yt-q-tag', 'dwa razy') : null));
+  const gluedIdx = elements.findIndex((e) => e.length === Math.max(...elements.map((x) => x.length)));
+  const host = el('div',
+    el('div.yt-q', rows),
+    el('div.sq-read', `Python widzi ${elements.length} elementów. Ostatni to ${lines.filter((l) => l.group === gluedIdx).length} linii sklejonych w jeden napis, zaczyna się od „${elements[gluedIdx].slice(0, 22)}…”. Takiego zapytania nikt nie wpisuje, więc YouTube nie zwrócił dla niego żadnego filmu.`));
+  return frame(n, 'Lista zapytań pierwszego skryptu', host, caption('Wyróżnione linie Python skleił w jeden napis, bo między nimi nie ma przecinków. Źródło: skrypt v2 projektu i przegląd jego wyników.'));
+}
+
+// ---------------------------------------------------------------- yt3: pages
+
 // invented pages, so the figure shows the mechanism and not the lab's answer
 const DEMO = [
   { items: ['film A', 'film B', 'film C', 'film D'], token: 'PAGE2' },
@@ -16737,7 +17158,7 @@ function realPagesFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Dziewięć stron z testu', host, caption(`${SRC} Strony odtworzone z zapisanych trafień. ${D.quotaSearch} jednostek limitu, po 100 za stronę.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
+__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/main3.js ===== */
@@ -16755,8 +17176,12 @@ const { setUp: setUpCourse, restoreOptions } = __modules["../../analiza-trendow-
 const { CHAPTER, CORPUS_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter3.js"];
 const { labExercise, labAnswer, restoreLab } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS3, FILES3, explainError3 } = __modules["../../analiza-trendow-w-internecie/src/tasks3.js"];
-const { pageChainFigure, realPagesFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
+const { keyFigure, limitFigure, gluedFigure, realQueriesFigure, pageChainFigure, realPagesFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
 const FIGURES3 = {
+  ytsklejanie: gluedFigure,
+  ytzapytania: realQueriesFigure,
+  ytklucz: keyFigure,
+  ytlimit: limitFigure,
   ytstrony: pageChainFigure,
   ytstronyreal: realPagesFigure,
 };

@@ -1896,6 +1896,8 @@ textarea.kc-input { resize: vertical; }
 .yt-stack-row .yt-bar { height: 16px; }
 .yt-stack-val { font: 12px var(--mono); color: var(--ink-soft); overflow-wrap: anywhere; }
 .yt-item.yt-hit { background: var(--ok-bg); outline: 1px solid var(--ok); }
+.yt-bar-row-wide { grid-template-columns: minmax(0, 11em) minmax(0, 1fr) auto; }
+.yt-bar-row-wide .yt-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 </style>
 </head>
@@ -15676,6 +15678,8 @@ const STRINGS = {
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
   'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.regex.title': 'Dla chętnych. Ten sam wzorzec w module re',
+  'py.alt.regex.note': 'pandas używa pod spodem zwykłych wyrażeń regularnych Pythona. Ten sam wzorzec działa w module `re`, a `re.IGNORECASE` znaczy to samo co `case=False`.',
   'py.alt.lang.title': 'Dla chętnych. To samo bez pandas',
   'py.alt.lang.note': 'Moduł `csv` daje pusty kod jako pusty napis, a nie NaN. Że to brak informacji, a nie osobny język, trzeba zdecydować samemu i napisać to w kodzie.',
   'py.alt.sums.title': 'Dla chętnych. To samo bez pandas',

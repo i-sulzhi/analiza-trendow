@@ -16997,7 +16997,38 @@ const sections = [
     { figure: 'ytliczby' },
     { p: `Rysunek {rys:ytliczby} pokazuje, skąd ta różnica w teście. Dwa filmy mają prawie połowę komentarzy, a ${GENERATED3.labs.yt7.facts.zeroComments} filmów nie ma żadnego. Do karty korpusu zapisz, którą liczbę podajesz, wynik dla całego zbioru czy dla typowego filmu, i co zrobiono z brakami.` },
   ]),
+
+  step('w3-9', '3.9', 'Karta korpusu', [
+    { p: 'Każdy krok tego tematu kończył się zdaniem „zapisz w karcie korpusu”. Karta to krótki opis danych, bez którego nikt nie oceni wyniku. Tak wyglądałaby karta testu, na którym pracowaliśmy.' },
+    { table: corpusExample() },
+    { p: 'Teraz zrób taką kartę dla źródła z własnego projektu. Nie musi to być YouTube. Pytania są te same dla każdego źródła zbieranego przez API albo skrypt.' },
+    { exercise: 'raport3', num: 'Projekt', title: 'Karta korpusu', toc: 'Projekt. Karta korpusu' },
+    { discuss: { who: 'w parach, ostatnie 10 minut', prompts: [
+      'Przeczytajcie sobie nawzajem karty. Czy z karty da się powtórzyć zbieranie danych?',
+      'Które pole jest najsłabsze? Czego w nim brakuje, liczby czy decyzji?',
+      'Jaki jeden błąd z tego tematu najbardziej grozi waszemu źródłu?',
+    ] } },
+    { p: 'Na koniec pobierz raport dla prowadzącego. Są w nim wszystkie laby tego tematu i karta.' },
+  ]),
 ];
+
+/** The corpus card of the test itself, filled from the labs' numbers (section 3.9). */
+function corpusExample() {
+  const L = GENERATED3.labs;
+  const n = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  const pct = (x) => `${String(Math.round(x * 1000) / 10).replace('.', ',')}%`;
+  return {
+    head: ['Pole karty', 'Test „manosfera”'],
+    rows: [
+      ['Zapytanie i okres', `„${D.query}”, filmy z kwietnia 2026 r., pobrane ${D.recorded.split('-').reverse().join('.')}. Pełny plan to ${L.yt2.expect.distinct} zapytań od 2020 r., ${L.yt1.expect.days} dni przy domyślnym limicie.`],
+      ['Jak zebrano dane', `YouTube Data API v3, \`search.list\` z \`relevanceLanguage="pl"\`, wszystkie ${L.yt3.expect.pages} stron, komentarze razem z odpowiedziami.`],
+      ['Filtry i co odrzucają', `Lista zapytań sprawdzona przed startem. Kanały z wiadomościami oznaczone, nie usunięte, ${L.yt6.expect.videos} filmów.`],
+      ['Straty i pokrycie', `${n(L.yt3.expect.hits)} trafień, ${L.yt3.expect.videos} różnych filmów. ${L.yt4.facts.disabled} filmy z wyłączonymi komentarzami. Odpowiedzi to ${pct(L.yt4.expect.lost)} zebranych komentarzy.`],
+      ['Język i szum', `Kod języka ma ${L.yt5.expect.known} z ${L.yt5.facts.all} filmów, ${pct(L.yt5.expect.share)} z nich po angielsku, polski kod ma ${L.yt5.facts.pl}.`],
+      ['Czego ten korpus nie powie?', `Niczego pewnego o polskiej manosferze, bo większość filmów nie jest po polsku. Typowy film ma ${String(L.yt7.expect.typical).replace('.', ',')} komentarza na 1000 wyświetleń, więc o odbiorze mówią głównie duże filmy.`],
+    ],
+  };
+}
 
 const CHAPTER = {
   ...BASE,
@@ -17021,6 +17052,7 @@ const CHAPTER = {
     { id: 'yt5', label: 'Lab 5. Język', section: 'w3-6' },
     { id: 'yt6', label: 'Lab 6. Kanały', section: 'w3-7' },
     { id: 'yt7', label: 'Lab 7. Liczby na film', section: 'w3-8' },
+    { id: 'raport3', label: 'Projekt. Karta korpusu', section: 'w3-9' },
   ],
   recap: [
     'Brak przecinka na liście nie daje błędu, tylko mniej zapytań. Listę zapytań sprawdza się przed startem skryptu.',
@@ -17033,7 +17065,7 @@ const CHAPTER = {
     'Wskaźnik na 1000 wyświetleń ma dwie wersje. Suma przez sumę mówi o całym zbiorze, a mediana o typowym filmie. Średnia z filmów nie mówi o żadnym z nich.',
     'Bez odpowiedzi znika prawie połowa komentarzy. Liczba z API to nie to, co zebrano. Porównuje się jedno z drugim.',
   ],
-  next: 'Dalsze kroki tego tematu są w budowie. Został krok o karcie korpusu.',
+  next: 'Temat 4 to profile z mediów społecznościowych. Karta korpusu przyda się tam od pierwszej minuty, bo profile też zbiera się przez API i skrypty.',
   prep: '',
   datasets: [
     { name: 'YouTube Data API v3', url: 'https://developers.google.com/youtube/v3/docs/search/list', what: 'Wyszukiwanie filmów, strony wyników, tokeny.', licence: 'Warunki korzystania z YouTube API.' },
@@ -17905,7 +17937,7 @@ __modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure":
  * The saved state is shared with the other topics (one course, one report); the ids are new.
  */
 const { BookApp, EXERCISES, ANSWERS, FIGURES, RESTORE } = __modules["src/book/book.js"];
-const { CARDS } = __modules["src/book/figures/project.js"];
+const { CARDS, cardExercise } = __modules["src/book/figures/project.js"];
 const { gate } = __modules["src/ui/people.js"];
 const { setUp: setUpCourse, restoreOptions } = __modules["../../analiza-trendow-w-internecie/src/main.js"];
 const { CHAPTER, CORPUS_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter3.js"];
@@ -17939,6 +17971,7 @@ function setUp3() {
     RESTORE[id] = (text) => restoreLab(id, text, LABS3);
   }
   CARDS.raport3 = { fields: CORPUS_FIELDS, file: 'karta-korpusu-youtube.txt', title: () => 'Karta korpusu z YouTube (temat 3). Analiza trendów w Internecie' };
+  EXERCISES.raport3 = cardExercise('raport3');
 }
 
 class TopicApp3 {

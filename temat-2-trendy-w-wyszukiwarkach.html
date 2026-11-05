@@ -1907,6 +1907,11 @@ textarea.kc-input { resize: vertical; }
 .yt-card strong { display: block; font: 600 18px var(--mono); overflow-wrap: anywhere; }
 .yt-sub { margin: 8px 0 2px; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
 .yt-bar-row.yt-cross { outline: 1px solid var(--warn); border-radius: 3px; background: var(--warn-bg); }
+.yt-labels { display: grid; gap: 2px; margin: 4px 0 8px; font-size: 13px; }
+.yt-labels-head, .yt-labels-row { display: grid; grid-template-columns: minmax(0, 1fr) 6.5em 6.5em; gap: 8px; align-items: baseline; padding: 4px 6px; }
+.yt-labels-head b { font-size: 12px; color: var(--ink-soft); font-weight: 600; text-align: right; }
+.yt-labels-row { background: var(--bg-sunken); border-radius: 3px; }
+.yt-labels-row b { font: 600 13px var(--mono); text-align: right; }
 
 </style>
 </head>
@@ -15687,6 +15692,8 @@ const STRINGS = {
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
   'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.groups.title': 'Dla chętnych. Grupy w słowniku, bez pandas',
+  'py.alt.groups.note': 'Słownik z dwoma kluczami robi to samo co `groupby`. Pusta liczba komentarzy wymaga osobnego warunku, pandas pomija ją po cichu.',
   'py.alt.loop.title': 'Dla chętnych. To samo pętlą, bez pandas',
   'py.alt.loop.note': 'Pętla dodaje filmy od najwięcej oglądanego i zatrzymuje się, gdy suma przekroczy połowę. To dokładnie to, co robi `cumsum` na posortowanej kolumnie.',
   'py.alt.iso.title': 'Dla chętnych. Zapis ISO 8601 bez pandas',

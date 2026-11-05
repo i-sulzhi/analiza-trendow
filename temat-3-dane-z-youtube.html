@@ -16685,7 +16685,7 @@ const GENERATED3 = {
   "yt8": {
    "alt": {
     "kind": "iso",
-    "code": "import csv\nimport re\n\n\ndef seconds(duration):\n    \"\"\"Seconds of an ISO 8601 duration such as PT1H2M3S, PT1M5S or PT33S.\"\"\"\n    parts = re.fullmatch(r\"PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?\", duration)\n    h, m, s = (int(x) if x else 0 for x in parts.groups())\n    return h * 3600 + m * 60 + s\n\n\nlengths = []\nwith open(\"videos.csv\", encoding=\"utf-8\", newline=\"\") as f:\n    for row in csv.DictReader(f):\n        lengths.append(seconds(row[\"duration\"]))\n\nshort = sum(s <= 180 for s in lengths)\nresult = {\"short\": short, \"share\": round(short / len(lengths), 3)}\nprint(result)\n"
+    "code": "import csv\nimport re\n\n\ndef seconds(duration):\n    \"\"\"Długość w sekundach z zapisu ISO 8601, na przykład PT1H2M3S, PT1M5S albo PT33S.\"\"\"\n    parts = re.fullmatch(r\"PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?\", duration)\n    h, m, s = (int(x) if x else 0 for x in parts.groups())\n    return h * 3600 + m * 60 + s\n\n\nlengths = []\nwith open(\"videos.csv\", encoding=\"utf-8\", newline=\"\") as f:\n    for row in csv.DictReader(f):\n        lengths.append(seconds(row[\"duration\"]))\n\nshort = sum(s <= 180 for s in lengths)\nresult = {\"short\": short, \"share\": round(short / len(lengths), 3)}\nprint(result)\n"
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Długość filmu z API, w zapisie ISO 8601: PT33S to 33 sekundy, PT1M5S to minuta i 5 sekund.\nprint(videos[\"duration\"].head(5))\n\n# Zadanie: ile filmów trwa 3 minuty albo krócej? Tyle może mieć Short.\nshort = videos[\"duration\"] <= \"PT3M\"   # tu popraw\n\nresult = {\"short\": int(short.sum()), \"share\": round(float(short.mean()), 3)}\nprint(result)\n",
    "expect": {
@@ -16730,6 +16730,7 @@ const GENERATED3 = {
     "unsortedTop10": 0.393,
     "ascending": 403,
     "minusOne": 5,
+    "rowNumber": 7,
     "ceilTop10": 0.854,
     "top1": 0.123,
     "n10": 40,
@@ -18761,6 +18762,11 @@ const GENERATED3 = {
     "Latin Afterdeath 3.0",
     5,
     false
+   ],
+   [
+    "Loqueseentienda",
+    5,
+    false
    ]
   ],
   "channelCount": 288,
@@ -19563,6 +19569,7 @@ LABS3.yt9 = {
       half(v) {
         if (v === G.yt9.facts.unsorted) return 'Pierwsza liczba jest liczona bez sortowania. Najpierw ułóż filmy od największej liczby wyświetleń.';
         if (v === G.yt9.facts.minusOne) return 'Pierwsza liczba jest o jeden za mała. Policz też wiersz, w którym suma mija połowę.';
+        if (v === G.yt9.facts.rowNumber) return 'Pierwsza liczba to numer wiersza w arkuszu. Wiersz 1 to nagłówek, więc filmów jest o jeden mniej.';
         return 'Pierwsza liczba jeszcze nie. Posortuj malejąco i szukaj, gdzie suma narastająca mija połowę.';
       },
       top10(v) {
@@ -19803,8 +19810,8 @@ function keyFigure({ num: n = 'Rysunek' } = {}) {
         KEEP.map(([label, good], k) => el(`button.fg-toggle${state.pick === k ? (good ? '.yt-good' : '.yt-bad') : ''}`, { type: 'button', onClick: () => { state.pick = k; draw(); } }, label)),
         state.pick == null ? null : el('div.sq-read', `${KEEP[state.pick][1] ? 'Dobrze.' : 'Nie.'} ${KEEP[state.pick][2]}`)) : null,
       el('div.fg-toggles',
-        state.step > 0 ? el('button.fg-toggle', { type: 'button', onClick: () => { state.step -= 1; draw(); } }, '‹ Wstecz') : null,
-        last ? null : el('button.fg-toggle', { type: 'button', onClick: () => { state.step += 1; draw(); } }, 'Dalej ›')));
+        state.step > 0 ? el('button.fg-toggle', { type: 'button', onClick: () => { state.step = Math.max(0, state.step - 1); draw(); } }, '‹ Wstecz') : null,
+        last ? null : el('button.fg-toggle', { type: 'button', onClick: () => { state.step = Math.min(KEY_STEPS.length - 1, state.step + 1); draw(); } }, 'Dalej ›')));
   };
   draw();
   return frame(n, 'Droga do klucza API', host, caption('Schemat według dokumentacji Google z listopada 2026 r. Nazwy przycisków w konsoli mogą się zmieniać.'));
@@ -20192,7 +20199,7 @@ function halfFigure({ num: n = 'Rysunek' } = {}) {
       return el(`div.yt-bar-row${crossed === k + 1 ? '.yt-cross' : ''}`,
         el('span.yt-bar-label', `${k + 1}. ${fmt(x)}`),
         el('span.yt-bar', el(`span.${crossed && crossed <= k ? 'yt-bar-miss' : 'yt-bar-new'}`, { style: `width:${(100 * run) / total}%` })),
-        el('span.yt-bar-val', `${Math.round((100 * run) / total)}%`));
+        el('span.yt-bar-val', `${Math.floor((100 * run) / total)}%`));
     });
     mount(host,
       el('div.fg-toggles', [['file', 'kolejność z pliku'], ['sorted', 'od najczęściej oglądanego']].map(([v, label]) =>
@@ -20369,7 +20376,7 @@ function scatterFigure({ num: n = 'Rysunek' } = {}) {
   const host = el('div',
     el('div.yt-scatter-wrap', scatter(pts, { mark: top, log: true, xLabel: 'wyświetlenia, skala logarytmiczna', yLabel: 'komentarze, skala log.' })),
     el('div.sq-read', `Wyróżniony film ma najwięcej wyświetleń, ${fmt(pts[top][0])}, ale tylko ${pts[top][1]} komentarzy. r wszystkich filmów to ${r2(e11.r)}, bez niego ${r2(e11.r_without_top)}, a na rangach ${r2(e11.r_rank)}.`));
-  return frame(n, 'Wyświetlenia i komentarze w teście', host, caption(`${SRC} ${pts.length} filmów z liczbą komentarzy. Do obu osi dodano 1, żeby filmy bez komentarzy też były widoczne.`));
+  return frame(n, 'Wyświetlenia i komentarze w teście', host, caption(`${SRC} ${fmt(pts.length)} ${plural(pts.length, 'film', 'filmy', 'filmów')} z liczbą komentarzy. Do obu osi dodano 1, żeby filmy bez komentarzy też były widoczne.`));
 }
 
 // ---------------------------------------------------------------- 3.14: the corpus panel

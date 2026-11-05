@@ -19010,6 +19010,7 @@ const sections = [
     { p: 'Skrypt pyta YouTube w imieniu projektu. Do tego potrzebny jest klucz API, czyli coś w rodzaju hasła projektu. Do danych publicznych, takich jak wyszukiwanie filmów, wystarczy sam klucz. Logowanie przez OAuth jest potrzebne dopiero do danych albo działań konkretnego konta. Rysunek {rys:ytklucz} pokazuje drogę do klucza krok po kroku.' },
     { figure: 'ytklucz' },
     { p: 'Klucz ma dzienny limit. Od czerwca 2026 r. YouTube liczy go w dwóch pulach. Wyszukiwanie, czyli `search.list`, ma domyślnie 100 wywołań dziennie. Pozostałe metody, na przykład komentarze i statystyki filmów, mają razem 10 000 jednostek, zwykle 1 za wywołanie. Obie pule odnawiają się o północy czasu pacyficznego, czyli około 9 rano w Polsce.' },
+    { p: 'Z kluczem przychodzą też zasady korzystania z danych. Zasady YouTube dla deweloperów, w części E.4, mówią, że statystyk pobranych samym kluczem, bez zgody użytkownika, nie wolno przechowywać dłużej niż 30 dni. Pozostałe takie dane też najwyżej 30 dni kalendarzowych. Projekt badawczy musi więc przed startem sprawdzić, na jakich zasadach wolno mu trzymać dane, i zapisać to w karcie korpusu.' },
     { p: 'Limit liczy wywołania, a nie wyniki. Jedno wywołanie to jedna odpowiedź API, a ile w niej jest, zależy od metody.' },
     { table: callCosts() },
     { p: 'Rysunek {rys:ytwywolanie} pokazuje jedno wywołanie wyszukiwania ze skryptu projektu i to, co wraca. Kliknij każdy parametr i zobacz, co się dzieje bez niego.' },

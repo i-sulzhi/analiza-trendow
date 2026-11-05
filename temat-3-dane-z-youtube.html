@@ -16351,12 +16351,13 @@ function editorKeys(area, onChange) {
  * the numbers typed on the path without code. Kept at the moment of success, so later edits
  * and a switch of path do not change what was handed in.
  */
-function labAnswer(labId) {
+function labAnswer(labId, labs = LABS) {
   const solved = getItem(`lab:${labId}:solved`);
   if (!solved) return null;
   if (solved.code) return solved.code;
   const typed = Object.values(solved.answers || {}).filter((v) => v !== '' && v != null);
-  return typed.length ? `${t('py.noCodeAnswer')} ${typed.join('; ')}` : null;
+  // a topic may name the typed answer after its own second tab (topic 3: the explanation)
+  return typed.length ? `${labs[labId]?.answerPrefix || t('py.noCodeAnswer')} ${typed.join('; ')}` : null;
 }
 
 /**
@@ -16366,8 +16367,9 @@ function labAnswer(labId) {
 function restoreLab(labId, text, labs = LABS) {
   const lab = labs[labId];
   if (!lab || !text) return;
-  const typed = t('py.noCodeAnswer');
-  if (text.startsWith(typed)) {
+  // the lab's own prefix, or the course's; reports made before a topic renamed its tab still restore
+  const typed = [lab.answerPrefix, t('py.noCodeAnswer')].filter(Boolean).find((p) => text.startsWith(p));
+  if (typed) {
     const values = text.slice(typed.length).trim().split('; ');
     const answers = Object.fromEntries((lab.base?.fields || []).map((f, i) => [f.id, values[i] ?? '']));
     setItem(`lab:${labId}`, { path: 'baza', code: '', answers });
@@ -16523,7 +16525,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const paneHost = el('div');
     const tabsHost = el('div');
     const draw = () => {
-      mount(tabsHost, toggles([['kod', t('py.pathCode')], ['bez', lab.baseLabel || t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
+      mount(tabsHost, toggles([['kod', lab.codeLabel || t('py.pathCode')], ['bez', lab.baseLabel || t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
       mount(paneHost, state.path === 'kod' ? codePane : basePane);
     };
     draw();
@@ -19345,13 +19347,15 @@ const n = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
 
 const NOTE = 'To zwykły Python. Pierwsze uruchomienie pobiera Pythona (około 25 MB) i trwa do pół minuty. Nie łączymy się z YouTube. Pliki obok kodu to odpowiedzi API z testowego przebiegu skryptu, więc każdy dostaje te same liczby.';
 const LOADING = 'Uruchamiam Pythona i czytam pliki…';
-const WALK_LOCKED = 'Najpierw spróbuj znaleźć błąd w wyróżnionych liniach. Poprawiony skrypt i objaśnienie otworzą się, gdy rozwiążesz zadanie albo obejrzysz wszystkie podpowiedzi w zakładce „Z kodem (Python)”.';
+const WALK_LOCKED = 'Najpierw spróbuj znaleźć błąd w wyróżnionych liniach. Poprawiony skrypt i objaśnienie otworzą się, gdy rozwiążesz zadanie albo obejrzysz wszystkie podpowiedzi w zakładce „Popraw skrypt”.';
 const WALK_NO_PYTHON = 'Python nie uruchomił się w tej przeglądarce. Tak wypisuje poprawiony skrypt, gdy działa. Z tych liczb wpisz odpowiedzi poniżej.';
 // the second tab explains the script; it opens after an attempt (src/walk.js)
 const common = {
   note: NOTE,
   loading: LOADING,
+  codeLabel: 'Popraw skrypt',
   baseLabel: 'Objaśnienie',
+  answerPrefix: 'Odpowiedź z objaśnienia, wpisane liczby:',
   walkLocked: WALK_LOCKED,
   walkNoPython: WALK_NO_PYTHON,
   loadFailed: 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo otwórz zakładkę „Objaśnienie”. Jest tam poprawiony skrypt i to, co wypisuje.',
@@ -19725,7 +19729,7 @@ LABS3.yt6 = {
     wrong: {
       caught(v) {
         if (v === listOf(G.yt6.facts.searchLike).length) return 'Pierwsza liczba liczy kanały poprawionego wzorca. Pytamy o wzorzec „News” ze skryptu z błędem, z samą wielkością liter „News”.';
-        return 'Pierwsza liczba jeszcze nie. Policz kanały, które łapie wzorzec „News” ze skryptu z błędem. Uruchom go w zakładce z kodem i policz nazwy w wyniku.';
+        return 'Pierwsza liczba jeszcze nie. Policz kanały, które łapie wzorzec „News” ze skryptu z błędem. Uruchom go w zakładce „Popraw skrypt” i policz nazwy w wyniku.';
       },
       videos(v) {
         if (v === listOf(G.yt6.facts.searchLike).length) return 'Druga liczba liczy też pomyłkę. Jeden kanał ma „News” w nazwisku, a nie w nazwie serwisu.';
@@ -20927,7 +20931,7 @@ function setUp3() {
   Object.assign(FIGURES, FIGURES3);
   for (const id of Object.keys(LABS3)) {
     EXERCISES[id] = labExercise(id, { labs: LABS3, files: FILES3, explain: explainError3 });
-    ANSWERS[id] = () => labAnswer(id);
+    ANSWERS[id] = () => labAnswer(id, LABS3);
     RESTORE[id] = (text) => restoreLab(id, text, LABS3);
   }
   CARDS.raport3 = { fields: CORPUS_FIELDS, file: 'karta-korpusu-youtube.txt', title: () => 'Karta korpusu z YouTube (temat 3). Analiza trendów w Internecie' };

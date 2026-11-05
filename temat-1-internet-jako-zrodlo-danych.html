@@ -16351,12 +16351,13 @@ function editorKeys(area, onChange) {
  * the numbers typed on the path without code. Kept at the moment of success, so later edits
  * and a switch of path do not change what was handed in.
  */
-function labAnswer(labId) {
+function labAnswer(labId, labs = LABS) {
   const solved = getItem(`lab:${labId}:solved`);
   if (!solved) return null;
   if (solved.code) return solved.code;
   const typed = Object.values(solved.answers || {}).filter((v) => v !== '' && v != null);
-  return typed.length ? `${t('py.noCodeAnswer')} ${typed.join('; ')}` : null;
+  // a topic may name the typed answer after its own second tab (topic 3: the explanation)
+  return typed.length ? `${labs[labId]?.answerPrefix || t('py.noCodeAnswer')} ${typed.join('; ')}` : null;
 }
 
 /**
@@ -16366,8 +16367,9 @@ function labAnswer(labId) {
 function restoreLab(labId, text, labs = LABS) {
   const lab = labs[labId];
   if (!lab || !text) return;
-  const typed = t('py.noCodeAnswer');
-  if (text.startsWith(typed)) {
+  // the lab's own prefix, or the course's; reports made before a topic renamed its tab still restore
+  const typed = [lab.answerPrefix, t('py.noCodeAnswer')].filter(Boolean).find((p) => text.startsWith(p));
+  if (typed) {
     const values = text.slice(typed.length).trim().split('; ');
     const answers = Object.fromEntries((lab.base?.fields || []).map((f, i) => [f.id, values[i] ?? '']));
     setItem(`lab:${labId}`, { path: 'baza', code: '', answers });
@@ -16523,7 +16525,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const paneHost = el('div');
     const tabsHost = el('div');
     const draw = () => {
-      mount(tabsHost, toggles([['kod', t('py.pathCode')], ['bez', lab.baseLabel || t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
+      mount(tabsHost, toggles([['kod', lab.codeLabel || t('py.pathCode')], ['bez', lab.baseLabel || t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
       mount(paneHost, state.path === 'kod' ? codePane : basePane);
     };
     draw();

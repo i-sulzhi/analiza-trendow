@@ -18852,7 +18852,7 @@ const sections = [
     { p: 'Klucz ma dzienny limit. Od czerwca 2026 r. YouTube liczy go w dwóch pulach. Wyszukiwanie, czyli `search.list`, ma domyślnie 100 wywołań dziennie. Pozostałe metody, na przykład komentarze i statystyki filmów, mają razem 10 000 jednostek, zwykle 1 za wywołanie. Obie pule odnawiają się o północy czasu pacyficznego, czyli około 9 rano w Polsce.' },
     { exercise: 'yt1', num: 'Lab 2', title: 'Ile dni potrwa zbieranie?', toc: 'Lab 2. Klucz i limit' },
     { figure: 'ytlimit' },
-    { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Prawie całą drugą pulę zużywają komentarze i odpowiedzi, a statystyki filmów kosztują bardzo mało. Większy limit można dostać od Google na wniosek. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
+    { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Prawie całą drugą pulę zużywają komentarze i odpowiedzi, a statystyki filmów kosztują bardzo mało. Jeden film kosztuje tym więcej jednostek, im więcej ma komentarzy. Przesuń suwak jednostek na film w prawo, tak wygląda korpus z setkami komentarzy pod filmem. Wtedy pierwsza kończy się pula jednostek. Większy limit można dostać od Google na wniosek, ale pomaga on tylko tej puli, która kończy się pierwsza. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
   ]),
 
   step('w3-4', '3.4', 'Strony wyników', [
@@ -19842,18 +19842,22 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
   ];
   // no preset of the test itself: its videos are the answer of Lab 3, which comes after this figure
   const PRESETS = { plan: [G1.facts.queries, G1.facts.months, G1.facts.pages], month: [G1.facts.queries, 1, G1.facts.pages] };
-  const state = { v: 'plan', q: G1.facts.queries, m: G1.facts.months, p: G1.facts.pages };
+  // u: units per video for stats and comments (the test's rate by default; more talk under the videos, more units)
+  // cap: the daily units of the second bucket (the default, or a raised one on request)
+  const BIG_CAP = 1_000_000;
+  const state = { v: 'plan', q: G1.facts.queries, m: G1.facts.months, p: G1.facts.pages, u: perVideo, cap: D.unitsPerDay };
+  const dec1 = (x) => (Math.round(x * 10) / 10).toFixed(1).replace('.', ',');
   const meter = (label, used, cap, text) => el('div.yt-meter',
     el('div.yt-meter-head', el('span', label), el('b', text)),
     el('div.yt-meter-track', el('span.yt-meter-bar', { style: `width:${Math.min(100, (100 * used) / cap)}%` })));
   const card = (label, value) => el('div.yt-card', el('span', label), el('strong', value));
   // the controls are built once, so dragging a slider is not cut off by a redraw; only the results redraw
   const sliders = {};
-  const slider = (key, label, max) => {
-    const out = el('b', String(state[key]));
-    const input = el('input.yt-range', { type: 'range', min: '1', max: String(max), step: '1', value: String(state[key]), 'aria-label': label,
-      onInput: () => { state[key] = Number(input.value); state.v = ''; draw(); } });
-    sliders[key] = { input, out };
+  const slider = (key, label, { min = 1, max, step = 1, show = String, plan = true }) => {
+    const out = el('b', show(state[key]));
+    const input = el('input.yt-range', { type: 'range', min: String(min), max: String(max), step: String(step), value: String(state[key]), 'aria-label': label,
+      onInput: () => { state[key] = Number(input.value); if (plan) state.v = ''; draw(); } });
+    sliders[key] = { input, out, show };
     return el('label.yt-slider', el('span', label), input, out);
   };
   const buttons = [['plan', 'Pełny plan'], ['month', 'Jeden miesiąc']].map(([v, label]) => {
@@ -19861,20 +19865,36 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
     b.dataset.v = v;
     return b;
   });
+  const capButtons = [[D.unitsPerDay, `Limit ${fmt(D.unitsPerDay)} jednostek`], [BIG_CAP, `Limit ${fmt(BIG_CAP)} jednostek`]].map(([cap, label]) => {
+    const b = el('button.fg-toggle', { type: 'button', onClick: () => { state.cap = cap; draw(); } }, label);
+    b.dataset.cap = String(cap);
+    return b;
+  });
   const results = el('div');
-  const host = el('div', el('div.fg-toggles', buttons), slider('q', 'Zapytania', 20), slider('m', 'Miesiące', 82), slider('p', 'Strony na zapytanie i miesiąc', 10), results);
+  const host = el('div', el('div.fg-toggles', buttons),
+    slider('q', 'Zapytania', { max: 20 }), slider('m', 'Miesiące', { max: 82 }), slider('p', 'Strony na zapytanie i miesiąc', { max: 10 }),
+    slider('u', 'Jednostki na jeden film', { min: 0.5, max: 5, step: 0.1, show: dec1, plan: false }),
+    el('div.fg-toggles', capButtons), results);
   const draw = () => {
     for (const b of buttons) b.className = `fg-toggle${b.dataset.v === state.v ? ' fg-toggle-on' : ''}`;
-    for (const [key, { input, out }] of Object.entries(sliders)) {
-      if (Number(input.value) !== state[key]) input.value = String(state[key]);
-      out.textContent = String(state[key]);
+    for (const b of capButtons) b.className = `fg-toggle${Number(b.dataset.cap) === state.cap ? ' fg-toggle-on' : ''}`;
+    for (const [key, { input, out, show }] of Object.entries(sliders)) {
+      if (Math.abs(Number(input.value) - state[key]) > 0.05) input.value = String(state[key]);
+      out.textContent = show(state[key]);
     }
     const calls = state.q * state.m * state.p;
     const day1 = Math.min(calls, D.searchPerDay);
     const videos1 = Math.round(day1 * perCall * distinct);
-    const units1 = Math.min(D.unitsPerDay, Math.round(videos1 * perVideo));
-    const days = Math.ceil(calls / D.searchPerDay);
-    const commentsFirst = videos1 * perVideo > D.unitsPerDay;
+    const units1 = Math.min(state.cap, Math.round(videos1 * state.u));
+    const allVideos = Math.round(calls * perCall * distinct);
+    // the script works until both buckets have done their part: the one that runs out first sets the days
+    const searchDays = Math.ceil(calls / D.searchPerDay);
+    const unitDays = Math.ceil((allVideos * state.u) / state.cap);
+    const days = Math.max(searchDays, unitDays);
+    const commentsFirst = unitDays > searchDays;
+    const bigCap = state.cap > D.unitsPerDay;
+    // with the raised limit: did it shorten the work, or would the default limit give the same days?
+    const helped = bigCap && Math.ceil((allVideos * state.u) / D.unitsPerDay) > searchDays;
     // videos.list is exact, one unit per 50 videos; the rest goes to comments in the test's proportions
     const stats = Math.min(units1, Math.ceil(videos1 / 50));
     const rest = Q.total - Q.videos_list;
@@ -19882,21 +19902,21 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
     for (const key of ['comment_threads_list', 'comments_list', 'other']) split[key] = Math.round(((units1 - stats) * Q[key]) / rest);
     mount(results,
       meter('Wyszukiwanie, pierwszy dzień', day1, D.searchPerDay, `${day1} z ${D.searchPerDay} wywołań`),
-      meter('Pozostałe metody, pierwszy dzień', units1, D.unitsPerDay, `ok. ${fmt(units1)} z ${fmt(D.unitsPerDay)} jednostek`),
+      meter('Pozostałe metody, pierwszy dzień', units1, state.cap, `ok. ${fmt(units1)} z ${fmt(state.cap)} jednostek`),
       el('div.yt-sub', 'Na co idą te jednostki'),
       el('div.yt-bars', QUOTA_PARTS.map(([key, label]) => el('div.yt-bar-row.yt-bar-row-wide',
         el('span.yt-bar-label', label),
         el('span.yt-bar', el('span.yt-bar-new', { style: `width:${(100 * split[key]) / Math.max(1, units1)}%` })),
         el('span.yt-bar-val', `ok. ${fmt(split[key])}`)))),
-      el('div.yt-cards', card('Wywołania wyszukiwania', fmt(calls)), card('Filmy z wyszukiwania', `ok. ${fmt(Math.round(calls * perCall * distinct))}`), card('Dni przy domyślnym limicie', String(days))),
-      el('div.sq-read', calls <= D.searchPerDay
+      el('div.yt-cards', card('Wywołania wyszukiwania', fmt(calls)), card('Filmy z wyszukiwania', `ok. ${fmt(allVideos)}`), card('Dni pracy skryptu', String(days))),
+      el('div.sq-read', days === 1
         ? `Plan mieści się w jednym dniu. Na komentarze i statystyki idzie ok. ${units(units1)}.`
         : commentsFirst
-          ? 'Pierwsza kończy się pula jednostek. O czasie decydują komentarze, nie wyszukiwanie.'
-          : `Pierwsza kończy się pula wyszukiwania. Komentarze do ok. ${fmt(videos1)} filmów z jednego dnia mieszczą się w drugiej puli, więc o czasie decyduje wyszukiwanie. Skrypt pracuje ${days} dni.`));
+          ? `Pierwsza kończy się pula jednostek. Przy ${dec1(state.u)} jednostki na film starcza jej na ok. ${fmt(Math.floor(state.cap / state.u))} filmów dziennie, a wyszukiwanie daje ich ok. ${fmt(videos1)}. Skrypt pracuje ${days} dni. Tu pomaga większy limit jednostek.`
+          : `Pierwsza kończy się pula wyszukiwania. Komentarze do ok. ${fmt(videos1)} filmów z jednego dnia mieszczą się w drugiej puli, więc o czasie decyduje wyszukiwanie. Skrypt pracuje ${days} dni.${helped ? ' Większy limit jednostek skrócił pracę, ale dalej nie pomoże, bo wyszukiwanie ma własny limit.' : bigCap ? ' Większy limit jednostek nic tu nie zmienia, bo wyszukiwanie ma własny limit.' : ''}`));
   };
   draw();
-  return frame(n, 'Jeden dzień pracy skryptu', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r. Przeliczniki z testu: około 50 trafień na wywołanie, około 1 na 10 to powtórka, ${String(Math.round(perVideo * 10) / 10).replace('.', ',')} jednostki na film. W teście ${units(Q.total)} poza wyszukiwaniem to ${fmt(Q.comment_threads_list)} na commentThreads.list (strona do 100 komentarzy głównych), ${fmt(Q.comments_list)} na comments.list (odpowiedzi w wątkach, które mają ich więcej niż 5), ${fmt(Q.videos_list)} na videos.list (do 50 filmów w jednym wywołaniu) i ${fmt(Q.other)} na inne wywołania, w tym jedno z błędem. Duże kanały z tysiącami komentarzy zużywają drugą pulę szybciej. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
+  return frame(n, 'Jeden dzień pracy skryptu', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r.: 100 wywołań wyszukiwania i 10 000 jednostek dziennie. Jednostka to opłata za jedno wywołanie innej metody, nie za jeden wynik. Większy limit jednostek nie zmienia limitu wyszukiwania, to osobna pula. Przeliczniki z testu: około 50 trafień na wywołanie, około 1 na 10 to powtórka, ${String(Math.round(perVideo * 10) / 10).replace('.', ',')} jednostki na film. W teście ${units(Q.total)} poza wyszukiwaniem to ${fmt(Q.comment_threads_list)} na commentThreads.list (strona do 100 komentarzy głównych), ${fmt(Q.comments_list)} na comments.list (odpowiedzi w wątkach, które mają ich więcej niż 5), ${fmt(Q.videos_list)} na videos.list (do 50 filmów w jednym wywołaniu) i ${fmt(Q.other)} na inne wywołania, w tym jedno z błędem. Pod filmami z dużych kanałów jest więcej komentarzy, więc jeden film kosztuje więcej jednostek. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
 }
 
 const fmt = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');

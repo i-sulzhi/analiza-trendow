@@ -16254,32 +16254,45 @@ function changeBlocks(starter, solution) {
 /**
  * The walkthrough: `say` (rich text), then both scripts with the changed lines marked, then the
  * explanation of the picked change. `notes` has one text per change block, in order.
+ *
+ * `isOpen()` decides what shows: closed, only the wrong script with its changed lines marked and
+ * `locked` (so the fix does not sit next to the task before an attempt); open, everything. When
+ * `noPython()` is true the fixed script's recorded `output` is shown too, so the lab can still be
+ * finished in a browser that cannot run Python. `host.refresh()` redraws after either changes.
  */
-function walkView({ say, starter, solution, notes }) {
+function walkView({ say, starter, solution, notes, isOpen = () => true, noPython = () => false, locked = '', noPythonSay = '', output = '' }) {
   const blocks = changeBlocks(starter, solution);
   if (blocks.length !== notes.length) throw new Error(`walk: ${blocks.length} changes, ${notes.length} notes`);
   const state = { k: 0 };
   const host = el('div.yt-walk');
-  const pane = (title, src, side, cls) => el('div',
+  const pane = (title, src, side, cls, open) => el('div',
     el('div.yt-sub', title),
     el('div.yt-code', src.split('\n').map((text, n) => {
       const k = blocks.findIndex((b) => b[side].includes(n));
       if (k < 0) return el('div.yt-code-line', text || ' ');
+      if (!open) return el(`div.yt-code-line.yt-param.${cls}`, text);
       return el(`button.yt-code-line.yt-param.${cls}${k === state.k ? '.yt-param-on' : ''}`,
         { type: 'button', 'aria-label': `${title}, zmiana ${k + 1}`, onClick: () => { state.k = k; draw(); } }, text);
     })));
   const draw = () => {
+    const open = isOpen() || noPython();
     const many = blocks.length > 1;
+    if (!open) {
+      mount(host, el('p.py-say', { html: rich(locked) }), pane('Skrypt z błędem', starter.replace(/\n$/, ''), 'wrong', 'yt-param-bad', false));
+      return;
+    }
     mount(host,
       el('p.py-say', { html: rich(say) }),
-      pane('Skrypt z błędem', starter.replace(/\n$/, ''), 'wrong', 'yt-param-bad'),
-      pane('Poprawiony skrypt', solution.replace(/\n$/, ''), 'right', 'yt-param-good'),
+      pane('Skrypt z błędem', starter.replace(/\n$/, ''), 'wrong', 'yt-param-bad', true),
+      pane('Poprawiony skrypt', solution.replace(/\n$/, ''), 'right', 'yt-param-good', true),
       el('div.yt-screen',
         el('div.yt-screen-title', many ? `Zmiana ${state.k + 1} z ${blocks.length}` : 'Co się zmieniło'),
         el('p', { html: rich(notes[state.k]) }),
-        many ? el('div.fg-toggles', el('button.fg-toggle', { type: 'button', onClick: () => { state.k = (state.k + 1) % blocks.length; draw(); } }, state.k + 1 < blocks.length ? 'Następna zmiana ›' : '‹ Pierwsza zmiana')) : null));
+        many ? el('div.fg-toggles', el('button.fg-toggle', { type: 'button', onClick: () => { state.k = (state.k + 1) % blocks.length; draw(); } }, state.k + 1 < blocks.length ? 'Następna zmiana ›' : '‹ Pierwsza zmiana')) : null),
+      noPython() && output ? el('div.yt-walk-output', el('p.py-say', { html: rich(noPythonSay) }), el('pre.py-out', output)) : null);
   };
   draw();
+  host.refresh = draw;
   return host;
 }
 
@@ -16378,6 +16391,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       answers: { ...(saved.answers || {}) },
       hint: 0,
       busy: false,
+      noPython: false,  // Pyodide failed to load in this browser: the explanation shows the recorded output
     };
     const save = () => setItem(`lab:${lab.id}`, { path: state.path, code: area.value, answers: state.answers });
     const finish = () => {
@@ -16386,6 +16400,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       else if (!getItem(`lab:${lab.id}:solved`)?.code) setItem(`lab:${lab.id}:solved`, { answers: { ...state.answers } });
       if (!isDone(lab.id)) markDone(lab.id);
       onDone?.(lab.id);
+      walk?.refresh();
     };
 
     // ---- code path (built once)
@@ -16434,7 +16449,9 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
         }
       } catch (e) {
         showOut('', '');
-        say(verdict, 'py-wrong', rich(e?.offline ? t('py.offline') : t('py.loadFailed')));
+        state.noPython = true;
+        walk?.refresh();
+        say(verdict, 'py-wrong', rich(e?.offline ? (lab.offline || t('py.offline')) : (lab.loadFailed || t('py.loadFailed'))));
       }
       state.busy = false;
       runBtn.disabled = false;
@@ -16444,7 +16461,12 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     hintBtn.addEventListener('click', () => {
       state.hint = Math.min(lab.hints.length, state.hint + 1);
       mount(hintBox, lab.hints.slice(0, state.hint).map((h) => el('p.py-hint', { html: rich(h) })));
-      if (state.hint >= lab.hints.length) hintBtn.disabled = true;
+      if (state.hint >= lab.hints.length) {
+        hintBtn.disabled = true;
+        // every hint seen: the explanation tab opens (topic 3), and stays open on this computer
+        setItem(`lab:${lab.id}:explain`, true);
+        walk?.refresh();
+      }
     });
     resetBtn.addEventListener('click', () => {
       area.value = lab.starter;
@@ -16467,7 +16489,13 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const baseVerdict = el('div.py-verdict', { 'aria-live': 'polite' });
     const inputs = new Map();
     // topic 3: the no-code tab reads the script, wrong and fixed, instead of a spreadsheet
-    const walk = lab.base.walk ? walkView({ say: lab.base.say, starter: lab.starter, solution: lab.solution, notes: lab.base.walk }) : null;
+    const walk = lab.base.walk ? walkView({
+      say: lab.base.say, starter: lab.starter, solution: lab.solution, notes: lab.base.walk,
+      // the fix opens after an attempt: the lab solved or every hint seen; or when Python cannot run here
+      isOpen: () => isDone(lab.id) || !!getItem(`lab:${lab.id}:explain`),
+      noPython: () => state.noPython,
+      locked: lab.walkLocked, noPythonSay: lab.walkNoPython, output: lab.solutionOutput,
+    }) : null;
     const basePane = el('div.py-pane',
       walk || el('p.py-say', { html: rich(lab.base.say) }),
       !walk && lab.base.files?.length ? el('div.py-files', el('span.py-files-label', t('py.tables')),
@@ -16495,7 +16523,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const paneHost = el('div');
     const tabsHost = el('div');
     const draw = () => {
-      mount(tabsHost, toggles([['kod', t('py.pathCode')], ['bez', t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
+      mount(tabsHost, toggles([['kod', t('py.pathCode')], ['bez', lab.baseLabel || t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
       mount(paneHost, state.path === 'kod' ? codePane : basePane);
     };
     draw();
@@ -16572,6 +16600,7 @@ const GENERATED3 = {
    },
    "starter": "# Plan pełnego zbierania danych w projekcie: każde zapytanie w każdym miesiącu.\nQUERIES = 14          # różne zapytania z poprzedniego kroku\nMONTHS = 82           # od stycznia 2020 r. do października 2026 r.\nPAGES = 2             # założenie planu projektu: średnio tyle stron na zapytanie i miesiąc\nSEARCH_PER_DAY = 100  # domyślny dzienny limit wywołań search.list\n\n# Jedno wywołanie search.list oddaje jedną stronę wyników.\ncalls = QUERIES * MONTHS          # tu popraw: ile wywołań search.list?\ndays = calls / SEARCH_PER_DAY     # tu popraw: ile dni, liczonych w całości?\n\nresult = {\"calls\": calls, \"days\": days}\nprint(result)\n",
    "solution": "import math\n\n# Plan pełnego zbierania danych w projekcie: każde zapytanie w każdym miesiącu.\nQUERIES = 14          # różne zapytania z poprzedniego kroku\nMONTHS = 82           # od stycznia 2020 r. do października 2026 r.\nPAGES = 2             # założenie planu projektu: średnio tyle stron na zapytanie i miesiąc\nSEARCH_PER_DAY = 100  # domyślny dzienny limit wywołań search.list\n\n# Jedno wywołanie search.list oddaje jedną stronę wyników, więc liczą się też strony.\ncalls = QUERIES * MONTHS * PAGES\n# Niepełny dzień to też dzień czekania na nowy limit, więc zaokrąglamy w górę.\ndays = math.ceil(calls / SEARCH_PER_DAY)\n\nresult = {\"calls\": calls, \"days\": days}\nprint(result)\n",
+   "solutionOutput": "{'calls': 2296, 'days': 23}\n",
    "expect": {
     "calls": 2296,
     "days": 23
@@ -16602,6 +16631,7 @@ const GENERATED3 = {
    },
    "starter": "# Lista zapytań z pierwszej wersji skryptu projektu (v2), przepisana bez zmian.\nSEARCH_QUERIES = [\n    \"red pill polska\",\n    \"manosfera\",\n    \"mgtow polska\",\n    \"incel polska\",\n    \"przegryw\",\n    \"samiec alfa\"\n    \"black pill polska\"\n    \"pua polska\"\n    \"samiec alfa\"\n    \"męskość\"\n    \"wzorce męskości\"\n    \"relacje damsko-męskie\"\n    \"prawa mężczyzn\"\n    \"samiec sigma\"\n    \"samiec beta\",\n]\n\n# Skrypt wysyła do API każdy element listy jako osobne zapytanie.\nprint(\"Elementów na liście:\", len(SEARCH_QUERIES))\nfor query in SEARCH_QUERIES:\n    print(repr(query))\n\n# Zadanie: popraw listę i policz różne zapytania.\n# in_list: ile elementów ma lista, distinct: ile jest różnych zapytań\nresult = {\"in_list\": len(SEARCH_QUERIES), \"distinct\": len(SEARCH_QUERIES)}\nprint(result)\n",
    "solution": "# Lista zapytań z pierwszej wersji skryptu projektu (v2), z dopisanymi przecinkami.\n# Bez przecinka Python skleja dwa napisy w jeden i nie zgłasza błędu.\nSEARCH_QUERIES = [\n    \"red pill polska\",\n    \"manosfera\",\n    \"mgtow polska\",\n    \"incel polska\",\n    \"przegryw\",\n    \"samiec alfa\",\n    \"black pill polska\",\n    \"pua polska\",\n    \"samiec alfa\",\n    \"męskość\",\n    \"wzorce męskości\",\n    \"relacje damsko-męskie\",\n    \"prawa mężczyzn\",\n    \"samiec sigma\",\n    \"samiec beta\",\n]\n\nprint(\"Elementów na liście:\", len(SEARCH_QUERIES))\n\n# \"samiec alfa\" jest na liście dwa razy. Różne zapytania liczymy zbiorem.\nresult = {\"in_list\": len(SEARCH_QUERIES), \"distinct\": len(set(SEARCH_QUERIES))}\nprint(result)\n",
+   "solutionOutput": "Elementów na liście: 15\n{'in_list': 15, 'distinct': 14}\n",
    "expect": {
     "in_list": 15,
     "distinct": 14
@@ -16627,6 +16657,7 @@ const GENERATED3 = {
    },
    "starter": "import json\n\n\ndef get_page(token):\n    \"\"\"Jedna odpowiedź search.list. Token None to pierwsza strona.\n\n    Na zajęciach nie łączymy się z API: funkcja czyta strony zapisane w plikach obok kodu.\n    W skrypcie badawczym jest tu youtube.search().list(..., maxResults=50, pageToken=token).\n    \"\"\"\n    name = \"search_page1.json\" if token is None else f\"search_{token.lower()}.json\"\n    with open(name, encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\npage = get_page(None)\nprint(\"Elementów na stronie:\", len(page[\"items\"]))\nprint(\"następna strona:\", page.get(\"nextPageToken\"))\n\n# Zadanie: pobieraj kolejne strony, dopóki odpowiedź ma \"nextPageToken\".\npages = 1\nids = [item[\"id\"][\"videoId\"] for item in page[\"items\"]]\n\n# pages: ile stron, hits: ile trafień, videos: ile różnych filmów\nresult = {\"pages\": pages, \"hits\": len(ids), \"videos\": len(ids)}\nprint(result)\n",
    "solution": "import json\n\n\ndef get_page(token):\n    \"\"\"Jedna odpowiedź search.list. Token None to pierwsza strona.\n\n    Na zajęciach nie łączymy się z API: funkcja czyta strony zapisane w plikach obok kodu.\n    W skrypcie badawczym jest tu youtube.search().list(..., maxResults=50, pageToken=token).\n    \"\"\"\n    name = \"search_page1.json\" if token is None else f\"search_{token.lower()}.json\"\n    with open(name, encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\n# Pobieramy kolejne strony, dopóki odpowiedź ma \"nextPageToken\".\npages, ids, token = 0, [], None\nwhile True:\n    page = get_page(token)\n    pages += 1\n    ids += [item[\"id\"][\"videoId\"] for item in page[\"items\"]]\n    token = page.get(\"nextPageToken\")\n    if token is None:\n        break\nprint(pages, \"stron,\", len(ids), \"trafień\")\n\n# Ten sam film może być na dwóch stronach, więc różne filmy liczymy zbiorem.\nresult = {\"pages\": pages, \"hits\": len(ids), \"videos\": len(set(ids))}\nprint(result)\n",
+   "solutionOutput": "9 stron, 451 trafień\n{'pages': 9, 'hits': 451, 'videos': 408}\n",
    "expect": {
     "pages": 9,
     "hits": 451,
@@ -16653,6 +16684,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\n# Jeden wiersz na film: ile komentarzy podaje API i ile skrypt zebrał.\n# n_top: komentarze główne, n_replies: odpowiedzi pod nimi.\nstatus = pd.read_csv(\"comments_status.csv\")\nprint(status.shape)\nprint(status.head(3))\n\ntop = status[\"n_top\"].sum()\nreplies = status[\"n_replies\"].sum()\n\n# Zadanie: jaką część zebranych komentarzy stracilibyśmy,\n# gdyby skrypt pobrał tylko komentarze główne, jak pierwsza wersja?\nlost = replies / top   # tu popraw\n\nresult = {\"top\": int(top), \"replies\": int(replies), \"lost\": round(float(lost), 3)}\nprint(result)\n",
    "solution": "import pandas as pd\n\n# Jeden wiersz na film: ile komentarzy podaje API i ile skrypt zebrał.\n# n_top: komentarze główne, n_replies: odpowiedzi pod nimi.\nstatus = pd.read_csv(\"comments_status.csv\")\nprint(status.shape)\nprint(status.head(3))\n\ntop = status[\"n_top\"].sum()\nreplies = status[\"n_replies\"].sum()\n\n# Bez odpowiedzi znika ich część w całości zebranych komentarzy.\nlost = replies / (top + replies)\n\nresult = {\"top\": int(top), \"replies\": int(replies), \"lost\": round(float(lost), 3)}\nprint(result)\n",
+   "solutionOutput": "(407, 5)\n      video_id  api_comment_count  n_top  n_replies         status\n0  hFw5cl0iwO0                1.0      1          0             ok\n1  hUp-H519HaY                0.0      0          0  zero_comments\n2  dD8ihWEuUHQ                2.0      2          0             ok\n{'top': 9212, 'replies': 8420, 'lost': 0.478}\n",
    "expect": {
     "top": 9212,
     "replies": 8420,
@@ -16684,6 +16716,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\n# Filmy z testu. Skrypt prosił API o wyniki po polsku: relevanceLanguage=\"pl\".\nvideos = pd.read_csv(\"videos.csv\")\nlang = videos[\"default_audio_language\"]   # język ścieżki dźwiękowej, jeśli autor go podał\nprint(lang.value_counts(dropna=False).head(8))\n\n# Zadanie: jaka część filmów ze znanym językiem jest po angielsku?\nenglish = (lang == \"en\").sum()   # tu popraw\nknown = len(lang)                # tu popraw\n\nresult = {\"known\": int(known), \"english\": int(english), \"share\": round(float(english / known), 3)}\nprint(result)\n",
    "solution": "import pandas as pd\n\n# Filmy z testu. Skrypt prosił API o wyniki po polsku: relevanceLanguage=\"pl\".\nvideos = pd.read_csv(\"videos.csv\")\nlang = videos[\"default_audio_language\"]   # język ścieżki dźwiękowej, jeśli autor go podał\nprint(lang.value_counts(dropna=False).head(8))\n\n# \"en\", \"en-US\", \"en-GB\" i inne to ten sam język: liczą się dwie pierwsze litery.\nenglish = (lang.str[:2] == \"en\").sum()\n# Pusty kod to brak informacji, a nie osobny język. Mianownik to filmy ze znanym językiem.\nknown = lang.notna().sum()\n\nresult = {\"known\": int(known), \"english\": int(english), \"share\": round(float(english / known), 3)}\nprint(result)\n",
+   "solutionOutput": "default_audio_language\nNaN       229\nen-US      52\nen         52\nen-GB      16\nes-419     12\nes-MX      10\npl          7\nit          5\nName: count, dtype: int64\n{'known': 179, 'english': 130, 'share': 0.726}\n",
    "expect": {
     "known": 179,
     "english": 130,
@@ -16720,6 +16753,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nprint(videos[\"channel_title\"].nunique(), \"kanałów\")\n\n# Reguła z projektu: kanał wygląda na serwis informacyjny, jeśli w nazwie jest\n# słowo \"news\" (wielkość liter bez znaczenia) albo \"radio\".\n# Zadanie: popraw wzorzec tak, żeby reguła złapała dokładnie takie kanały.\npattern = \"News\"   # tu popraw\nnews = videos[videos[\"channel_title\"].str.contains(pattern)]\nprint(news[\"channel_title\"].value_counts())\n\nresult = {\"videos\": len(news), \"channels\": \"; \".join(sorted(news[\"channel_title\"].unique()))}\nprint(result)\n",
    "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nprint(videos[\"channel_title\"].nunique(), \"kanałów\")\n\n# news\\b: słowo kończy się na \"news\", więc \"7NEWS\" tak, a \"Newsom\" nie.\n# |radio: albo \"radio\". case=False: wielkość liter bez znaczenia.\npattern = r\"news\\b|radio\"\nnews = videos[videos[\"channel_title\"].str.contains(pattern, case=False, regex=True)]\nprint(news[\"channel_title\"].value_counts())\n\nresult = {\"videos\": len(news), \"channels\": \"; \".join(sorted(news[\"channel_title\"].unique()))}\nprint(result)\n",
+   "solutionOutput": "288 kanałów\nchannel_title\n7NEWS Australia                            1\nRadio Olsztyn                              1\nBFBS Forces News                           1\nRadioEco                                   1\nNews Clips                                 1\nAlleria Eh - Covering Politics and News    1\nThis Is Ridiculous News                    1\nName: count, dtype: int64\n{'videos': 7, 'channels': '7NEWS Australia; Alleria Eh - Covering Politics and News; BFBS Forces News; News Clips; Radio Olsztyn; RadioEco; This Is Ridiculous News'}\n",
    "expect": {
     "videos": 7,
     "channels": "7NEWS Australia; Alleria Eh - Covering Politics and News; BFBS Forces News; News Clips; Radio Olsztyn; RadioEco; This Is Ridiculous News"
@@ -16753,6 +16787,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Filmy z wyłączonymi komentarzami mają w comment_count NaN.\nprint(videos[[\"view_count\", \"comment_count\"]].describe())\n\n# Komentarze na 1000 wyświetleń, osobno dla każdego filmu.\nratio = videos[\"comment_count\"] / videos[\"view_count\"] * 1000\n\n# Zadanie: ile komentarzy na 1000 wyświetleń ma cały korpus, a ile typowy film?\ncorpus = ratio.mean()    # tu popraw\ntypical = ratio.mean()   # tu popraw\n\nresult = {\"corpus\": round(float(corpus), 2), \"typical\": round(float(typical), 2)}\nprint(result)\n",
    "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Filmy z wyłączonymi komentarzami mają w comment_count NaN.\nprint(videos[[\"view_count\", \"comment_count\"]].describe())\n\n# Komentarze na 1000 wyświetleń, osobno dla każdego filmu.\nratio = videos[\"comment_count\"] / videos[\"view_count\"] * 1000\n\n# Cały korpus: wszystkie komentarze przez wszystkie wyświetlenia, bez filmów bez liczby komentarzy.\nknown = videos[\"comment_count\"].notna()\ncorpus = videos.loc[known, \"comment_count\"].sum() / videos.loc[known, \"view_count\"].sum() * 1000\n# Typowy film: mediana, bo kilka dużych filmów ciągnie średnią w górę.\ntypical = ratio.median()\n\nresult = {\"corpus\": round(float(corpus), 2), \"typical\": round(float(typical), 2)}\nprint(result)\n",
+   "solutionOutput": "          view_count  comment_count\ncount     408.000000     404.000000\nmean     8071.389706      43.933168\nstd     37241.384147     290.529828\nmin         4.000000       0.000000\n25%       376.000000       0.000000\n50%       978.500000       1.000000\n75%      2012.750000       7.000000\nmax    404590.000000    4354.000000\n{'corpus': 5.39, 'typical': 1.23}\n",
    "expect": {
     "corpus": 5.39,
     "typical": 1.23
@@ -16785,6 +16820,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Długość filmu z API, w zapisie ISO 8601: PT33S to 33 sekundy, PT1M5S to minuta i 5 sekund.\nprint(videos[\"duration\"].head(5))\n\n# Zadanie: ile filmów trwa 3 minuty albo krócej? Tyle może mieć Short.\nshort = videos[\"duration\"] <= \"PT3M\"   # tu popraw\n\nresult = {\"short\": int(short.sum()), \"share\": round(float(short.mean()), 3)}\nprint(result)\n",
    "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Długość filmu z API, w zapisie ISO 8601: PT33S to 33 sekundy, PT1M5S to minuta i 5 sekund.\nprint(videos[\"duration\"].head(5))\n\n# Napis porównuje się znak po znaku: \"PT45S\" wychodzi większe niż \"PT3M\", a \"PT10M\" mniejsze.\n# pd.to_timedelta czyta zapis ISO 8601 i daje prawdziwy czas.\nseconds = pd.to_timedelta(videos[\"duration\"]).dt.total_seconds()\nshort = seconds <= 180\n\nresult = {\"short\": int(short.sum()), \"share\": round(float(short.mean()), 3)}\nprint(result)\n",
+   "solutionOutput": "0     PT1M14S\n1        PT6S\n2    PT20M54S\n3    PT12M14S\n4     PT1M33S\nName: duration, dtype: object\n{'short': 362, 'share': 0.887}\n",
    "expect": {
     "short": 362,
     "share": 0.887
@@ -16814,6 +16850,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nviews = videos[\"view_count\"]   # tu popraw: najpierw najwięcej oglądane\ntotal = views.sum()\nprint(\"wszystkie wyświetlenia:\", total)\n\n# Zadanie 1: ile najczęściej oglądanych filmów daje razem połowę wszystkich wyświetleń?\nhalf = int((views.cumsum() < total / 2).sum() + 1)\n\n# Zadanie 2: jaką część wyświetleń mają filmy z najlepszej dziesiątej części?\ntop10 = views.head(len(views) // 10).sum() / total\n\nresult = {\"half\": half, \"top10\": round(float(top10), 3)}\nprint(result)\n",
    "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Najpierw najwięcej oglądane: bez tego cumsum dodaje filmy w przypadkowej kolejności pliku.\nviews = videos[\"view_count\"].sort_values(ascending=False)\ntotal = views.sum()\nprint(\"wszystkie wyświetlenia:\", total)\n\n# Ile filmów od góry trzeba wziąć, żeby suma przekroczyła połowę?\nhalf = int((views.cumsum() < total / 2).sum() + 1)\n\n# Najlepsza dziesiąta część filmów i jej część wszystkich wyświetleń.\ntop10 = views.head(len(views) // 10).sum() / total\n\nresult = {\"half\": half, \"top10\": round(float(top10), 3)}\nprint(result)\n",
+   "solutionOutput": "wszystkie wyświetlenia: 3293127\n{'half': 6, 'top10': 0.851}\n",
    "expect": {
     "half": 6,
     "top10": 0.851
@@ -16845,6 +16882,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Etykieta projektu: czy w tytule, opisie albo tagach filmu jest jedno ze słów projektu.\n# core_query_with_terms: jest, core_query_no_terms: nie ma.\nprint(videos.groupby(\"relevance\").size())\n\nvideos[\"polish\"] = videos[\"default_audio_language\"].str[:2] == \"pl\"\npolish = videos.groupby(\"relevance\")[\"polish\"].sum()\n\n# Zadanie: jaka część wszystkich komentarzy jest pod filmami bez słów projektu?\nno_terms = videos.groupby(\"relevance\").size()[\"core_query_no_terms\"]   # tu popraw\nshare = no_terms / len(videos)                                         # tu popraw\n\nresult = {\n    \"pl_with\": int(polish[\"core_query_with_terms\"]),\n    \"pl_without\": int(polish[\"core_query_no_terms\"]),\n    \"comments_no_terms\": round(float(share), 3),\n}\nprint(result)\n",
    "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Etykieta projektu: czy w tytule, opisie albo tagach filmu jest jedno ze słów projektu.\n# core_query_with_terms: jest, core_query_no_terms: nie ma.\nprint(videos.groupby(\"relevance\").size())\n\nvideos[\"polish\"] = videos[\"default_audio_language\"].str[:2] == \"pl\"\npolish = videos.groupby(\"relevance\")[\"polish\"].sum()\n\n# Komentarze, a nie filmy: sumujemy comment_count w każdej grupie.\ncomments = videos.groupby(\"relevance\")[\"comment_count\"].sum()\nshare = comments[\"core_query_no_terms\"] / comments.sum()\n\nresult = {\n    \"pl_with\": int(polish[\"core_query_with_terms\"]),\n    \"pl_without\": int(polish[\"core_query_no_terms\"]),\n    \"comments_no_terms\": round(float(share), 3),\n}\nprint(result)\n",
+   "solutionOutput": "relevance\ncore_query_no_terms      255\ncore_query_with_terms    153\ndtype: int64\n{'pl_with': 7, 'pl_without': 0, 'comments_no_terms': 0.796}\n",
    "expect": {
     "pl_with": 7,
     "pl_without": 0,
@@ -16876,6 +16914,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nviews = videos[\"view_count\"]\ncomments = videos[\"comment_count\"]   # NaN przy wyłączonych komentarzach; corr pomija takie pary\n\n# Zadanie 1: jak mocno wyświetlenia idą w parze z komentarzami? Współczynnik r Pearsona.\nr = views.corr(comments)\n\n# Zadanie 2: to samo bez jednego filmu, tego z największą liczbą wyświetleń.\nr_without_top = views.corr(comments)   # tu popraw\n\n# Zadanie 3: to samo na rangach, czyli na miejscach filmów w kolejności.\nr_rank = views.corr(comments)          # tu popraw\n\nresult = {\"r\": round(float(r), 2), \"r_without_top\": round(float(r_without_top), 2), \"r_rank\": round(float(r_rank), 2)}\nprint(result)\n",
    "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nviews = videos[\"view_count\"]\ncomments = videos[\"comment_count\"]   # NaN przy wyłączonych komentarzach; corr pomija takie pary\n\nr = views.corr(comments)\n\n# Indeks filmu z największą liczbą wyświetleń i ten sam wiersz usunięty z obu kolumn.\ntop = views.idxmax()\nr_without_top = views.drop(top).corr(comments.drop(top))\n\n# Rangi zamiast wartości. Bez scipy: rank() i zwykły corr dają współczynnik Spearmana.\nr_rank = views.rank().corr(comments.rank())\n\nresult = {\"r\": round(float(r), 2), \"r_without_top\": round(float(r_without_top), 2), \"r_rank\": round(float(r_rank), 2)}\nprint(result)\n",
+   "solutionOutput": "{'r': 0.76, 'r_without_top': 0.89, 'r_rank': 0.69}\n",
    "expect": {
     "r": 0.76,
     "r_without_top": 0.89,
@@ -16903,6 +16942,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\n# Jeden wiersz na film: ile zebranych komentarzy przyszło w kolejnych okresach po publikacji.\ntiming = pd.read_csv(\"comments_timing.csv\")\nprint(timing.head(3))\n\ncounts = timing[[\"day1\", \"day2_7\", \"day8_30\", \"later\"]].sum()\ntotal = counts.sum()\nprint(counts)\n\n# Zadanie: gdyby skrypt zebrał komentarze dzień albo tydzień po publikacji,\n# jaką część wszystkich komentarzy by miał?\nday = counts[\"day1\"] / total\nweek = counts[\"day2_7\"] / total   # tu popraw\n\nresult = {\"day\": round(float(day), 3), \"week\": round(float(week), 3)}\nprint(result)\n",
    "solution": "import pandas as pd\n\n# Jeden wiersz na film: ile zebranych komentarzy przyszło w kolejnych okresach po publikacji.\ntiming = pd.read_csv(\"comments_timing.csv\")\nprint(timing.head(3))\n\ncounts = timing[[\"day1\", \"day2_7\", \"day8_30\", \"later\"]].sum()\ntotal = counts.sum()\nprint(counts)\n\n# Tydzień po publikacji skrypt ma wszystko z pierwszego dnia i z dni 2 do 7.\nday = counts[\"day1\"] / total\nweek = (counts[\"day1\"] + counts[\"day2_7\"]) / total\n\nresult = {\"day\": round(float(day), 3), \"week\": round(float(week), 3)}\nprint(result)\n",
+   "solutionOutput": "      video_id  day1  day2_7  day8_30  later\n0  hFw5cl0iwO0     0       0        1      0\n1  hUp-H519HaY     0       0        0      0\n2  dD8ihWEuUHQ     2       0        0      0\nday1       7104\nday2_7     5420\nday8_30    1856\nlater      3155\ndtype: int64\n{'day': 0.405, 'week': 0.714}\n",
    "expect": {
     "day": 0.405,
     "week": 0.714
@@ -19305,9 +19345,20 @@ const n = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
 
 const NOTE = 'To zwykły Python. Pierwsze uruchomienie pobiera Pythona (około 25 MB) i trwa do pół minuty. Nie łączymy się z YouTube. Pliki obok kodu to odpowiedzi API z testowego przebiegu skryptu, więc każdy dostaje te same liczby.';
 const LOADING = 'Uruchamiam Pythona i czytam pliki…';
-const common = { note: NOTE, loading: LOADING };
+const WALK_LOCKED = 'Najpierw spróbuj znaleźć błąd w wyróżnionych liniach. Poprawiony skrypt i objaśnienie otworzą się, gdy rozwiążesz zadanie albo obejrzysz wszystkie podpowiedzi w zakładce „Z kodem (Python)”.';
+const WALK_NO_PYTHON = 'Python nie uruchomił się w tej przeglądarce. Tak wypisuje poprawiony skrypt, gdy działa. Z tych liczb wpisz odpowiedzi poniżej.';
+// the second tab explains the script; it opens after an attempt (src/walk.js)
+const common = {
+  note: NOTE,
+  loading: LOADING,
+  baseLabel: 'Objaśnienie',
+  walkLocked: WALK_LOCKED,
+  walkNoPython: WALK_NO_PYTHON,
+  loadFailed: 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo otwórz zakładkę „Objaśnienie”. Jest tam poprawiony skrypt i to, co wypisuje.',
+  offline: 'Nie udało się pobrać Pythona, bo nie ma internetu. Otwórz zakładkę „Objaśnienie”. Jest tam poprawiony skrypt i to, co wypisuje.',
+};
 /** The no-code tab: what each change between the starter and the solution does (src/walk.js). No field's answer here. */
-const WALK_SAY = 'Tu nie piszesz kodu. Przeczytaj skrypt z błędem i poprawiony skrypt. Kliknij wyróżnioną linię, żeby zobaczyć, co było źle i dlaczego Python nie zgłosił błędu. Liczby da poprawiony skrypt uruchomiony w zakładce „Z kodem (Python)”.';
+const WALK_SAY = 'Przeczytaj skrypt z błędem i poprawiony skrypt. Kliknij wyróżnioną linię, żeby zobaczyć, co było źle i dlaczego Python nie zgłosił błędu.';
 const WALK = {
   yt1: [
     'Skrypt potrzebuje funkcji `math.ceil`, która zaokrągla w górę. Jest w module `math`, więc trzeba go najpierw zaimportować.',
@@ -19365,6 +19416,7 @@ const LABS3 = {
     intro: 'Pełny plan projektu to każde z różnych zapytań w każdym miesiącu od 2020 r. Wyszukiwanie ma własny limit, 100 wywołań dziennie. Policz, ile wywołań potrzeba i ile dni to zajmie.',
     starter: G.yt1.starter,
     solution: G.yt1.solution,
+    solutionOutput: G.yt1.solutionOutput,
     files: [],
     expect: G.yt1.expect,
     tol: 0,
@@ -19418,6 +19470,7 @@ const LABS3 = {
     intro: 'Lista zapytań z pierwszej wersji skryptu ma 15 linii. Skrypt wysyła każdy element listy jako osobne zapytanie. Uruchom kod i zobacz, co naprawdę jest na liście. Popraw ją i policz różne zapytania.',
     starter: G.yt2.starter,
     solution: G.yt2.solution,
+    solutionOutput: G.yt2.solutionOutput,
     files: [],
     expect: G.yt2.expect,
     tol: 0,
@@ -19467,6 +19520,7 @@ const LABS3 = {
     intro: 'API oddaje wyniki porcjami. Jedna odpowiedź to jedna strona i token do następnej. Kod startowy bierze tylko pierwszą stronę. Pobierz wszystkie i policz strony, trafienia i różne filmy.',
     starter: G.yt3.starter,
     solution: G.yt3.solution,
+    solutionOutput: G.yt3.solutionOutput,
     files: PAGES,
     expect: G.yt3.expect,
     tol: 0,
@@ -19524,6 +19578,7 @@ LABS3.yt4 = {
   intro: 'Pierwszy skrypt pobierał tylko komentarze główne, bez odpowiedzi. Plik ma jeden wiersz na film z testu. Policz komentarze główne i odpowiedzi i sprawdź, jaką część zebranych komentarzy dałoby się stracić.',
   starter: G.yt4.starter,
   solution: G.yt4.solution,
+  solutionOutput: G.yt4.solutionOutput,
   files: ['comments_status.csv'],
   expect: G.yt4.expect,
   tol: 0.0006,
@@ -19573,6 +19628,7 @@ LABS3.yt5 = {
   intro: 'Skrypt prosił o wyniki po polsku. Kolumna `default_audio_language` mówi, w jakim języku jest ścieżka dźwiękowa. Bywa puste. Policz, jaka część filmów ze znanym językiem jest po angielsku.',
   starter: G.yt5.starter,
   solution: G.yt5.solution,
+  solutionOutput: G.yt5.solutionOutput,
   files: ['videos.csv'],
   expect: G.yt5.expect,
   tol: 0.0006,
@@ -19631,6 +19687,7 @@ LABS3.yt6 = {
   intro: 'Projekt oznacza kanały, które wyglądają na serwisy informacyjne. Reguła mówi, że w nazwie jest słowo „news”, w dowolnej wielkości liter, albo „radio”. Kod startowy szuka tylko „News”. Popraw wzorzec i sprawdź, kogo reguła łapie.',
   starter: G.yt6.starter,
   solution: G.yt6.solution,
+  solutionOutput: G.yt6.solutionOutput,
   files: ['videos.csv'],
   expect: G.yt6.expect,
   tol: 0,
@@ -19686,6 +19743,7 @@ LABS3.yt7 = {
   intro: '„Komentarze na 1000 wyświetleń” brzmi jak jedna liczba, a to dwie. Jedna mówi o całym korpusie, druga o typowym filmie. Kod startowy liczy obie średnią z filmów. Popraw obie.',
   starter: G.yt7.starter,
   solution: G.yt7.solution,
+  solutionOutput: G.yt7.solutionOutput,
   files: ['videos.csv'],
   expect: G.yt7.expect,
   tol: 0.006,
@@ -19744,6 +19802,7 @@ LABS3.yt8 = {
   intro: 'YouTube podaje długość filmu jako tekst, na przykład „PT1M5S”. Kod startowy porównuje ten tekst z „PT3M” i liczy się bez błędu. Policz, ile filmów trwa naprawdę 3 minuty albo krócej.',
   starter: G.yt8.starter,
   solution: G.yt8.solution,
+  solutionOutput: G.yt8.solutionOutput,
   files: ['videos.csv'],
   expect: G.yt8.expect,
   tol: 0.0006,
@@ -19794,6 +19853,7 @@ LABS3.yt9 = {
   intro: 'Średnia w Lab 7 była dużo większa od mediany, bo kilka filmów ma prawie wszystko. Policz, ile najczęściej oglądanych filmów daje połowę wszystkich wyświetleń i ile ma najlepsza dziesiąta część.',
   starter: G.yt9.starter,
   solution: G.yt9.solution,
+  solutionOutput: G.yt9.solutionOutput,
   files: ['videos.csv'],
   expect: G.yt9.expect,
   tol: 0.004,
@@ -19845,6 +19905,7 @@ LABS3.yt10 = {
   intro: 'Projekt oznacza filmy, w których tytule, opisie albo tagach jest jedno ze słów projektu. Sprawdź, gdzie są filmy z polskim kodem języka i jaka część wszystkich komentarzy jest pod filmami bez tych słów.',
   starter: G.yt10.starter,
   solution: G.yt10.solution,
+  solutionOutput: G.yt10.solutionOutput,
   files: ['videos.csv'],
   expect: G.yt10.expect,
   tol: 0.0006,
@@ -19895,6 +19956,7 @@ LABS3.yt12 = {
   intro: 'Komentarze przychodzą przez wiele tygodni po publikacji. Plik mówi, ile zebranych komentarzy przyszło w kolejnych okresach. Policz, jaką część skrypt by miał, gdyby zbierał dzień albo tydzień po publikacji.',
   starter: G.yt12.starter,
   solution: G.yt12.solution,
+  solutionOutput: G.yt12.solutionOutput,
   files: ['comments_timing.csv'],
   expect: G.yt12.expect,
   tol: 0.0006,
@@ -19945,6 +20007,7 @@ LABS3.yt11 = {
   intro: 'Współczynnik r mówi, jak mocno dwie liczby idą w parze. Policz go dla wyświetleń i komentarzy trzy razy. Na wszystkich filmach, bez filmu z największą liczbą wyświetleń i na rangach.',
   starter: G.yt11.starter,
   solution: G.yt11.solution,
+  solutionOutput: G.yt11.solutionOutput,
   files: ['videos.csv'],
   expect: G.yt11.expect,
   tol: 0.006,

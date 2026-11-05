@@ -16254,32 +16254,45 @@ function changeBlocks(starter, solution) {
 /**
  * The walkthrough: `say` (rich text), then both scripts with the changed lines marked, then the
  * explanation of the picked change. `notes` has one text per change block, in order.
+ *
+ * `isOpen()` decides what shows: closed, only the wrong script with its changed lines marked and
+ * `locked` (so the fix does not sit next to the task before an attempt); open, everything. When
+ * `noPython()` is true the fixed script's recorded `output` is shown too, so the lab can still be
+ * finished in a browser that cannot run Python. `host.refresh()` redraws after either changes.
  */
-function walkView({ say, starter, solution, notes }) {
+function walkView({ say, starter, solution, notes, isOpen = () => true, noPython = () => false, locked = '', noPythonSay = '', output = '' }) {
   const blocks = changeBlocks(starter, solution);
   if (blocks.length !== notes.length) throw new Error(`walk: ${blocks.length} changes, ${notes.length} notes`);
   const state = { k: 0 };
   const host = el('div.yt-walk');
-  const pane = (title, src, side, cls) => el('div',
+  const pane = (title, src, side, cls, open) => el('div',
     el('div.yt-sub', title),
     el('div.yt-code', src.split('\n').map((text, n) => {
       const k = blocks.findIndex((b) => b[side].includes(n));
       if (k < 0) return el('div.yt-code-line', text || ' ');
+      if (!open) return el(`div.yt-code-line.yt-param.${cls}`, text);
       return el(`button.yt-code-line.yt-param.${cls}${k === state.k ? '.yt-param-on' : ''}`,
         { type: 'button', 'aria-label': `${title}, zmiana ${k + 1}`, onClick: () => { state.k = k; draw(); } }, text);
     })));
   const draw = () => {
+    const open = isOpen() || noPython();
     const many = blocks.length > 1;
+    if (!open) {
+      mount(host, el('p.py-say', { html: rich(locked) }), pane('Skrypt z błędem', starter.replace(/\n$/, ''), 'wrong', 'yt-param-bad', false));
+      return;
+    }
     mount(host,
       el('p.py-say', { html: rich(say) }),
-      pane('Skrypt z błędem', starter.replace(/\n$/, ''), 'wrong', 'yt-param-bad'),
-      pane('Poprawiony skrypt', solution.replace(/\n$/, ''), 'right', 'yt-param-good'),
+      pane('Skrypt z błędem', starter.replace(/\n$/, ''), 'wrong', 'yt-param-bad', true),
+      pane('Poprawiony skrypt', solution.replace(/\n$/, ''), 'right', 'yt-param-good', true),
       el('div.yt-screen',
         el('div.yt-screen-title', many ? `Zmiana ${state.k + 1} z ${blocks.length}` : 'Co się zmieniło'),
         el('p', { html: rich(notes[state.k]) }),
-        many ? el('div.fg-toggles', el('button.fg-toggle', { type: 'button', onClick: () => { state.k = (state.k + 1) % blocks.length; draw(); } }, state.k + 1 < blocks.length ? 'Następna zmiana ›' : '‹ Pierwsza zmiana')) : null));
+        many ? el('div.fg-toggles', el('button.fg-toggle', { type: 'button', onClick: () => { state.k = (state.k + 1) % blocks.length; draw(); } }, state.k + 1 < blocks.length ? 'Następna zmiana ›' : '‹ Pierwsza zmiana')) : null),
+      noPython() && output ? el('div.yt-walk-output', el('p.py-say', { html: rich(noPythonSay) }), el('pre.py-out', output)) : null);
   };
   draw();
+  host.refresh = draw;
   return host;
 }
 
@@ -16378,6 +16391,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       answers: { ...(saved.answers || {}) },
       hint: 0,
       busy: false,
+      noPython: false,  // Pyodide failed to load in this browser: the explanation shows the recorded output
     };
     const save = () => setItem(`lab:${lab.id}`, { path: state.path, code: area.value, answers: state.answers });
     const finish = () => {
@@ -16386,6 +16400,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       else if (!getItem(`lab:${lab.id}:solved`)?.code) setItem(`lab:${lab.id}:solved`, { answers: { ...state.answers } });
       if (!isDone(lab.id)) markDone(lab.id);
       onDone?.(lab.id);
+      walk?.refresh();
     };
 
     // ---- code path (built once)
@@ -16434,7 +16449,9 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
         }
       } catch (e) {
         showOut('', '');
-        say(verdict, 'py-wrong', rich(e?.offline ? t('py.offline') : t('py.loadFailed')));
+        state.noPython = true;
+        walk?.refresh();
+        say(verdict, 'py-wrong', rich(e?.offline ? (lab.offline || t('py.offline')) : (lab.loadFailed || t('py.loadFailed'))));
       }
       state.busy = false;
       runBtn.disabled = false;
@@ -16444,7 +16461,12 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     hintBtn.addEventListener('click', () => {
       state.hint = Math.min(lab.hints.length, state.hint + 1);
       mount(hintBox, lab.hints.slice(0, state.hint).map((h) => el('p.py-hint', { html: rich(h) })));
-      if (state.hint >= lab.hints.length) hintBtn.disabled = true;
+      if (state.hint >= lab.hints.length) {
+        hintBtn.disabled = true;
+        // every hint seen: the explanation tab opens (topic 3), and stays open on this computer
+        setItem(`lab:${lab.id}:explain`, true);
+        walk?.refresh();
+      }
     });
     resetBtn.addEventListener('click', () => {
       area.value = lab.starter;
@@ -16467,7 +16489,13 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const baseVerdict = el('div.py-verdict', { 'aria-live': 'polite' });
     const inputs = new Map();
     // topic 3: the no-code tab reads the script, wrong and fixed, instead of a spreadsheet
-    const walk = lab.base.walk ? walkView({ say: lab.base.say, starter: lab.starter, solution: lab.solution, notes: lab.base.walk }) : null;
+    const walk = lab.base.walk ? walkView({
+      say: lab.base.say, starter: lab.starter, solution: lab.solution, notes: lab.base.walk,
+      // the fix opens after an attempt: the lab solved or every hint seen; or when Python cannot run here
+      isOpen: () => isDone(lab.id) || !!getItem(`lab:${lab.id}:explain`),
+      noPython: () => state.noPython,
+      locked: lab.walkLocked, noPythonSay: lab.walkNoPython, output: lab.solutionOutput,
+    }) : null;
     const basePane = el('div.py-pane',
       walk || el('p.py-say', { html: rich(lab.base.say) }),
       !walk && lab.base.files?.length ? el('div.py-files', el('span.py-files-label', t('py.tables')),
@@ -16495,7 +16523,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const paneHost = el('div');
     const tabsHost = el('div');
     const draw = () => {
-      mount(tabsHost, toggles([['kod', t('py.pathCode')], ['bez', t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
+      mount(tabsHost, toggles([['kod', t('py.pathCode')], ['bez', lab.baseLabel || t('py.pathBase')]], state.path, (p) => { state.path = p; save(); draw(); }));
       mount(paneHost, state.path === 'kod' ? codePane : basePane);
     };
     draw();

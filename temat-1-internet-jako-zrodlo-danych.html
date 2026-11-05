@@ -1906,6 +1906,7 @@ textarea.kc-input { resize: vertical; }
 .yt-card span { display: block; font-size: 12px; color: var(--ink-soft); }
 .yt-card strong { display: block; font: 600 18px var(--mono); overflow-wrap: anywhere; }
 .yt-sub { margin: 8px 0 2px; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.yt-bar-row.yt-cross { outline: 1px solid var(--warn); border-radius: 3px; background: var(--warn-bg); }
 
 </style>
 </head>
@@ -15686,6 +15687,8 @@ const STRINGS = {
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
   'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.loop.title': 'Dla chętnych. To samo pętlą, bez pandas',
+  'py.alt.loop.note': 'Pętla dodaje filmy od najwięcej oglądanego i zatrzymuje się, gdy suma przekroczy połowę. To dokładnie to, co robi `cumsum` na posortowanej kolumnie.',
   'py.alt.iso.title': 'Dla chętnych. Zapis ISO 8601 bez pandas',
   'py.alt.iso.note': 'Ta sama długość policzona ręcznie. Wyrażenie regularne rozbiera „PT1H2M3S” na godziny, minuty i sekundy. Tak działa `pd.to_timedelta` pod spodem.',
   'py.alt.ratio.title': 'Dla chętnych. To samo bez pandas',

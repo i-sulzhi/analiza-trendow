@@ -1931,6 +1931,17 @@ textarea.kc-input { resize: vertical; }
 .yt-param:hover { background: var(--line); }
 .yt-param-on, .yt-param-on:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); outline: 1px solid var(--accent); }
 .yt-param:focus-visible { outline: 2px solid var(--accent); }
+/* the no-code tab of topic 3: the wrong lines and the fixed lines */
+.yt-walk .yt-code { margin-bottom: 4px; }
+.yt-walk .yt-param { width: max-content; min-width: 100%; }
+.yt-param-bad { background: color-mix(in srgb, var(--warn) 16%, transparent); }
+.yt-param-good { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.yt-param-bad.yt-param-on, .yt-param-bad.yt-param-on:hover { background: color-mix(in srgb, var(--warn) 30%, transparent); outline: 1px solid var(--warn); }
+.yt-walk .yt-param { border-radius: 0; }
+.yt-walk .yt-param-on, .yt-walk .yt-param-on:hover { outline: none; }
+.yt-walk .yt-param-good.yt-param-on { background: color-mix(in srgb, var(--accent) 28%, transparent); box-shadow: inset 3px 0 0 var(--accent); }
+.yt-walk .yt-param-bad.yt-param-on { box-shadow: inset 3px 0 0 var(--warn); }
+.yt-walk .yt-code-line { padding: 0 4px; }
 
 </style>
 </head>
@@ -16197,6 +16208,84 @@ function checkBase(lab, answers) {
 __modules["../../analiza-trendow-w-internecie/src/tasks.js"] = { "PROFILE_ROWS": PROFILE_ROWS, "FILES": FILES, "matches": matches, "LABS": LABS, "explainError": explainError, "parseNumber": parseNumber, "checkCode": checkCode, "checkBase": checkBase };
 })();
 
+/* ===== ../../analiza-trendow-w-internecie/src/walk.js ===== */
+(function () {
+/**
+ * The no-code tab of topic 3: the starter script with its mistake and the fixed script, side by
+ * side (stacked on a phone), each changed line clickable, one explanation per change.
+ *
+ * The change blocks come from the two files themselves: code lines are compared with comments
+ * left out (the fixed script explains more in its comments, which is not a change of code), by
+ * a longest common subsequence, and each block is mapped back to the line numbers of both files.
+ */
+const { el, mount } = __modules["src/ui/dom.js"];
+const { rich } = __modules["src/book/rich.js"];
+/** The code of a line without its comment, or null for a comment-only or empty line. */
+const codeOf = (line) => {
+  if (!line.trim() || line.trim().startsWith('#')) return null;
+  return line.replace(/\s+#.*$/, '').trimEnd();
+};
+
+/** Change blocks: [{ wrong: [line numbers in the starter], right: [line numbers in the solution] }]. */
+function changeBlocks(starter, solution) {
+  const keep = (src) => src.split('\n').map((t, i) => [i, codeOf(t)]).filter(([, c]) => c !== null);
+  const a = keep(starter);
+  const b = keep(solution);
+  // LCS table on the code lines
+  const L = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i -= 1) {
+    for (let j = b.length - 1; j >= 0; j -= 1) L[i][j] = a[i][1] === b[j][1] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  }
+  const blocks = [];
+  let cur = null;
+  const flush = () => { if (cur) blocks.push(cur); cur = null; };
+  let i = 0;
+  let j = 0;
+  while (i < a.length || j < b.length) {
+    if (i < a.length && j < b.length && a[i][1] === b[j][1]) { flush(); i += 1; j += 1; } else {
+      cur = cur || { wrong: [], right: [] };
+      if (j >= b.length || (i < a.length && L[i + 1][j] >= L[i][j + 1])) { cur.wrong.push(a[i][0]); i += 1; } else { cur.right.push(b[j][0]); j += 1; }
+    }
+  }
+  flush();
+  return blocks;
+}
+
+/**
+ * The walkthrough: `say` (rich text), then both scripts with the changed lines marked, then the
+ * explanation of the picked change. `notes` has one text per change block, in order.
+ */
+function walkView({ say, starter, solution, notes }) {
+  const blocks = changeBlocks(starter, solution);
+  if (blocks.length !== notes.length) throw new Error(`walk: ${blocks.length} changes, ${notes.length} notes`);
+  const state = { k: 0 };
+  const host = el('div.yt-walk');
+  const pane = (title, src, side, cls) => el('div',
+    el('div.yt-sub', title),
+    el('div.yt-code', src.split('\n').map((text, n) => {
+      const k = blocks.findIndex((b) => b[side].includes(n));
+      if (k < 0) return el('div.yt-code-line', text || ' ');
+      return el(`button.yt-code-line.yt-param.${cls}${k === state.k ? '.yt-param-on' : ''}`,
+        { type: 'button', 'aria-label': `${title}, zmiana ${k + 1}`, onClick: () => { state.k = k; draw(); } }, text);
+    })));
+  const draw = () => {
+    const many = blocks.length > 1;
+    mount(host,
+      el('p.py-say', { html: rich(say) }),
+      pane('Skrypt z błędem', starter.replace(/\n$/, ''), 'wrong', 'yt-param-bad'),
+      pane('Poprawiony skrypt', solution.replace(/\n$/, ''), 'right', 'yt-param-good'),
+      el('div.yt-screen',
+        el('div.yt-screen-title', many ? `Zmiana ${state.k + 1} z ${blocks.length}` : 'Co się zmieniło'),
+        el('p', { html: rich(notes[state.k]) }),
+        many ? el('div.fg-toggles', el('button.fg-toggle', { type: 'button', onClick: () => { state.k = (state.k + 1) % blocks.length; draw(); } }, state.k + 1 < blocks.length ? 'Następna zmiana ›' : '‹ Pierwsza zmiana')) : null));
+  };
+  draw();
+  return host;
+}
+
+__modules["../../analiza-trendow-w-internecie/src/walk.js"] = { "codeOf": codeOf, "changeBlocks": changeBlocks, "walkView": walkView };
+})();
+
 /* ===== ../../analiza-trendow-w-internecie/src/pylab.js ===== */
 (function () {
 /**
@@ -16218,6 +16307,7 @@ const { t } = __modules["src/i18n/index.js"];
 const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
 const { runPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
 const { LABS, FILES, checkCode, checkBase, explainError } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
+const { walkView } = __modules["../../analiza-trendow-w-internecie/src/walk.js"];
 const { download } = __modules["src/ui/download.js"];
 const INDENT = '    ';
 
@@ -16376,11 +16466,13 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     // ---- no-code path
     const baseVerdict = el('div.py-verdict', { 'aria-live': 'polite' });
     const inputs = new Map();
+    // topic 3: the no-code tab reads the script, wrong and fixed, instead of a spreadsheet
+    const walk = lab.base.walk ? walkView({ say: lab.base.say, starter: lab.starter, solution: lab.solution, notes: lab.base.walk }) : null;
     const basePane = el('div.py-pane',
-      el('p.py-say', { html: rich(lab.base.say) }),
-      lab.base.files?.length ? el('div.py-files', el('span.py-files-label', t('py.tables')),
+      walk || el('p.py-say', { html: rich(lab.base.say) }),
+      !walk && lab.base.files?.length ? el('div.py-files', el('span.py-files-label', t('py.tables')),
         lab.base.files.map((name) => el('button.py-file', { type: 'button', onClick: () => download(name, `\ufeff${files[name]}`) }, name))) : null,
-      lab.base.steps?.length ? el('ol.py-steps', lab.base.steps.map((step) => el('li', { html: rich(step) }))) : null,
+      !walk && lab.base.steps?.length ? el('ol.py-steps', lab.base.steps.map((step) => el('li', { html: rich(step) }))) : null,
       lab.base.fields.map((f) => {
         const input = el('input.py-input', { type: 'text', inputmode: 'decimal', id: `py-${lab.id}-${f.id}`, autocomplete: 'off' });
         input.value = state.answers[f.id] || '';

@@ -1926,6 +1926,11 @@ textarea.kc-input { resize: vertical; }
 .yt-tile-note { font-style: italic; }
 .yt-why-list { margin: 6px 0 0; padding-left: 1.2em; font-size: 13px; color: var(--ink-soft); }
 .yt-why-list li { margin: 2px 0; }
+/* figure "Jedno wywołanie search.list": each parameter is a clickable code line */
+.yt-param { display: block; width: 100%; margin: 0; padding: 0 4px; border: 0; border-radius: 4px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.yt-param:hover { background: var(--line); }
+.yt-param-on, .yt-param-on:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); outline: 1px solid var(--accent); }
+.yt-param:focus-visible { outline: 2px solid var(--accent); }
 
 </style>
 </head>

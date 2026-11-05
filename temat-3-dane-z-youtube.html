@@ -16967,6 +16967,13 @@ const GENERATED3 = {
   "testSearchCalls": 9,
   "testOtherUnits": 642,
   "testScriptUnits": 1542,
+  "quotaParts": {
+   "videos_list": 9,
+   "comment_threads_list": 326,
+   "comments_list": 303,
+   "other": 4,
+   "total": 642
+  },
   "searchPerDay": 100,
   "unitsPerDay": 10000,
   "v2": {
@@ -18845,7 +18852,7 @@ const sections = [
     { p: 'Klucz ma dzienny limit. Od czerwca 2026 r. YouTube liczy go w dwóch pulach. Wyszukiwanie, czyli `search.list`, ma domyślnie 100 wywołań dziennie. Pozostałe metody, na przykład komentarze i statystyki filmów, mają razem 10 000 jednostek, zwykle 1 za wywołanie. Obie pule odnawiają się o północy czasu pacyficznego, czyli około 9 rano w Polsce.' },
     { exercise: 'yt1', num: 'Lab 2', title: 'Ile dni potrwa zbieranie?', toc: 'Lab 2. Klucz i limit' },
     { figure: 'ytlimit' },
-    { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Większy limit można dostać od Google na wniosek. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
+    { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Prawie całą drugą pulę zużywają komentarze i odpowiedzi, a statystyki filmów kosztują bardzo mało. Większy limit można dostać od Google na wniosek. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
   ]),
 
   step('w3-4', '3.4', 'Strony wyników', [
@@ -19825,6 +19832,14 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
   const perCall = G3.expect.hits / G3.expect.pages;
   const distinct = G3.expect.videos / G3.expect.hits;
   const perVideo = D.testOtherUnits / G3.expect.videos;
+  // the same units split by method, in the proportions of the test
+  const Q = D.quotaParts;
+  const QUOTA_PARTS = [
+    ['comment_threads_list', 'komentarze główne'],
+    ['comments_list', 'odpowiedzi'],
+    ['videos_list', 'statystyki filmów'],
+    ['other', 'inne'],
+  ];
   // no preset of the test itself: its videos are the answer of Lab 3, which comes after this figure
   const PRESETS = { plan: [G1.facts.queries, G1.facts.months, G1.facts.pages], month: [G1.facts.queries, 1, G1.facts.pages] };
   const state = { v: 'plan', q: G1.facts.queries, m: G1.facts.months, p: G1.facts.pages };
@@ -19860,9 +19875,19 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
     const units1 = Math.min(D.unitsPerDay, Math.round(videos1 * perVideo));
     const days = Math.ceil(calls / D.searchPerDay);
     const commentsFirst = videos1 * perVideo > D.unitsPerDay;
+    // videos.list is exact, one unit per 50 videos; the rest goes to comments in the test's proportions
+    const stats = Math.min(units1, Math.ceil(videos1 / 50));
+    const rest = Q.total - Q.videos_list;
+    const split = { videos_list: stats };
+    for (const key of ['comment_threads_list', 'comments_list', 'other']) split[key] = Math.round(((units1 - stats) * Q[key]) / rest);
     mount(results,
       meter('Wyszukiwanie, pierwszy dzień', day1, D.searchPerDay, `${day1} z ${D.searchPerDay} wywołań`),
       meter('Pozostałe metody, pierwszy dzień', units1, D.unitsPerDay, `ok. ${fmt(units1)} z ${fmt(D.unitsPerDay)} jednostek`),
+      el('div.yt-sub', 'Na co idą te jednostki'),
+      el('div.yt-bars', QUOTA_PARTS.map(([key, label]) => el('div.yt-bar-row.yt-bar-row-wide',
+        el('span.yt-bar-label', label),
+        el('span.yt-bar', el('span.yt-bar-new', { style: `width:${(100 * split[key]) / Math.max(1, units1)}%` })),
+        el('span.yt-bar-val', `ok. ${fmt(split[key])}`)))),
       el('div.yt-cards', card('Wywołania wyszukiwania', fmt(calls)), card('Filmy z wyszukiwania', `ok. ${fmt(Math.round(calls * perCall * distinct))}`), card('Dni przy domyślnym limicie', String(days))),
       el('div.sq-read', calls <= D.searchPerDay
         ? `Plan mieści się w jednym dniu. Na komentarze i statystyki idzie ok. ${units(units1)}.`
@@ -19871,7 +19896,7 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
           : `Pierwsza kończy się pula wyszukiwania. Komentarze do ok. ${fmt(videos1)} filmów z jednego dnia mieszczą się w drugiej puli, więc o czasie decyduje wyszukiwanie. Skrypt pracuje ${days} dni.`));
   };
   draw();
-  return frame(n, 'Jeden dzień pracy skryptu', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r. Przeliczniki z testu: około 50 trafień na wywołanie, około 1 na 10 to powtórka, ${String(Math.round(perVideo * 10) / 10).replace('.', ',')} jednostki na film. Duże kanały z tysiącami komentarzy zużywają drugą pulę szybciej. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
+  return frame(n, 'Jeden dzień pracy skryptu', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r. Przeliczniki z testu: około 50 trafień na wywołanie, około 1 na 10 to powtórka, ${String(Math.round(perVideo * 10) / 10).replace('.', ',')} jednostki na film. W teście ${units(Q.total)} poza wyszukiwaniem to ${fmt(Q.comment_threads_list)} na commentThreads.list (strona do 100 komentarzy głównych), ${fmt(Q.comments_list)} na comments.list (odpowiedzi w wątkach, które mają ich więcej niż 5), ${fmt(Q.videos_list)} na videos.list (do 50 filmów w jednym wywołaniu) i ${fmt(Q.other)} na inne wywołania, w tym jedno z błędem. Duże kanały z tysiącami komentarzy zużywają drugą pulę szybciej. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
 }
 
 const fmt = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');

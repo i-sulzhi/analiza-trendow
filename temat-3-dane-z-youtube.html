@@ -1912,6 +1912,12 @@ textarea.kc-input { resize: vertical; }
 .yt-labels-head b { font-size: 12px; color: var(--ink-soft); font-weight: 600; text-align: right; }
 .yt-labels-row { background: var(--bg-sunken); border-radius: 3px; }
 .yt-labels-row b { font: 600 13px var(--mono); text-align: right; }
+.yt-scatter-wrap { min-width: 0; }
+.yt-scatter { display: block; width: 100%; max-width: 420px; height: auto; }
+.yt-axis { stroke: var(--line-strong); stroke-width: 1; }
+.yt-axis-text { font-size: 10px; fill: var(--ink-soft); }
+.yt-dot { fill: var(--accent); fill-opacity: .55; }
+.yt-dot-out { fill: var(--warn); stroke: var(--ink); stroke-width: 1; }
 
 </style>
 </head>
@@ -15692,6 +15698,8 @@ const STRINGS = {
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
   'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.pearson.title': 'Dla chętnych. r i rangi bez pandas',
+  'py.alt.pearson.note': 'Wzór Pearsona i rangi napisane ręcznie. Współczynnik Spearmana to zwykły r policzony na rangach zamiast na wartościach.',
   'py.alt.running.title': 'Dla chętnych. Suma narastająca bez pandas',
   'py.alt.running.note': 'Pętla dodaje okresy po kolei i zapisuje, ile skrypt ma po każdym z nich. Tydzień to suma pierwszych dwóch okresów, a nie sam drugi.',
   'py.alt.groups.title': 'Dla chętnych. Grupy w słowniku, bez pandas',
@@ -16755,6 +16763,32 @@ const GENERATED3 = {
     "allComments": 17749
    }
   },
+  "yt11": {
+   "alt": {
+    "kind": "pearson",
+    "code": "import csv\nimport math\n\n\ndef pearson(xs, ys):\n    \"\"\"Pearson correlation of two equally long lists.\"\"\"\n    n = len(xs)\n    mx, my = sum(xs) / n, sum(ys) / n\n    sxy = sum((x - mx) * (y - my) for x, y in zip(xs, ys))\n    sxx = sum((x - mx) ** 2 for x in xs)\n    syy = sum((y - my) ** 2 for y in ys)\n    return sxy / math.sqrt(sxx * syy)\n\n\ndef ranks(xs):\n    \"\"\"Ranks from 1, ties get the mean of their places, like pandas rank().\"\"\"\n    order = sorted(range(len(xs)), key=lambda i: xs[i])\n    out = [0.0] * len(xs)\n    i = 0\n    while i < len(order):\n        j = i\n        while j + 1 < len(order) and xs[order[j + 1]] == xs[order[i]]:\n            j += 1\n        for k in range(i, j + 1):\n            out[order[k]] = (i + j) / 2 + 1\n        i = j + 1\n    return out\n\n\npairs = []\nwith open(\"videos.csv\", encoding=\"utf-8\", newline=\"\") as f:\n    for row in csv.DictReader(f):\n        if row[\"comment_count\"]:   # pary bez liczby komentarzy pomijamy, jak pandas\n            pairs.append((float(row[\"view_count\"]), float(row[\"comment_count\"])))\n\nxs = [p[0] for p in pairs]\nys = [p[1] for p in pairs]\ntop = xs.index(max(xs))\nresult = {\n    \"r\": round(pearson(xs, ys), 2),\n    \"r_without_top\": round(pearson(xs[:top] + xs[top + 1:], ys[:top] + ys[top + 1:]), 2),\n    \"r_rank\": round(pearson(ranks(xs), ranks(ys)), 2),\n}\nprint(result)\n"
+   },
+   "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nviews = videos[\"view_count\"]\ncomments = videos[\"comment_count\"]   # NaN przy wyłączonych komentarzach; corr pomija takie pary\n\n# Zadanie 1: jak mocno wyświetlenia idą w parze z komentarzami? Współczynnik r Pearsona.\nr = views.corr(comments)\n\n# Zadanie 2: to samo bez jednego filmu, tego z największą liczbą wyświetleń.\nr_without_top = views.corr(comments)   # tu popraw\n\n# Zadanie 3: to samo na rangach, czyli na miejscach filmów w kolejności.\nr_rank = views.corr(comments)          # tu popraw\n\nresult = {\"r\": round(float(r), 2), \"r_without_top\": round(float(r_without_top), 2), \"r_rank\": round(float(r_rank), 2)}\nprint(result)\n",
+   "expect": {
+    "r": 0.76,
+    "r_without_top": 0.89,
+    "r_rank": 0.69
+   },
+   "starterError": null,
+   "starterValue": {
+    "r": 0.76,
+    "r_without_top": 0.76,
+    "r_rank": 0.76
+   },
+   "facts": {
+    "withoutTopComments": 0.66,
+    "log": 0.74,
+    "topViews": 404590,
+    "topComments": 109,
+    "pairs": 404,
+    "topShareViews": 0.123
+   }
+  },
   "yt12": {
    "alt": {
     "kind": "running",
@@ -17063,6 +17097,1624 @@ const GENERATED3 = {
    "videos_with_creator_comments": 85,
    "dated_before_video": 27
   },
+  "scatter": [
+   [
+    933,
+    1
+   ],
+   [
+    2479,
+    0
+   ],
+   [
+    165,
+    2
+   ],
+   [
+    1270,
+    1
+   ],
+   [
+    3082,
+    3
+   ],
+   [
+    2009,
+    7
+   ],
+   [
+    3850,
+    10
+   ],
+   [
+    1281,
+    5
+   ],
+   [
+    3152,
+    1
+   ],
+   [
+    571,
+    20
+   ],
+   [
+    239,
+    5
+   ],
+   [
+    394490,
+    4354
+   ],
+   [
+    255963,
+    3261
+   ],
+   [
+    243461,
+    1244
+   ],
+   [
+    65016,
+    679
+   ],
+   [
+    655,
+    2
+   ],
+   [
+    33,
+    2
+   ],
+   [
+    447,
+    0
+   ],
+   [
+    2188,
+    2
+   ],
+   [
+    175581,
+    125
+   ],
+   [
+    887,
+    0
+   ],
+   [
+    655,
+    0
+   ],
+   [
+    26225,
+    575
+   ],
+   [
+    189,
+    0
+   ],
+   [
+    1188,
+    0
+   ],
+   [
+    1378,
+    3
+   ],
+   [
+    9225,
+    52
+   ],
+   [
+    16678,
+    118
+   ],
+   [
+    6051,
+    57
+   ],
+   [
+    332,
+    0
+   ],
+   [
+    4864,
+    62
+   ],
+   [
+    57212,
+    354
+   ],
+   [
+    841,
+    3
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    5950,
+    15
+   ],
+   [
+    2377,
+    14
+   ],
+   [
+    1181,
+    1
+   ],
+   [
+    718,
+    0
+   ],
+   [
+    1202,
+    3
+   ],
+   [
+    1380,
+    0
+   ],
+   [
+    948,
+    1
+   ],
+   [
+    129,
+    0
+   ],
+   [
+    1255,
+    6
+   ],
+   [
+    198,
+    0
+   ],
+   [
+    3650,
+    11
+   ],
+   [
+    30858,
+    165
+   ],
+   [
+    20389,
+    210
+   ],
+   [
+    1079,
+    0
+   ],
+   [
+    39136,
+    17
+   ],
+   [
+    488,
+    0
+   ],
+   [
+    86,
+    0
+   ],
+   [
+    6441,
+    3
+   ],
+   [
+    1098,
+    0
+   ],
+   [
+    57810,
+    354
+   ],
+   [
+    23,
+    0
+   ],
+   [
+    274,
+    0
+   ],
+   [
+    1793,
+    2
+   ],
+   [
+    36598,
+    18
+   ],
+   [
+    74,
+    1
+   ],
+   [
+    1157,
+    1
+   ],
+   [
+    370,
+    0
+   ],
+   [
+    3672,
+    1
+   ],
+   [
+    1277,
+    0
+   ],
+   [
+    2062,
+    0
+   ],
+   [
+    1504,
+    5
+   ],
+   [
+    553,
+    0
+   ],
+   [
+    279,
+    0
+   ],
+   [
+    8586,
+    12
+   ],
+   [
+    56,
+    0
+   ],
+   [
+    1508,
+    3
+   ],
+   [
+    1181,
+    2
+   ],
+   [
+    181636,
+    865
+   ],
+   [
+    13569,
+    21
+   ],
+   [
+    21030,
+    22
+   ],
+   [
+    7272,
+    74
+   ],
+   [
+    95,
+    0
+   ],
+   [
+    492,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    23326,
+    154
+   ],
+   [
+    2009,
+    9
+   ],
+   [
+    1297,
+    19
+   ],
+   [
+    1688,
+    0
+   ],
+   [
+    93,
+    0
+   ],
+   [
+    3117,
+    5
+   ],
+   [
+    500,
+    1
+   ],
+   [
+    1319,
+    0
+   ],
+   [
+    404590,
+    109
+   ],
+   [
+    15405,
+    50
+   ],
+   [
+    1126,
+    3
+   ],
+   [
+    321,
+    0
+   ],
+   [
+    912,
+    0
+   ],
+   [
+    137430,
+    685
+   ],
+   [
+    22540,
+    489
+   ],
+   [
+    90,
+    0
+   ],
+   [
+    1192,
+    6
+   ],
+   [
+    1490,
+    0
+   ],
+   [
+    351,
+    0
+   ],
+   [
+    5313,
+    5
+   ],
+   [
+    1094,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    7225,
+    30
+   ],
+   [
+    1066,
+    0
+   ],
+   [
+    711,
+    6
+   ],
+   [
+    649,
+    0
+   ],
+   [
+    1104,
+    1
+   ],
+   [
+    910,
+    1
+   ],
+   [
+    1090,
+    0
+   ],
+   [
+    1613,
+    1
+   ],
+   [
+    1630,
+    6
+   ],
+   [
+    976,
+    1
+   ],
+   [
+    780,
+    0
+   ],
+   [
+    393,
+    1
+   ],
+   [
+    16,
+    0
+   ],
+   [
+    1571,
+    4
+   ],
+   [
+    373,
+    2
+   ],
+   [
+    3873,
+    24
+   ],
+   [
+    13,
+    0
+   ],
+   [
+    4440,
+    41
+   ],
+   [
+    117,
+    0
+   ],
+   [
+    4156,
+    19
+   ],
+   [
+    155,
+    0
+   ],
+   [
+    798,
+    5
+   ],
+   [
+    865,
+    0
+   ],
+   [
+    3250,
+    21
+   ],
+   [
+    258,
+    8
+   ],
+   [
+    981,
+    5
+   ],
+   [
+    167,
+    0
+   ],
+   [
+    498,
+    5
+   ],
+   [
+    49,
+    0
+   ],
+   [
+    736,
+    2
+   ],
+   [
+    1163,
+    4
+   ],
+   [
+    588,
+    12
+   ],
+   [
+    9,
+    0
+   ],
+   [
+    85,
+    0
+   ],
+   [
+    272,
+    0
+   ],
+   [
+    308,
+    0
+   ],
+   [
+    45100,
+    12
+   ],
+   [
+    1552,
+    1
+   ],
+   [
+    681,
+    0
+   ],
+   [
+    650,
+    4
+   ],
+   [
+    105960,
+    187
+   ],
+   [
+    2770,
+    4
+   ],
+   [
+    1434,
+    4
+   ],
+   [
+    23052,
+    35
+   ],
+   [
+    1010,
+    1
+   ],
+   [
+    413,
+    1
+   ],
+   [
+    3924,
+    5
+   ],
+   [
+    678,
+    0
+   ],
+   [
+    902,
+    1
+   ],
+   [
+    491,
+    0
+   ],
+   [
+    1272,
+    11
+   ],
+   [
+    914,
+    1
+   ],
+   [
+    699,
+    0
+   ],
+   [
+    81,
+    0
+   ],
+   [
+    1284,
+    6
+   ],
+   [
+    1534,
+    1
+   ],
+   [
+    9257,
+    13
+   ],
+   [
+    709,
+    0
+   ],
+   [
+    575,
+    1
+   ],
+   [
+    1799,
+    7
+   ],
+   [
+    1324,
+    1
+   ],
+   [
+    14,
+    0
+   ],
+   [
+    327,
+    2
+   ],
+   [
+    1089,
+    5
+   ],
+   [
+    1771,
+    0
+   ],
+   [
+    721,
+    0
+   ],
+   [
+    914,
+    2
+   ],
+   [
+    217,
+    0
+   ],
+   [
+    1186,
+    0
+   ],
+   [
+    1487,
+    1
+   ],
+   [
+    548,
+    0
+   ],
+   [
+    992,
+    0
+   ],
+   [
+    89,
+    1
+   ],
+   [
+    1123,
+    0
+   ],
+   [
+    214,
+    0
+   ],
+   [
+    5978,
+    9
+   ],
+   [
+    1180,
+    0
+   ],
+   [
+    892,
+    1
+   ],
+   [
+    919,
+    0
+   ],
+   [
+    630,
+    6
+   ],
+   [
+    2726,
+    0
+   ],
+   [
+    1137,
+    12
+   ],
+   [
+    1259,
+    5
+   ],
+   [
+    13,
+    0
+   ],
+   [
+    212,
+    1
+   ],
+   [
+    1099,
+    9
+   ],
+   [
+    377,
+    0
+   ],
+   [
+    308,
+    0
+   ],
+   [
+    1287,
+    4
+   ],
+   [
+    4663,
+    19
+   ],
+   [
+    1135,
+    3
+   ],
+   [
+    731,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    863,
+    10
+   ],
+   [
+    43391,
+    418
+   ],
+   [
+    1015,
+    8
+   ],
+   [
+    138,
+    0
+   ],
+   [
+    9649,
+    0
+   ],
+   [
+    2569,
+    2
+   ],
+   [
+    481,
+    3
+   ],
+   [
+    1029,
+    0
+   ],
+   [
+    261,
+    0
+   ],
+   [
+    1047,
+    2
+   ],
+   [
+    1248,
+    0
+   ],
+   [
+    10045,
+    10
+   ],
+   [
+    961,
+    1
+   ],
+   [
+    547,
+    1
+   ],
+   [
+    1021,
+    2
+   ],
+   [
+    503,
+    0
+   ],
+   [
+    1080,
+    10
+   ],
+   [
+    916,
+    0
+   ],
+   [
+    1179,
+    0
+   ],
+   [
+    216,
+    0
+   ],
+   [
+    110,
+    1
+   ],
+   [
+    1104,
+    4
+   ],
+   [
+    12609,
+    10
+   ],
+   [
+    1251,
+    0
+   ],
+   [
+    1010,
+    1
+   ],
+   [
+    802,
+    0
+   ],
+   [
+    84,
+    1
+   ],
+   [
+    757,
+    3
+   ],
+   [
+    1185,
+    7
+   ],
+   [
+    1799,
+    2
+   ],
+   [
+    2140,
+    0
+   ],
+   [
+    501,
+    1
+   ],
+   [
+    33,
+    0
+   ],
+   [
+    32902,
+    7
+   ],
+   [
+    972,
+    1
+   ],
+   [
+    265,
+    0
+   ],
+   [
+    233,
+    0
+   ],
+   [
+    327,
+    0
+   ],
+   [
+    1213,
+    0
+   ],
+   [
+    758,
+    0
+   ],
+   [
+    1204,
+    9
+   ],
+   [
+    889,
+    2
+   ],
+   [
+    163,
+    8
+   ],
+   [
+    1011,
+    14
+   ],
+   [
+    349,
+    0
+   ],
+   [
+    1540,
+    7
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    510,
+    1
+   ],
+   [
+    1345,
+    6
+   ],
+   [
+    1065,
+    0
+   ],
+   [
+    1098,
+    0
+   ],
+   [
+    25,
+    0
+   ],
+   [
+    194,
+    0
+   ],
+   [
+    1218,
+    1
+   ],
+   [
+    107,
+    0
+   ],
+   [
+    12243,
+    35
+   ],
+   [
+    1004,
+    3
+   ],
+   [
+    957,
+    4
+   ],
+   [
+    604,
+    4
+   ],
+   [
+    912,
+    9
+   ],
+   [
+    584,
+    0
+   ],
+   [
+    63,
+    0
+   ],
+   [
+    26,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    45,
+    2
+   ],
+   [
+    23,
+    0
+   ],
+   [
+    171,
+    1
+   ],
+   [
+    488,
+    4
+   ],
+   [
+    3351,
+    18
+   ],
+   [
+    1778,
+    0
+   ],
+   [
+    923,
+    5
+   ],
+   [
+    1148,
+    3
+   ],
+   [
+    1317,
+    1
+   ],
+   [
+    3319,
+    55
+   ],
+   [
+    5428,
+    27
+   ],
+   [
+    75,
+    0
+   ],
+   [
+    771,
+    0
+   ],
+   [
+    2894,
+    4
+   ],
+   [
+    12183,
+    4
+   ],
+   [
+    2166,
+    6
+   ],
+   [
+    20645,
+    109
+   ],
+   [
+    1101,
+    2
+   ],
+   [
+    7196,
+    91
+   ],
+   [
+    20,
+    0
+   ],
+   [
+    4079,
+    9
+   ],
+   [
+    733,
+    1
+   ],
+   [
+    2621,
+    30
+   ],
+   [
+    115,
+    0
+   ],
+   [
+    956,
+    0
+   ],
+   [
+    1111,
+    6
+   ],
+   [
+    852,
+    5
+   ],
+   [
+    7969,
+    17
+   ],
+   [
+    1839,
+    0
+   ],
+   [
+    84,
+    0
+   ],
+   [
+    847,
+    4
+   ],
+   [
+    963,
+    1
+   ],
+   [
+    2283,
+    11
+   ],
+   [
+    1605,
+    9
+   ],
+   [
+    609,
+    0
+   ],
+   [
+    8914,
+    75
+   ],
+   [
+    1667,
+    2
+   ],
+   [
+    1141,
+    1
+   ],
+   [
+    5208,
+    24
+   ],
+   [
+    901,
+    3
+   ],
+   [
+    736,
+    0
+   ],
+   [
+    9,
+    0
+   ],
+   [
+    751,
+    1
+   ],
+   [
+    3243,
+    6
+   ],
+   [
+    277,
+    0
+   ],
+   [
+    314,
+    2
+   ],
+   [
+    1391,
+    4
+   ],
+   [
+    1024,
+    0
+   ],
+   [
+    15682,
+    89
+   ],
+   [
+    1853,
+    6
+   ],
+   [
+    2249,
+    1
+   ],
+   [
+    1169,
+    1
+   ],
+   [
+    1174,
+    10
+   ],
+   [
+    906,
+    2
+   ],
+   [
+    14,
+    0
+   ],
+   [
+    51,
+    0
+   ],
+   [
+    280,
+    0
+   ],
+   [
+    250,
+    0
+   ],
+   [
+    4454,
+    11
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    1870,
+    2
+   ],
+   [
+    5165,
+    3
+   ],
+   [
+    768,
+    0
+   ],
+   [
+    6821,
+    27
+   ],
+   [
+    909,
+    0
+   ],
+   [
+    1754,
+    18
+   ],
+   [
+    779,
+    4
+   ],
+   [
+    224,
+    1
+   ],
+   [
+    1932,
+    0
+   ],
+   [
+    767,
+    2
+   ],
+   [
+    663,
+    0
+   ],
+   [
+    6994,
+    17
+   ],
+   [
+    1615,
+    33
+   ],
+   [
+    56,
+    0
+   ],
+   [
+    133,
+    0
+   ],
+   [
+    915,
+    29
+   ],
+   [
+    691,
+    0
+   ],
+   [
+    121,
+    1
+   ],
+   [
+    1340,
+    2
+   ],
+   [
+    543,
+    0
+   ],
+   [
+    643,
+    9
+   ],
+   [
+    1131,
+    6
+   ],
+   [
+    3254,
+    20
+   ],
+   [
+    3314,
+    5
+   ],
+   [
+    3766,
+    155
+   ],
+   [
+    577,
+    1
+   ],
+   [
+    4374,
+    7
+   ],
+   [
+    7058,
+    34
+   ],
+   [
+    6526,
+    35
+   ],
+   [
+    613,
+    1
+   ],
+   [
+    40,
+    0
+   ],
+   [
+    1759,
+    0
+   ],
+   [
+    2104,
+    7
+   ],
+   [
+    1430,
+    10
+   ],
+   [
+    490,
+    6
+   ],
+   [
+    670,
+    1
+   ],
+   [
+    161230,
+    839
+   ],
+   [
+    3267,
+    5
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    496,
+    2
+   ],
+   [
+    509,
+    2
+   ],
+   [
+    753,
+    1
+   ],
+   [
+    457,
+    0
+   ],
+   [
+    902,
+    1
+   ],
+   [
+    130,
+    8
+   ],
+   [
+    543,
+    0
+   ],
+   [
+    10661,
+    4
+   ],
+   [
+    10600,
+    34
+   ],
+   [
+    797,
+    1
+   ],
+   [
+    202,
+    0
+   ],
+   [
+    433,
+    1
+   ],
+   [
+    9998,
+    13
+   ],
+   [
+    2747,
+    3
+   ],
+   [
+    113,
+    0
+   ],
+   [
+    331,
+    2
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    440,
+    5
+   ],
+   [
+    2740,
+    24
+   ],
+   [
+    41,
+    4
+   ],
+   [
+    26,
+    0
+   ],
+   [
+    661,
+    0
+   ],
+   [
+    269,
+    0
+   ],
+   [
+    227,
+    0
+   ],
+   [
+    1310,
+    12
+   ],
+   [
+    646,
+    33
+   ],
+   [
+    6533,
+    14
+   ],
+   [
+    53,
+    0
+   ],
+   [
+    1164,
+    5
+   ],
+   [
+    373,
+    0
+   ],
+   [
+    7590,
+    27
+   ],
+   [
+    2180,
+    3
+   ],
+   [
+    1172,
+    1
+   ],
+   [
+    202,
+    14
+   ],
+   [
+    99,
+    0
+   ],
+   [
+    319,
+    2
+   ],
+   [
+    429,
+    6
+   ],
+   [
+    127,
+    0
+   ],
+   [
+    945,
+    0
+   ],
+   [
+    877,
+    18
+   ],
+   [
+    4036,
+    17
+   ],
+   [
+    9374,
+    37
+   ],
+   [
+    816,
+    5
+   ],
+   [
+    2006,
+    2
+   ],
+   [
+    2024,
+    6
+   ],
+   [
+    62,
+    0
+   ],
+   [
+    189,
+    1
+   ],
+   [
+    1899,
+    5
+   ]
+  ],
   "topChannels": [
    [
     "The Rational Male",
@@ -17268,7 +18920,16 @@ const sections = [
     { p: 'Rysunki {rys:ytnarastanie} i {rys:ytautorzy} mówią o rozmowie w korpusie. Część przychodzi późno, a większość autorów pisze tylko raz. Do karty korpusu zapisz, kiedy zebrano komentarze i ile czasu minęło od publikacji filmów.' },
   ]),
 
-  step('w3-9', '3.13', 'Karta korpusu', [
+  step('w3-a4', '3.13', 'Jedna liczba r', [
+    { p: 'W temacie 2 współczynnik r liczyliśmy dla 13 kandydatów. Tu mamy kilkaset filmów, więc jeden film powinien mniej znaczyć. Lab 9 pokazał jednak, że kilka filmów niesie cały korpus.' },
+    { p: 'Rysunek {rys:ytrozrzut} pokazuje, co jeden nietypowy punkt robi z r na dwunastu wymyślonych filmach.' },
+    { figure: 'ytrozrzut' },
+    { exercise: 'yt11', num: 'Lab 12', title: 'Jedna liczba r', toc: 'Lab 12. Jedna liczba r' },
+    { figure: 'ytrozrzutreal' },
+    { p: 'Rysunek {rys:ytrozrzutreal} pokazuje wszystkie filmy na osiach logarytmicznych. Do karty korpusu zapisz każde r razem z tym, jak je policzono, na wszystkich filmach, bez największych czy na rangach.' },
+  ]),
+
+  step('w3-9', '3.14', 'Karta korpusu', [
     { p: 'Każdy krok tego tematu kończył się zdaniem „zapisz w karcie korpusu”. Karta to krótki opis danych, bez którego nikt nie oceni wyniku. Tak wyglądałaby karta testu, na którym pracowaliśmy.' },
     { table: corpusExample() },
     { p: 'Teraz zrób taką kartę dla źródła z własnego projektu. Nie musi to być YouTube. Pytania są te same dla każdego źródła zbieranego przez API albo skrypt.' },
@@ -17326,6 +18987,7 @@ const CHAPTER = {
     { id: 'yt9', label: 'Lab 9. Skupienie wyświetleń', section: 'w3-a2' },
     { id: 'yt10', label: 'Lab 10. Rdzeń czy szum', section: 'w3-a3' },
     { id: 'yt12', label: 'Lab 11. Czas komentarzy', section: 'w3-a5' },
+    { id: 'yt11', label: 'Lab 12. Jedna liczba r', section: 'w3-a4' },
     { id: 'raport3', label: 'Projekt. Karta korpusu', section: 'w3-9' },
   ],
   recap: [
@@ -17342,6 +19004,7 @@ const CHAPTER = {
     'Kilka filmów niesie cały korpus. Sumę narastającą liczy się po posortowaniu, od największego.',
     'Część filmów i część komentarzy to dwie różne liczby. Etykietę projektu sprawdza się na obu.',
     'Komentarze przychodzą tygodniami. Data zbierania jest częścią korpusu, a część zebraną po tygodniu liczy się narastająco.',
+    'Jeden duży film potrafi zmienić r o ponad jedną dziesiątą. r podaje się razem z wersją bez największych filmów albo na rangach.',
   ],
   next: 'Temat 4 to profile z mediów społecznościowych. Karta korpusu przyda się tam od pierwszej minuty, bo profile też zbiera się przez API i skrypty.',
   prep: '',
@@ -18009,6 +19672,61 @@ LABS3.yt12 = {
   },
 };
 
+LABS3.yt11 = {
+  ...common,
+  id: 'yt11',
+  alt: G.yt11.alt,
+  intro: 'Współczynnik r mówi, jak mocno dwie liczby idą w parze. Policz go dla wyświetleń i komentarzy trzy razy. Na wszystkich filmach, bez filmu z największą liczbą wyświetleń i na rangach.',
+  starter: G.yt11.starter,
+  files: ['videos.csv'],
+  expect: G.yt11.expect,
+  tol: 0.006,
+  hints: [
+    'Film z największą liczbą wyświetleń wskaże `views.idxmax()`. Usuń ten wiersz z obu kolumn, `.drop(...)`.',
+    'Rangi daje `.rank()`. Policz zwykły `corr` na rangach obu kolumn.',
+  ],
+  diagnose(value) {
+    const { expect, facts } = G.yt11;
+    if (!sameKeys(value, expect)) return 'Zmienna `result` powinna mieć trzy pola, `r`, `r_without_top` i `r_rank`. Zostaw ostatnie wiersze kodu bez zmian.';
+    const at = (k, x) => near(value[k], x, 0.006);
+    if (!at('r', expect.r)) return 'Pierwsze r jeszcze nie. To zwykły `views.corr(comments)` na wszystkich filmach.';
+    if (at('r_without_top', expect.r) && at('r_rank', expect.r)) return 'Dwa ostatnie pola to jeszcze to samo r. Usuń jeden film w drugim i weź rangi w trzecim.';
+    if (at('r_without_top', facts.withoutTopComments)) return 'Usunięty jest film z największą liczbą komentarzy. Pytamy o ten z największą liczbą wyświetleń, `views.idxmax()`.';
+    if (!at('r_without_top', expect.r_without_top)) return 'Drugie r jeszcze nie. Usuń film z największą liczbą wyświetleń z obu kolumn i policz r jeszcze raz.';
+    if (at('r_rank', facts.log)) return 'To r na logarytmach. Też łagodzi duże filmy, ale pytamy o rangi, `.rank()`.';
+    return 'Dwa pierwsze r są dobre. Trzecie jeszcze nie. Zamień obie kolumny na rangi i policz zwykły `corr`.';
+  },
+  success(value) {
+    const f = G.yt11.facts;
+    return `Tak. Na wszystkich filmach r wynosi ${dec(value.r)}, bez jednego filmu ${dec(value.r_without_top)}, a na rangach ${dec(value.r_rank)}. Ten jeden film ma ${n(f.topViews)} wyświetleń i tylko ${f.topComments} komentarzy. Jedno r o korpusie warto więc podać razem z tym, co się dzieje bez największych filmów.`;
+  },
+  more: `Dla chętnych. Z ${G.yt11.facts.pairs} par usunęliśmy jedną i r zmieniło się o ${dec(Math.round((G.yt11.expect.r_without_top - G.yt11.expect.r) * 100) / 100)}. Usunięcie filmu z największą liczbą komentarzy daje ${dec(G.yt11.facts.withoutTopComments)}, czyli zmianę w drugą stronę. Na logarytmach r wynosi ${dec(G.yt11.facts.log)}. W temacie 2 r liczyliśmy na 13 punktach, tu na ${G.yt11.facts.pairs}, a jeden punkt i tak wiele zmienia.`,
+  base: {
+    say: `Policz to samo w arkuszu na pliku \`liczby_pl.csv\` z Lab 7. Kolumna B to wyświetlenia, C to komentarze. ${IMPORT}`,
+    files: ['liczby_pl.csv'],
+    steps: [
+      'Najpierw usuń wiersze, w których kolumna C jest pusta. To filmy z wyłączonymi komentarzami.',
+      'Policz r funkcją `WSP.KORELACJI` (`CORREL`) na kolumnach B i C, bez nagłówka.',
+      'Posortuj po kolumnie B malejąco, usuń pierwszy wiersz z danymi i policz r jeszcze raz.',
+      'Dodaj kolumny D i E z rangami, `POZYCJA.ŚR` (`RANK.AVG`) z porządkiem rosnącym, dla B i dla C, i policz r na D i E.',
+    ],
+    fields: [
+      { id: 'r', label: 'r na wszystkich filmach', expect: G.yt11.expect.r, tol: 0.006 },
+      { id: 'r_without_top', label: 'r bez filmu z największą liczbą wyświetleń', expect: G.yt11.expect.r_without_top, tol: 0.006 },
+      { id: 'r_rank', label: 'r na rangach', expect: G.yt11.expect.r_rank, tol: 0.006 },
+    ],
+    wrong: {
+      r: 'Pierwsza liczba jeszcze nie. `WSP.KORELACJI` na kolumnach B i C.',
+      r_without_top(v) {
+        if (near(v, G.yt11.facts.withoutTopComments, 0.006)) return 'Druga liczba jest bez filmu z największą liczbą komentarzy. Usuń ten z największą liczbą wyświetleń.';
+        return 'Druga liczba jeszcze nie. Posortuj po wyświetleniach malejąco i usuń pierwszy wiersz.';
+      },
+      r_rank: 'Trzecia liczba jeszcze nie. `WSP.KORELACJI` na kolumnach z rangami, nie na wartościach.',
+    },
+    success: 'Tak. Jedno r o całym korpusie zależy od kilku dużych filmów. Podaje się je razem z wersją bez nich albo na rangach.',
+  },
+};
+
 /** A plain sentence under a Python error that a beginner cannot read, or null. */
 function explainError3(lab, error) {
   const e = String(error || '');
@@ -18016,6 +19734,10 @@ function explainError3(lab, error) {
   if (/FileNotFoundError/.test(e)) return 'Nie ma takiego pliku. Tokeny to `PAGE2`, `PAGE3` i dalej. Pierwsza strona to `get_page(None)`.';
   if (/KeyError: 'items'|KeyError: 'videoId'|KeyError: 'id'/.test(e)) return 'Takiego klucza tu nie ma. Wypisz `page.keys()` i jeden element, `page["items"][0]`. Identyfikator filmu jest w `item["id"]["videoId"]`.';
   if (/TypeError: unhashable type/.test(e)) return 'Do zbioru trafiła lista albo słownik. Wkładaj same identyfikatory, `item["id"]["videoId"]`.';
+  // Pyodide words it differently and the page shows only its last line, with a link to loading-packages
+  const missing = /No module named 'scipy'|'scipy' is included in the Pyodide|loading-packages\.html/.test(e);
+  if (missing && (lab.id === 'yt11' || /scipy/.test(e))) return 'Metoda `spearman` w pandas potrzebuje biblioteki scipy, której na tej stronie nie ma. Policz to samo na rangach, `views.rank().corr(comments.rank())`.';
+  if (missing) return 'Tej biblioteki nie ma na stronie. Laby potrzebują tylko pandas i zwykłego Pythona, więc usuń ten import.';
   if (/Can only use \.str accessor with string values/.test(e)) return 'Kolumna ma same braki albo liczby, więc `.str` nie działa. Sprawdź, czy to dobra kolumna, `default_audio_language`.';
   if (/KeyError/.test(e)) return 'Takiego klucza nie ma w słowniku. Wypisz klucze, `print(page.keys())`, i porównaj nazwy.';
   return null;
@@ -18033,7 +19755,7 @@ __modules["../../analiza-trendow-w-internecie/src/tasks3.js"] = { "FILES3": FILE
  *               the reader fetches them one by one and watches hits and videos part
  *   realPages   after yt3: the nine real pages of the test, new and repeated videos per page
  */
-const { el, mount } = __modules["src/ui/dom.js"];
+const { el, svg, mount } = __modules["src/ui/dom.js"];
 const { frame } = __modules["src/book/figures/common.js"];
 const { GENERATED3 } = __modules["../../analiza-trendow-w-internecie/src/generated3.js"];
 const D = GENERATED3.data;
@@ -18580,6 +20302,67 @@ function authorsFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Kto pisze komentarze', host, caption(`${SRC} Tylko liczby zbiorcze. Na stronie nie ma żadnego autora ani treści komentarza.`));
 }
 
+// ---------------------------------------------------------------- yt11: one point and r
+
+const pearsonR = (pts) => {
+  const nn = pts.length;
+  const mx = pts.reduce((a, p) => a + p[0], 0) / nn;
+  const my = pts.reduce((a, p) => a + p[1], 0) / nn;
+  let sxy = 0; let sxx = 0; let syy = 0;
+  for (const [x, y] of pts) { sxy += (x - mx) * (y - my); sxx += (x - mx) ** 2; syy += (y - my) ** 2; }
+  return sxy / Math.sqrt(sxx * syy);
+};
+const r2 = (x) => String(Math.round(x * 100) / 100).replace('.', ',');
+
+/** A small scatter plot; `mark` is the index of the point drawn as the outlier. */
+function scatter(pts, { mark = -1, log = false, xLabel, yLabel } = {}) {
+  const W = 320; const H = 190; const L = 40; const B = 26; const T = 8; const R = 10;
+  const f = (v) => (log ? Math.log10(v + 1) : v);
+  const xs = pts.map((p) => f(p[0])); const ys = pts.map((p) => f(p[1]));
+  const x0 = Math.min(...xs); const x1 = Math.max(...xs); const y0 = Math.min(...ys); const y1 = Math.max(...ys);
+  const px = (v) => L + ((v - x0) / (x1 - x0 || 1)) * (W - L - R);
+  const py = (v) => H - B - ((v - y0) / (y1 - y0 || 1)) * (H - B - T);
+  return svg('svg', { viewBox: `0 0 ${W} ${H}`, class: 'yt-scatter', role: 'img', 'aria-label': `${xLabel} i ${yLabel}` },
+    svg('line', { x1: L, y1: H - B, x2: W - R, y2: H - B, class: 'yt-axis' }),
+    svg('line', { x1: L, y1: T, x2: L, y2: H - B, class: 'yt-axis' }),
+    pts.map((_, k) => svg('circle', { cx: px(xs[k]), cy: py(ys[k]), r: k === mark ? 5 : 3, class: k === mark ? 'yt-dot-out' : 'yt-dot' })),
+    svg('text', { x: (L + W - R) / 2, y: H - 6, class: 'yt-axis-text', 'text-anchor': 'middle' }, xLabel),
+    svg('text', { x: 12, y: (T + H - B) / 2, class: 'yt-axis-text', 'text-anchor': 'middle', transform: `rotate(-90 12 ${(T + H - B) / 2})` }, yLabel));
+}
+
+// twelve invented videos on a line, and one with very many views and few comments
+const SCATTER_DEMO = [[100, 2], [200, 3], [300, 5], [400, 6], [500, 8], [600, 9], [700, 11], [800, 12], [900, 14], [1000, 15], [1100, 17], [5000, 6]];
+
+function outlierFigure({ num: n = 'Rysunek' } = {}) {
+  const state = { v: 'all' };
+  const host = el('div');
+  const draw = () => {
+    const all = state.v === 'all';
+    const pts = all ? SCATTER_DEMO : SCATTER_DEMO.slice(0, -1);
+    mount(host,
+      el('div.fg-toggles', [['all', 'wszystkie filmy'], ['without', 'bez największego']].map(([v, label]) =>
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+      el('div.yt-scatter-wrap', scatter(pts, { mark: all ? pts.length - 1 : -1, xLabel: 'wyświetlenia', yLabel: 'komentarze' })),
+      el('div.yt-count', `r = ${r2(pearsonR(pts))}`),
+      el('div.sq-read', all
+        ? 'Jedenaście filmów leży na prostej linii, a jeden ma dużo wyświetleń i mało komentarzy. Ten jeden punkt ściąga r w dół.'
+        : 'Bez jednego punktu r jest prawie równe 1. Jedna liczba r o całym zbiorze może więc mówić głównie o jednym filmie.'));
+  };
+  draw();
+  return frame(n, 'Jeden punkt i współczynnik r', host, caption('Filmy są wymyślone. Wyróżniony punkt to film z największą liczbą wyświetleń.'));
+}
+
+/** After yt11: views and comments of the test's videos on log axes, the most viewed one marked. */
+function scatterFigure({ num: n = 'Rysunek' } = {}) {
+  const pts = D.scatter;
+  const top = pts.reduce((best, p, k) => (p[0] > pts[best][0] ? k : best), 0);
+  const e11 = GENERATED3.labs.yt11.expect;
+  const host = el('div',
+    el('div.yt-scatter-wrap', scatter(pts, { mark: top, log: true, xLabel: 'wyświetlenia, skala logarytmiczna', yLabel: 'komentarze, skala log.' })),
+    el('div.sq-read', `Wyróżniony film ma najwięcej wyświetleń, ${fmt(pts[top][0])}, ale tylko ${pts[top][1]} komentarzy. r wszystkich filmów to ${r2(e11.r)}, bez niego ${r2(e11.r_without_top)}, a na rangach ${r2(e11.r_rank)}.`));
+  return frame(n, 'Wyświetlenia i komentarze w teście', host, caption(`${SRC} ${pts.length} filmów z liczbą komentarzy. Do obu osi dodano 1, żeby filmy bez komentarzy też były widoczne.`));
+}
+
 // ---------------------------------------------------------------- yt3: pages
 
 // invented pages, so the figure shows the mechanism and not the lab's answer
@@ -18638,7 +20421,7 @@ function realPagesFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Dziewięć stron z testu', host, caption(`${SRC} Strony odtworzone z zapisanych trafień. Każda strona to jedno wywołanie wyszukiwania, razem ${D.testSearchCalls}.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
+__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "outlierFigure": outlierFigure, "scatterFigure": scatterFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/main3.js ===== */
@@ -18656,7 +20439,7 @@ const { setUp: setUpCourse, restoreOptions } = __modules["../../analiza-trendow-
 const { CHAPTER, CORPUS_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter3.js"];
 const { labExercise, labAnswer, restoreLab } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS3, FILES3, explainError3 } = __modules["../../analiza-trendow-w-internecie/src/tasks3.js"];
-const { keyFigure, limitFigure, gluedFigure, realQueriesFigure, pageChainFigure, realPagesFigure, threadFigure, commentsFigure, codesFigure, languagesFigure, rulesFigure, channelsFigure, ratioFigure, countsFigure, durationFigure, formatFigure, halfFigure, curveFigure, groupsFigure, labelsFigure, timingFigure, runningFigure, authorsFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
+const { keyFigure, limitFigure, gluedFigure, realQueriesFigure, pageChainFigure, realPagesFigure, threadFigure, commentsFigure, codesFigure, languagesFigure, rulesFigure, channelsFigure, ratioFigure, countsFigure, durationFigure, formatFigure, halfFigure, curveFigure, groupsFigure, labelsFigure, timingFigure, runningFigure, authorsFigure, outlierFigure, scatterFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
 const FIGURES3 = {
   ytsklejanie: gluedFigure,
   ytzapytania: realQueriesFigure,
@@ -18681,6 +20464,8 @@ const FIGURES3 = {
   ytczas: timingFigure,
   ytnarastanie: runningFigure,
   ytautorzy: authorsFigure,
+  ytrozrzut: outlierFigure,
+  ytrozrzutreal: scatterFigure,
 };
 
 /** Make the engine topic 3: the course's stores and strings, then this topic's labs, figures and card. */

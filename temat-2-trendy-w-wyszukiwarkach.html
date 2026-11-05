@@ -1912,6 +1912,12 @@ textarea.kc-input { resize: vertical; }
 .yt-labels-head b { font-size: 12px; color: var(--ink-soft); font-weight: 600; text-align: right; }
 .yt-labels-row { background: var(--bg-sunken); border-radius: 3px; }
 .yt-labels-row b { font: 600 13px var(--mono); text-align: right; }
+.yt-scatter-wrap { min-width: 0; }
+.yt-scatter { display: block; width: 100%; max-width: 420px; height: auto; }
+.yt-axis { stroke: var(--line-strong); stroke-width: 1; }
+.yt-axis-text { font-size: 10px; fill: var(--ink-soft); }
+.yt-dot { fill: var(--accent); fill-opacity: .55; }
+.yt-dot-out { fill: var(--warn); stroke: var(--ink); stroke-width: 1; }
 
 </style>
 </head>
@@ -15692,6 +15698,8 @@ const STRINGS = {
   'py.loadFailed': 'Python nie uruchomił się w tej przeglądarce. Odśwież stronę albo wybierz ścieżkę „Bez kodu”.',
   'py.alt.pandas.title': 'Dla chętnych. To samo w pandas',
   'py.alt.pandas.note': 'Krótsza wersja bez pętli. Możesz ją wkleić do edytora i uruchomić. Pierwsze uruchomienie pobiera pandas (kilkanaście MB). Ten kod zadziała też na Twoim komputerze.',
+  'py.alt.pearson.title': 'Dla chętnych. r i rangi bez pandas',
+  'py.alt.pearson.note': 'Wzór Pearsona i rangi napisane ręcznie. Współczynnik Spearmana to zwykły r policzony na rangach zamiast na wartościach.',
   'py.alt.running.title': 'Dla chętnych. Suma narastająca bez pandas',
   'py.alt.running.note': 'Pętla dodaje okresy po kolei i zapisuje, ile skrypt ma po każdym z nich. Tydzień to suma pierwszych dwóch okresów, a nie sam drugi.',
   'py.alt.groups.title': 'Dla chętnych. Grupy w słowniku, bez pandas',

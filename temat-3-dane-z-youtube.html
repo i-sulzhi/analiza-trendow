@@ -1898,6 +1898,13 @@ textarea.kc-input { resize: vertical; }
 .yt-item.yt-hit { background: var(--ok-bg); outline: 1px solid var(--ok); }
 .yt-bar-row-wide { grid-template-columns: minmax(0, 11em) minmax(0, 1fr) auto; }
 .yt-bar-row-wide .yt-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yt-slider { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) 2.2em; align-items: center; gap: 8px; margin: 6px 0; font-size: 13px; }
+.yt-slider b { font: 600 13px var(--mono); text-align: right; }
+.yt-range { width: 100%; min-width: 0; accent-color: var(--accent); }
+.yt-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5em, 1fr)); gap: 8px; margin: 10px 0; }
+.yt-card { padding: 8px 10px; border-radius: var(--radius); background: var(--bg-sunken); min-width: 0; }
+.yt-card span { display: block; font-size: 12px; color: var(--ink-soft); }
+.yt-card strong { display: block; font: 600 18px var(--mono); overflow-wrap: anywhere; }
 
 </style>
 </head>
@@ -16948,7 +16955,7 @@ const sections = [
     { p: 'Klucz ma dzienny limit. Od czerwca 2026 r. YouTube liczy go w dwóch pulach. Wyszukiwanie, czyli `search.list`, ma domyślnie 100 wywołań dziennie. Pozostałe metody, na przykład komentarze i statystyki filmów, mają razem 10 000 jednostek, zwykle 1 za wywołanie. Obie pule odnawiają się o północy czasu pacyficznego, czyli około 9 rano w Polsce.' },
     { exercise: 'yt1', num: 'Lab 2', title: 'Ile dni potrwa zbieranie?', toc: 'Lab 2. Klucz i limit' },
     { figure: 'ytlimit' },
-    { p: 'Rysunek {rys:ytlimit} pokazuje obie pule. Test z kwietnia zmieścił się w jednym dniu, a pełny plan wymaga tygodni. Większy limit można dostać od Google na wniosek. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
+    { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Większy limit można dostać od Google na wniosek. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
   ]),
 
   step('w3-4', '3.4', 'Strony wyników', [
@@ -17589,24 +17596,58 @@ function keyFigure({ num: n = 'Rysunek' } = {}) {
 /** After yt1: the two daily buckets, for the test run and for the full plan. */
 function limitFigure({ num: n = 'Rysunek' } = {}) {
   const G1 = GENERATED3.labs.yt1;
-  const state = { v: 'test' };
-  const host = el('div');
+  const G3 = GENERATED3.labs.yt3;
+  // rates of the test: hits per search call, distinct videos per hit, units per video for stats and comments
+  const perCall = G3.expect.hits / G3.expect.pages;
+  const distinct = G3.expect.videos / G3.expect.hits;
+  const perVideo = D.testOtherUnits / G3.expect.videos;
+  // no preset of the test itself: its videos are the answer of Lab 3, which comes after this figure
+  const PRESETS = { plan: [G1.facts.queries, G1.facts.months, G1.facts.pages], month: [G1.facts.queries, 1, G1.facts.pages] };
+  const state = { v: 'plan', q: G1.facts.queries, m: G1.facts.months, p: G1.facts.pages };
   const meter = (label, used, cap, text) => el('div.yt-meter',
     el('div.yt-meter-head', el('span', label), el('b', text)),
     el('div.yt-meter-track', el('span.yt-meter-bar', { style: `width:${Math.min(100, (100 * used) / cap)}%` })));
+  const card = (label, value) => el('div.yt-card', el('span', label), el('strong', value));
+  // the controls are built once, so dragging a slider is not cut off by a redraw; only the results redraw
+  const sliders = {};
+  const slider = (key, label, max) => {
+    const out = el('b', String(state[key]));
+    const input = el('input.yt-range', { type: 'range', min: '1', max: String(max), step: '1', value: String(state[key]), 'aria-label': label,
+      onInput: () => { state[key] = Number(input.value); state.v = ''; draw(); } });
+    sliders[key] = { input, out };
+    return el('label.yt-slider', el('span', label), input, out);
+  };
+  const buttons = [['plan', 'Pełny plan'], ['month', 'Jeden miesiąc']].map(([v, label]) => {
+    const b = el('button.fg-toggle', { type: 'button', onClick: () => { [state.q, state.m, state.p] = PRESETS[v]; state.v = v; draw(); } }, label);
+    b.dataset.v = v;
+    return b;
+  });
+  const results = el('div');
+  const host = el('div', el('div.fg-toggles', buttons), slider('q', 'Zapytania', 20), slider('m', 'Miesiące', 82), slider('p', 'Strony na zapytanie i miesiąc', 10), results);
   const draw = () => {
-    const test = state.v === 'test';
-    const calls = test ? D.testSearchCalls : G1.expect.calls;
-    mount(host,
-      el('div.fg-toggles', [['test', 'Test z kwietnia'], ['plan', 'Pełny plan']].map(([v, label]) => el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
-      meter('Wyszukiwanie, pierwszy dzień', Math.min(calls, D.searchPerDay), D.searchPerDay, `${Math.min(calls, D.searchPerDay)} z ${D.searchPerDay} wywołań`),
-      test ? meter('Pozostałe metody, jednostki', D.testOtherUnits, D.unitsPerDay, `${fmt(D.testOtherUnits)} z ${fmt(D.unitsPerDay)}`) : null,
-      el('div.sq-read', test
-        ? `Test zajął ${D.testSearchCalls} wywołań wyszukiwania i ${units(D.testOtherUnits)} na komentarze i statystyki. Zmieścił się w jednym dniu.`
-        : `Pełny plan to ${fmt(calls)} wywołań wyszukiwania. Pula kończy się pierwszego dnia, więc skrypt czeka na nową i pracuje ${G1.expect.days} dni.`));
+    for (const b of buttons) b.className = `fg-toggle${b.dataset.v === state.v ? ' fg-toggle-on' : ''}`;
+    for (const [key, { input, out }] of Object.entries(sliders)) {
+      if (Number(input.value) !== state[key]) input.value = String(state[key]);
+      out.textContent = String(state[key]);
+    }
+    const calls = state.q * state.m * state.p;
+    const day1 = Math.min(calls, D.searchPerDay);
+    const videos1 = Math.round(day1 * perCall * distinct);
+    const units1 = Math.min(D.unitsPerDay, Math.round(videos1 * perVideo));
+    const days = Math.ceil(calls / D.searchPerDay);
+    const commentsFirst = videos1 * perVideo > D.unitsPerDay;
+    mount(results,
+      meter('Wyszukiwanie, pierwszy dzień', day1, D.searchPerDay, `${day1} z ${D.searchPerDay} wywołań`),
+      meter('Pozostałe metody, pierwszy dzień', units1, D.unitsPerDay, `ok. ${fmt(units1)} z ${fmt(D.unitsPerDay)} jednostek`),
+      el('div.yt-cards', card('Wywołania wyszukiwania', fmt(calls)), card('Filmy z wyszukiwania', `ok. ${fmt(Math.round(calls * perCall * distinct))}`), card('Dni przy domyślnym limicie', String(days))),
+      el('div.sq-read', calls <= D.searchPerDay
+        ? `Plan mieści się w jednym dniu. Na komentarze i statystyki idzie ok. ${units(units1)}.`
+        : commentsFirst
+          ? 'Pierwsza kończy się pula jednostek. O czasie decydują komentarze, nie wyszukiwanie.'
+          : `Pierwsza kończy się pula wyszukiwania. Komentarze do ok. ${fmt(videos1)} filmów z jednego dnia mieszczą się w drugiej puli, więc o czasie decyduje wyszukiwanie. Skrypt pracuje ${days} dni.`));
   };
   draw();
-  return frame(n, 'Dwie pule limitu na jeden dzień', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
+  return frame(n, 'Jeden dzień pracy skryptu', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r. Przeliczniki z testu: około 50 trafień na wywołanie, około 1 na 10 to powtórka, ${String(Math.round(perVideo * 10) / 10).replace('.', ',')} jednostki na film. Duże kanały z tysiącami komentarzy zużywają drugą pulę szybciej. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
 }
 
 const fmt = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');

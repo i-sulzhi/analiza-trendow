@@ -16851,7 +16851,7 @@ const GENERATED3 = {
     "code": "import csv\n\nwith open(\"videos.csv\", encoding=\"utf-8\", newline=\"\") as f:\n    views = sorted((int(float(row[\"view_count\"])) for row in csv.DictReader(f)), reverse=True)\n\ntotal = sum(views)\nrunning, half = 0, 0\nfor v in views:          # od najwięcej oglądanego, aż suma przekroczy połowę\n    running += v\n    half += 1\n    if running >= total / 2:\n        break\n\ntop10 = sum(views[: len(views) // 10]) / total\nresult = {\"half\": half, \"top10\": round(top10, 3)}\nprint(result)\n"
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nviews = videos[\"view_count\"]   # tu popraw: najpierw najwięcej oglądane\ntotal = views.sum()\nprint(\"wszystkie wyświetlenia:\", total)\n\n# Zadanie 1: ile najczęściej oglądanych filmów daje razem połowę wszystkich wyświetleń?\nhalf = int((views.cumsum() < total / 2).sum() + 1)\n\n# Zadanie 2: jaką część wyświetleń mają filmy z najlepszej dziesiątej części?\ntop10 = views.head(len(views) // 10).sum() / total\n\nresult = {\"half\": half, \"top10\": round(float(top10), 3)}\nprint(result)\n",
-   "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Najpierw najwięcej oglądane: bez tego cumsum dodaje filmy w przypadkowej kolejności pliku.\nviews = videos[\"view_count\"].sort_values(ascending=False)\ntotal = views.sum()\nprint(\"wszystkie wyświetlenia:\", total)\n\n# Ile filmów od góry trzeba wziąć, żeby suma przekroczyła połowę?\nhalf = int((views.cumsum() < total / 2).sum() + 1)\n\n# Najlepsza dziesiąta część filmów i jej część wszystkich wyświetleń.\ntop10 = views.head(len(views) // 10).sum() / total\n\nresult = {\"half\": half, \"top10\": round(float(top10), 3)}\nprint(result)\n",
+   "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\n# Najpierw najwięcej oglądane: bez tego cumsum dodaje filmy w przypadkowej kolejności pliku.\nviews = videos[\"view_count\"].sort_values(ascending=False)\ntotal = views.sum()\nprint(\"wszystkie wyświetlenia:\", total)\n\n# Ile filmów od góry trzeba wziąć, żeby suma przekroczyła połowę?\nhalf = int((views.cumsum() < total / 2).sum() + 1)\n\n# Dziesiąta część najczęściej oglądanych filmów i jej część wszystkich wyświetleń.\ntop10 = views.head(len(views) // 10).sum() / total\n\nresult = {\"half\": half, \"top10\": round(float(top10), 3)}\nprint(result)\n",
    "solutionOutput": "wszystkie wyświetlenia: 3293127\n{'half': 6, 'top10': 0.851}\n",
    "expect": {
     "half": 6,
@@ -19029,7 +19029,7 @@ const sections = [
       ['Komentarze', 'dla każdego filmu osobno, razem z odpowiedziami'],
       ['Tabela', 'to, co zostało po wszystkich decyzjach'],
     ] },
-    { note: `Dane pochodzą z testowego przebiegu skryptu z ${D.recorded.split('-').reverse().join('.')}. Zapytanie to „${D.query}”, a filmy są z kwietnia 2026 r. To test, a nie wynik badania. Autor projektu, mgr Marcin Baumann, zgodził się, żebyśmy na nim pracowali.`, tone: 'info' },
+    { note: `Dane pochodzą z testowego przebiegu skryptu z ${D.recorded.split('-').reverse().join('.')}. Zapytanie to „${D.query}”, a filmy są z kwietnia 2026 r. To test, a nie wynik badania. To najmniejszy przebieg, który przechodzi przez wszystkie kroki, więc przeliczniki z niego to tylko przybliżenie dla innych zapytań. Autor projektu, mgr Marcin Baumann, zgodził się, żebyśmy na nim pracowali.`, tone: 'info' },
     { note: 'Temat jest drażliwy. Oceniamy dane, a nie ludzi. Na stronie nie ma treści komentarzy ani nazw ich autorów, są tylko liczby.', tone: 'info' },
     { terms: [
       ['API', 'adres, pod który program wysyła pytanie i dostaje odpowiedź w formacie JSON'],
@@ -19045,7 +19045,7 @@ const sections = [
     { p: 'Python łączy w jeden dwa napisy, które stoją obok siebie. To celowe, bo tak dzieli się długi napis na kilka linii kodu. Na liście ta sama reguła sprawia, że brak przecinka nie jest błędem, tylko innym napisem.' },
     { exercise: 'yt2', num: 'Lab 1', title: 'Ile zapytań naprawdę poszło?', toc: 'Lab 1. Lista zapytań' },
     { figure: 'ytzapytania' },
-    { p: 'Na rysunku {rys:ytzapytania} widać całą listę pierwszego skryptu. Poszła tylko część zapytań, a reszta zniknęła bez śladu. Druga wersja skryptu ma tę samą listę z przecinkami i bez powtórki. Listę sprawdza się przed startem, bo potem zgubione zapytanie widać tylko po tym, czego brakuje.' },
+    { p: 'Na rysunku {rys:ytzapytania} widać całą listę pierwszego skryptu. Poszła tylko część zapytań, a reszta zniknęła bez śladu. Druga wersja skryptu ma tę samą listę z przecinkami i bez powtórki. Listę sprawdza się przed startem, bo potem zgubione zapytanie widać tylko po tym, czego brakuje. Powtórka też kosztuje, bo to drugie wywołanie wyszukiwania, które przynosi te same filmy.' },
   ]),
 
   step('w3-3', '3.3', 'Klucz i limit', [
@@ -19055,11 +19055,12 @@ const sections = [
     { p: 'Z kluczem przychodzą też zasady korzystania z danych. Zasady YouTube dla deweloperów, w części E.4, mówią, że statystyk pobranych samym kluczem, bez zgody użytkownika, nie wolno przechowywać dłużej niż 30 dni. Pozostałe takie dane też najwyżej 30 dni kalendarzowych. Projekt badawczy musi więc przed startem sprawdzić, na jakich zasadach wolno mu trzymać dane, i zapisać to w karcie korpusu.' },
     { p: 'Limit liczy wywołania, a nie wyniki. Jedno wywołanie to jedna odpowiedź API, a ile w niej jest, zależy od metody.' },
     { table: callCosts() },
+    { p: 'Gdy limit się skończy, API odpowiada błędem `quotaExceeded`. Skrypt musi wtedy poczekać do następnego dnia.' },
     { p: 'Rysunek {rys:ytwywolanie} pokazuje jedno wywołanie wyszukiwania ze skryptu projektu i to, co wraca. Kliknij każdy parametr i zobacz, co się dzieje bez niego.' },
     { figure: 'ytwywolanie' },
     { exercise: 'yt1', num: 'Lab 2', title: 'Ile dni potrwa zbieranie?', toc: 'Lab 2. Klucz i limit' },
     { figure: 'ytlimit' },
-    { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Prawie całą drugą pulę zużywają komentarze i odpowiedzi, a statystyki filmów kosztują bardzo mało. Jeden film kosztuje tym więcej jednostek, im więcej ma komentarzy. Przesuń suwak jednostek na film w prawo, tak wygląda korpus z setkami komentarzy pod filmem. Wtedy pierwsza kończy się pula jednostek. Większy limit można dostać od Google na wniosek, ale pomaga on tylko tej puli, która kończy się pierwsza. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
+    { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Prawie całą drugą pulę zużywają komentarze i odpowiedzi, a statystyki filmów kosztują bardzo mało. Jeden film kosztuje tym więcej jednostek, im więcej ma komentarzy. Przesuń suwak jednostek na film w prawo, tak wygląda korpus z setkami komentarzy pod filmem. Wtedy pierwsza kończy się pula jednostek. Większy limit Google daje po audycie, który sprawdza, czy projekt przestrzega zasad. Pomaga on tylko tej puli, która kończy się pierwsza. Limitu nie powiększa się, zakładając kolejne projekty, bo według zasad jedna aplikacja ma dokładnie jeden projekt API. Start w 2020 r. i dwie strony na miesiąc to decyzje planu projektu. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
   ]),
 
   step('w3-4', '3.4', 'Strony wyników', [
@@ -19069,19 +19070,20 @@ const sections = [
     { p: 'Pierwszy skrypt projektu brał jedną stronę na zapytanie. Wyglądało to dobrze, bo strona była pełna. Sprawdź, ile to jest z całości.' },
     { exercise: 'yt3', num: 'Lab 3', title: 'Pobierz wszystkie strony wyników', toc: 'Lab 3. Strony wyników' },
     { figure: 'ytstronyreal' },
-    { p: `Na rysunku {rys:ytstronyreal} powtórki są na ${REPEAT_PAGES} z ${D.pages.length - 1} dalszych stron. API nie mówi, skąd się biorą, i nie ostrzega przed nimi. Dlatego liczy się różne identyfikatory filmów. Zapisz w karcie korpusu, ile było trafień i ile z nich zostało różnych filmów.` },
+    { p: `Na rysunku {rys:ytstronyreal} powtórki są na ${REPEAT_PAGES} z ${D.pages.length - 1} dalszych stron. API nie mówi, skąd się biorą, i nie ostrzega przed nimi. Możliwe, że ranking zmienia się, gdy skrypt przechodzi przez kolejne strony. Dlatego liczy się różne identyfikatory filmów. Zapisz w karcie korpusu, ile było trafień i ile z nich zostało różnych filmów.` },
     { p: 'W odpowiedzi wyszukiwania nie ma liczb o filmach. Dla listy różnych filmów skrypt wysyła drugie wywołanie, `videos.list`, po 50 filmów naraz. Z obu odpowiedzi powstaje plik `videos.csv`, z którego korzystają dalsze laby. Tabela mówi, skąd jest każda kolumna.' },
     { table: videoColumns() },
-    { p: `Liczniki to stan z chwili pobrania, tutaj z ${D.recorded.split('-').reverse().join('.')}. Ten sam film pobrany za tydzień może mieć inne liczby, a w Data API nie ma ich historii.` },
+    { p: `Liczniki to stan z chwili pobrania, tutaj z ${D.recorded.split('-').reverse().join('.')}. Ten sam film pobrany za tydzień może mieć inne liczby, a w Data API nie ma ich historii. Film znaleziony w wyszukiwaniu może też zniknąć albo stać się prywatny, zanim skrypt pobierze jego liczby.` },
+    { p: 'Migawką jest też sama lista filmów. Kolejność ustala ranking YouTube, a wyszukiwanie domyślnie odfiltrowuje część treści, co pokazuje rysunek {rys:ytwywolanie}. Ten sam skrypt jutro może dać inną listę. Dlatego w karcie korpusu zapisuje się datę zbierania i parametry wyszukiwania, także te, których skrypt nie ustawia.' },
   ]),
 
   step('w3-5', '3.5', 'Komentarze i odpowiedzi', [
-    { p: 'Pod filmem są komentarze główne, a pod nimi odpowiedzi. API oddaje je dwiema metodami. `commentThreads.list` daje komentarze główne i tylko część odpowiedzi do każdego. Dokumentacja nie podaje, ile, a skrypt projektu zakłada, że najwyżej 5. Resztę odpowiedzi pobiera się osobno, `comments.list`.' },
+    { p: 'Pod filmem są komentarze główne, a pod nimi odpowiedzi. API oddaje je dwiema metodami. `commentThreads.list` daje komentarze główne i tylko część odpowiedzi do każdego. Dokumentacja nie podaje, ile, a skrypt projektu zakłada, że najwyżej 5. Resztę odpowiedzi pobiera się osobno, `comments.list`. Skrypt prosi o 100 wątków na stronę, `maxResults=100`, bo bez tego przychodzi 20. Kolejność ustawia na `order="time"`, od najnowszych. Według komentarza w skrypcie przy `order="relevance"` stronicowanie urywa się po około 1000 do 1200 wątkach. Pod filmem z wyłączonymi komentarzami API odpowiada błędem, a wywołanie i tak się liczy.' },
     { p: 'Rysunek {rys:ytwatek} pokazuje to na jednym wymyślonym wątku. Przełącz trzy sposoby pobierania i patrz, ile zostaje.' },
     { figure: 'ytwatek' },
     { exercise: 'yt4', num: 'Lab 4', title: 'Ile rozmowy znika bez odpowiedzi?', toc: 'Lab 4. Komentarze i odpowiedzi' },
     { figure: 'ytkomentarze' },
-    { p: `Rysunek {rys:ytkomentarze} porównuje pierwszy skrypt z testem nowego. Liczba komentarzy z API to nie to samo, co zebrane dane. Dokumentacja opisuje \`commentCount\` tylko jako liczbę komentarzy do filmu. W teście API podało ${thousands(GENERATED3.labs.yt4.facts.api)}, a skrypt zebrał ${thousands(GENERATED3.data.authors.comments)} razem z odpowiedziami, więc tu ta liczba obejmuje też odpowiedzi. Do karty korpusu zapisz obie liczby i to, czy masz odpowiedzi.` },
+    { p: `Rysunek {rys:ytkomentarze} porównuje pierwszy skrypt z testem nowego. Liczba komentarzy z API to nie to samo, co zebrane dane. Dokumentacja opisuje \`commentCount\` tylko jako liczbę komentarzy do filmu. W teście API podało ${thousands(GENERATED3.labs.yt4.facts.api)}, a skrypt zebrał ${thousands(GENERATED3.data.authors.comments)} razem z odpowiedziami, więc tu ta liczba obejmuje też odpowiedzi. Pierwszy skrypt to cały przebieg, a test to jedno zapytanie i jeden miesiąc, więc porównuje się udziały, a nie liczby. Do karty korpusu zapisz obie liczby i to, czy masz odpowiedzi.` },
   ]),
 
   step('w3-6', '3.6', 'Język', [
@@ -19090,13 +19092,13 @@ const sections = [
     { figure: 'ytkody' },
     { exercise: 'yt5', num: 'Lab 5', title: 'Po jakiemu mówi korpus?', toc: 'Lab 5. Język' },
     { figure: 'ytjezyki' },
-    { p: 'Rysunek {rys:ytjezyki} pokazuje cały test. Najwięcej filmów nie ma kodu, a wśród znanych przeważa angielski i hiszpański. Projekt musi więc sam ustalić język filmu, zanim zacznie analizę polskiej manosfery. Jeden sposób skrypt już ma. Pobiera napisy do filmów, ale nie przez Data API, tylko osobną biblioteką `youtube-transcript-api`. Automatyczne napisy YouTube tworzy z mowy w filmie.' },
+    { p: 'Rysunek {rys:ytjezyki} pokazuje cały test. Najwięcej filmów nie ma kodu, a wśród znanych przeważa angielski i hiszpański. Projekt musi więc sam ustalić język filmu, zanim zacznie analizę polskiej manosfery. Jeden sposób skrypt już ma. Pobiera napisy do filmów, ale nie przez Data API, tylko osobną, nieoficjalną biblioteką `youtube-transcript-api`. Nie jest ona częścią API Google i może przestać działać, gdy YouTube zmieni swoją stronę. Automatyczne napisy YouTube tworzy z mowy w filmie.' },
     { table: languageTraces() },
     { p: `Automatyczne napisy po polsku ma ${LS.autoPl} filmów, prawie dwa razy tyle co polski kod. ${LS.autoPlNoCode} z nich nie ma kodu języka wcale. Pole języka dźwięku to więc dolna granica, a napisy to drugi ślad. Do karty korpusu zapisz, jak sprawdzasz język i ile filmów zostaje bez odpowiedzi.` },
   ]),
 
   step('w3-7', '3.7', 'Kanały', [
-    { p: 'Pierwszy skrypt sam dobierał kanały, z których brał wszystkie filmy. Tak do korpusu o manosferze trafił serwis informacyjny z kilkuset filmami. Drugi skrypt kanałów nie dobiera, tylko je oznacza, a o tym, co z nimi zrobić, decyduje autor badania.' },
+    { p: 'Pierwszy skrypt sam dobierał kanały. Brał każdy kanał, który miał w wynikach wyszukiwania co najmniej kilka filmów, i pobierał wszystkie jego filmy. Tak do korpusu o manosferze trafił serwis informacyjny z kilkuset filmami. Drugi skrypt kanałów nie dobiera, tylko je oznacza, a o tym, co z nimi zrobić, decyduje autor badania.' },
     { p: 'Najprostsze oznaczenie to reguła na nazwie kanału. Rysunek {rys:ytreguly} pokazuje trzy wersje takiej reguły na wymyślonych nazwach. Patrz na to, co reguła pomija, i na to, co łapie przez pomyłkę.' },
     { figure: 'ytreguly' },
     { exercise: 'yt6', num: 'Lab 6', title: 'Kto tu nadaje wiadomości?', toc: 'Lab 6. Kanały' },
@@ -19105,7 +19107,7 @@ const sections = [
   ]),
 
   step('w3-8', '3.8', 'Liczby na film', [
-    { p: 'W raporcie o YouTube szybko pojawia się wskaźnik „komentarze na 1000 wyświetleń”. Pozwala porównać duże filmy z małymi. Ale ten sam wskaźnik można policzyć na kilka sposobów i każdy daje inną liczbę.' },
+    { p: 'W raporcie o YouTube szybko pojawia się wskaźnik „komentarze na 1000 wyświetleń”. Pozwala porównać duże filmy z małymi. Ale ten sam wskaźnik można policzyć na kilka sposobów i każdy daje inną liczbę. Mnożenie przez 1000 to tylko umowa, żeby liczby nie były bardzo małe.' },
     { p: 'Rysunek {rys:ytwskaznik} pokazuje trzy sposoby na pięciu wymyślonych filmach. Przełącz je i patrz, który film ustala wynik.' },
     { figure: 'ytwskaznik' },
     { exercise: 'yt7', num: 'Lab 7', title: 'Komentarze na 1000 wyświetleń', toc: 'Lab 7. Liczby na film' },
@@ -19118,7 +19120,7 @@ const sections = [
     { p: 'Najpierw cała pierwsza część w jednej tabeli. W każdym kroku była pułapka, która nie daje żadnego błędu, a test nowego skryptu pokazał, ile to zmienia.' },
     { table: partOne() },
     { p: 'Zanim policzysz cokolwiek o filmach, sprawdź, jakie to filmy. Rozmowa pod godzinnym wywiadem i pod 30-sekundowym klipem to dwie różne rzeczy. Długość filmu API podaje w polu `duration`, ale jako tekst w zapisie ISO 8601.' },
-    { p: 'W pomocy YouTube Short to film do 3 minut, ale API takich filmów nie oznacza. Rysunek {rys:ytdlugosc} pokazuje, co się dzieje, gdy taki tekst porównać z „PT3M” wprost.' },
+    { p: 'W pomocy YouTube Short to film do 3 minut, ale API takich filmów nie oznacza, więc każde badanie Shorts przez API samo je definiuje. Długość to tylko jeden warunek, a granica się zmieniała, bo kiedyś Short miał najwyżej 60 sekund. Ta sama reguła 3 minut dla filmów z 2020 i z 2026 r. znaczy więc co innego. Rysunek {rys:ytdlugosc} pokazuje, co się dzieje, gdy długość jako tekst porównać z „PT3M” wprost.' },
     { figure: 'ytdlugosc' },
     { exercise: 'yt8', num: 'Lab 8', title: 'Czym jest ten korpus?', toc: 'Lab 8. Długość filmów' },
     { figure: 'ytformat' },
@@ -19136,6 +19138,7 @@ const sections = [
 
   step('w3-a3', '3.11', 'Rdzeń czy szum?', [
     { p: 'W Lab 5 i Lab 6 korpus okazał się w dużej części angielski i hiszpański. Projekt ma na to własną etykietę. Film dostaje ją, gdy w jego tytule, opisie albo tagach jest jedno ze słów projektu. Sprawdzimy, czy ta etykieta oddziela polski materiał od reszty.' },
+    { p: 'Wyszukiwarka nie sprawdza jednak tylko słów w tytule, opisie i tagach. Co jeszcze bierze pod uwagę, dokumentacja nie mówi. Dlatego zapytanie o „manosferę” daje też filmy bez tego słowa, a etykieta projektu sprawdza to dopiero po pobraniu. Tytułów i opisów nie ma na tej stronie, więc etykietę bierzemy od projektu na zaufanie.' },
     { p: 'Słowa projektu to wyrażenia regularne, takie jak w Lab 6. Wielkość liter nie ma znaczenia, a `\\b` pilnuje granicy słowa. Dlatego „alfabet” ani „Alfa Romeo” nie pasują, a „samca alfa” pasuje.' },
     { table: projectTerms() },
     { p: 'Grupy porównuje się na dwa sposoby, po liczbie filmów albo po sumie komentarzy. Rysunek {rys:ytgrupy} pokazuje, jak bardzo te dwie liczby mogą się różnić.' },
@@ -19146,7 +19149,7 @@ const sections = [
   ]),
 
   step('w3-a5', '3.12', 'Kiedy przychodzą komentarze?', [
-    { p: 'Skrypt zbiera komentarze w jednym dniu. Komentarze, które przyjdą później, w korpusie się nie znajdą. Test był robiony pół roku po publikacji, ale projekt może zbierać dane wcześniej, na przykład co tydzień.' },
+    { p: 'Skrypt zbiera komentarze w jednym dniu. Komentarze, które przyjdą później, w korpusie się nie znajdą. Test był robiony pół roku po publikacji, ale projekt może zbierać dane wcześniej, na przykład co tydzień. Działa to też w drugą stronę. Komentarze usunięte przed zbieraniem przez autora, kanał albo YouTube nie trafią do korpusu nigdy, a przy drażliwym temacie może ich być sporo.' },
     { p: 'Rysunek {rys:ytczas} pokazuje komentarze pod jednym wymyślonym filmem. Wybierz dzień zbierania i patrz, ile skrypt by miał.' },
     { figure: 'ytczas' },
     { exercise: 'yt12', num: 'Lab 11', title: 'Kiedy przychodzą komentarze?', toc: 'Lab 11. Czas komentarzy' },
@@ -19170,7 +19173,7 @@ const sections = [
     { figure: 'ytpanel' },
     { p: 'Każdy krok tego tematu kończył się zdaniem „zapisz w karcie korpusu”. Karta to krótki opis danych, bez którego nikt nie oceni wyniku. Tak wyglądałaby karta testu, na którym pracowaliśmy.' },
     { table: corpusExample() },
-    { p: 'Teraz zrób taką kartę dla źródła z własnego projektu. Nie musi to być YouTube. Pytania są te same dla każdego źródła zbieranego przez API albo skrypt.' },
+    { p: 'Teraz zrób taką kartę dla źródła z własnego projektu. Nie musi to być YouTube. Pytania są te same dla każdego źródła zbieranego przez API albo skrypt. W polu o zbieraniu danych zapisz też datę i godzinę zbierania oraz parametry wyszukiwania, także te, których skrypt nie ustawia, na przykład `safeSearch` i kolejność wyników.' },
     { exercise: 'raport3', num: 'Projekt', title: 'Karta korpusu', toc: 'Projekt. Karta korpusu' },
     { discuss: { who: 'w parach, ostatnie 10 minut', prompts: [
       'Przeczytajcie sobie nawzajem karty. Czy z karty da się powtórzyć zbieranie danych?',
@@ -19218,7 +19221,7 @@ function languageTraces() {
     rows: [
       ['Kod „pl” w polu języka dźwięku', String(LS.codePl)],
       ['Napisy po polsku, dowolne', String(LS.captionsPl)],
-      ['w tym automatyczne, czyli YouTube rozpoznał polską mowę', String(LS.autoPl)],
+      ['w tym automatyczne, które YouTube zrobił z mowy w filmie', String(LS.autoPl)],
       ['automatyczne po polsku w filmach bez kodu języka', String(LS.autoPlNoCode)],
       ['automatyczne po polsku w filmach z innym kodem', String(LS.autoPlOther)],
     ],
@@ -19345,7 +19348,7 @@ const isDict = (x) => x != null && typeof x === 'object' && !Array.isArray(x);
 const sameKeys = (value, expect) => isDict(value) && Object.keys(expect).every((k) => k in value);
 const n = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
 
-const NOTE = 'To zwykły Python. Pierwsze uruchomienie pobiera Pythona (około 25 MB) i trwa do pół minuty. Nie łączymy się z YouTube. Pliki obok kodu to odpowiedzi API z testowego przebiegu skryptu, więc każdy dostaje te same liczby.';
+const NOTE = 'To zwykły Python. Pierwsze uruchomienie pobiera Pythona (około 25 MB) i trwa do pół minuty. Nie łączymy się z YouTube. Pliki obok kodu to dane z testowego przebiegu skryptu, strony wyszukiwania odtworzone z jego zapisów i tabele, które skrypt zrobił z odpowiedzi API. Każdy dostaje więc te same liczby.';
 const LOADING = 'Uruchamiam Pythona i czytam pliki…';
 const WALK_LOCKED = 'Najpierw spróbuj znaleźć błąd w wyróżnionych liniach. Poprawiony skrypt i objaśnienie otworzą się, gdy rozwiążesz zadanie albo obejrzysz wszystkie podpowiedzi w zakładce „Popraw skrypt”.';
 const WALK_NO_PYTHON = 'Python nie uruchomił się w tej przeglądarce. Tak wypisuje poprawiony skrypt, gdy działa. Z tych liczb wpisz odpowiedzi poniżej.';
@@ -19854,7 +19857,7 @@ LABS3.yt9 = {
   ...common,
   id: 'yt9',
   alt: G.yt9.alt,
-  intro: 'Średnia w Lab 7 była dużo większa od mediany, bo kilka filmów ma prawie wszystko. Policz, ile najczęściej oglądanych filmów daje połowę wszystkich wyświetleń i ile ma najlepsza dziesiąta część.',
+  intro: 'Średnia w Lab 7 była dużo większa od mediany, bo kilka filmów ma prawie wszystko. Policz, ile najczęściej oglądanych filmów daje połowę wszystkich wyświetleń i ile ma dziesiąta część najczęściej oglądanych filmów.',
   starter: G.yt9.starter,
   solution: G.yt9.solution,
   solutionOutput: G.yt9.solutionOutput,
@@ -19863,7 +19866,7 @@ LABS3.yt9 = {
   tol: 0.004,
   hints: [
     '`cumsum` dodaje w kolejności wierszy. Najpierw ułóż od największej, `sort_values(ascending=False)`.',
-    'Najlepsza dziesiąta część to pierwsze `len(views) // 10` wierszy po posortowaniu.',
+    'Dziesiąta część najczęściej oglądanych to pierwsze `len(views) // 10` wierszy po posortowaniu.',
   ],
   diagnose(value) {
     const { expect, facts } = G.yt9;
@@ -19877,7 +19880,7 @@ LABS3.yt9 = {
   },
   success(value) {
     const f = G.yt9.facts;
-    return `Tak. ${value.half} z ${f.all} filmów daje połowę wszystkich wyświetleń, a najlepsza dziesiąta część ma ${pct(value.top10)}. Sam największy film ma ${pct(f.top1)}. Każda liczba o „całym korpusie” mówi głównie o tych kilku filmach.`;
+    return `Tak. ${value.half} z ${f.all} filmów daje połowę wszystkich wyświetleń, a dziesiąta część najczęściej oglądanych filmów ma ${pct(value.top10)}. Sam największy film ma ${pct(f.top1)}. Każda liczba o „całym korpusie” mówi głównie o tych kilku filmach.`;
   },
   more: `Dla chętnych. Taką nierówność mierzy współczynnik Giniego, od 0 dla równego podziału do 1, gdy wszystko ma jeden film. Tu wynosi ${dec(G.yt9.facts.gini)}. Jeśli dziesiąta część to dla Ciebie ${G.yt9.facts.n10 + 1} filmów, a nie ${G.yt9.facts.n10}, wynik zmienia się dopiero na trzecim miejscu po przecinku.`,
   base: {
@@ -19885,7 +19888,7 @@ LABS3.yt9 = {
     walk: WALK.yt9,
     fields: [
       { id: 'half', label: 'Ile filmów od góry daje połowę wyświetleń?', expect: G.yt9.expect.half, tol: 0 },
-      { id: 'top10', label: 'Jaką część wyświetleń ma najlepsza dziesiąta część filmów?', expect: G.yt9.expect.top10, tol: 0.004 },
+      { id: 'top10', label: 'Jaką część wyświetleń ma dziesiąta część najczęściej oglądanych filmów?', expect: G.yt9.expect.top10, tol: 0.004 },
     ],
     wrong: {
       half(v) {
@@ -20137,14 +20140,20 @@ function keyFigure({ num: n = 'Rysunek' } = {}) {
  * say nothing, the text says it is the project's assumption.
  */
 const REQUEST = (q, [after, before]) => [
-  ['q', `"${q}"`, 'Słowo, którego szukasz. Jedno zapytanie z listy, takiej jak w Lab 1.', 'API szuka bez słowa, tylko według pozostałych parametrów.'],
+  ['q', `"${q}"`, 'Słowo, którego szukasz. Jedno zapytanie z listy, takiej jak w Lab 1. Według dokumentacji zapytanie może też używać operatorów `-`, czyli bez, i `|`, czyli lub.', 'API szuka bez słowa, tylko według pozostałych parametrów.'],
   ['part', '"id,snippet"', 'Które części odpowiedzi chcesz dostać. `id` to identyfikator filmu, `snippet` to tytuł, kanał i data publikacji.', 'API odpowie błędem, bo ten parametr jest obowiązkowy.'],
   ['type', '"video"', 'Tylko filmy, bez kanałów i playlist.', 'Na stronie trafią się też kanały i playlisty, a one nie mają identyfikatora filmu.'],
   ['maxResults', '50', 'Ile elementów chcesz na jednej stronie. Dokumentacja pozwala od 0 do 50.', 'Domyślnie przychodzi 5 elementów na stronę. Te same filmy kosztują wtedy dziesięć razy więcej wywołań wyszukiwania.'],
   ['relevanceLanguage', '"pl"', 'Według dokumentacji API zwraca wtedy wyniki najbardziej pasujące do języka. Wyniki w innych językach i tak przychodzą, jeśli dobrze pasują do zapytania.', 'Ranking nie bierze języka pod uwagę. Filtrem nie jest ani z tym parametrem, ani bez niego.'],
-  ['publishedAfter', `"${after}T00:00:00Z"`, 'Początek okna czasu publikacji. Razem z `publishedBefore` daje jeden miesiąc.', 'Jedno zapytanie obejmuje wszystkie lata naraz.'],
+  ['publishedAfter', `"${after}T00:00:00Z"`, 'Początek okna czasu publikacji. Razem z `publishedBefore` daje jeden miesiąc. To zapis RFC 3339, T oddziela datę od godziny, a Z znaczy czas UTC. Miesiąc w UTC zaczyna się w Polsce o 1:00 albo o 2:00 w nocy, więc film opublikowany tuż po północy pierwszego dnia trafia do poprzedniego miesiąca.', 'Jedno zapytanie obejmuje wszystkie lata naraz.'],
   ['publishedBefore', `"${before}T00:00:00Z"`, 'Koniec okna. Skrypt projektu pyta o każdy miesiąc osobno, bo przyjmuje, że na jedno zapytanie API odda w praktyce najwyżej około 500 wyników, czyli 10 stron. Dokumentacja takiej granicy nie podaje, to założenie projektu.', 'Przy wielu wynikach lista może się urwać, zanim skończą się filmy.'],
   ['pageToken', 'None', 'Token z poprzedniej odpowiedzi. `None` znaczy pierwszą stronę.', 'Każde wywołanie daje znowu tę samą, pierwszą stronę.'],
+];
+// not set by scraper v3, so the docs' defaults apply (search/list, read 2026-11-05)
+const NOT_SET = [
+  ['order', '"relevance"', 'Kolejność wyników. Skrypt jej nie ustawia, więc według dokumentacji obowiązuje `relevance`, czyli ranking YouTube.', 'Gdy wyników jest więcej, niż skrypt pobierze, w korpusie jest góra rankingu, a nie wszystkie filmy.'],
+  ['safeSearch', '"moderate"', 'Filtr treści. Skrypt go nie ustawia, więc według dokumentacji obowiązuje `moderate`, a wtedy YouTube odfiltrowuje część treści z wyników.', 'Część filmów nie trafi do korpusu i nie widać, ile. Przy drażliwym temacie to może być właśnie jego brzeg. Wartość `none` wyłącza filtr.'],
+  ['regionCode', 'nie ustawiony', 'Kraj, w którym filmy mają być dostępne. Skrypt go nie ustawia, a dokumentacja nie mówi, co obowiązuje wtedy.', 'Film zablokowany w jednym kraju może być dostępny w innym. Dla polskiego tematu warto to ustawić świadomie, na przykład na `PL`.'],
 ];
 const ANSWER = [
   ['nextPageToken', '"…"', 'Jest w odpowiedzi, gdy są dalsze strony. Wysyłasz go jako `pageToken` w następnym wywołaniu.', 'Gdy go nie ma, to była ostatnia strona.'],
@@ -20158,26 +20167,34 @@ function requestFigure({ num: n = 'Rysunek' } = {}) {
   const state = { pick: ['q', 0] };
   const host = el('div');
   const draw = () => {
-    const [side, k] = state.pick === null ? [null, -1] : [state.pick[0] === 'a' ? 'a' : 'q', state.pick[1]];
+    const [side, k] = state.pick === null ? [null, -1] : [state.pick[0], state.pick[1]];
     const req = REQUEST(D.query, D.window);
     const line = (kind, rows, k2, fmtLine) => rows.map((r, i) => el(`button.yt-code-line.yt-param${side === kind && k2 === i ? '.yt-param-on' : ''}`,
       { type: 'button', onClick: () => { state.pick = [kind, i]; draw(); } }, fmtLine(r)));
-    const picked = side === 'q' ? req[k] : side === 'a' ? ANSWER[k] : null;
+    const picked = side === 'q' ? req[k] : side === 'a' ? ANSWER[k] : side === 'n' ? NOT_SET[k] : null;
     mount(host,
       el('div.yt-sub', 'Wywołanie w skrypcie projektu'),
       el('div.yt-code',
         el('div.yt-code-line', 'youtube.search().list('),
         line('q', req, k, ([name, value]) => `  ${name}=${value},`),
         el('div.yt-code-line', ')')),
+      el('div.yt-sub', 'Czego skrypt nie ustawia, więc obowiązują wartości domyślne'),
+      el('div.yt-code', line('n', NOT_SET, k, ([name, value]) => `  ${name}: ${value}`)),
+      el('div.yt-sub', 'To samo wywołanie jako adres w internecie'),
+      el('div.yt-code', [
+        'https://www.googleapis.com/youtube/v3/search',
+        ...req.filter(([name]) => name !== 'pageToken').map(([name, value], i) => `${i ? '&' : '?'}${name}=${String(value).replace(/"/g, '')}`),
+        '&key=TWÓJ_KLUCZ',
+      ].map((t) => el('div.yt-code-line', t))),
       el('div.yt-sub', 'Odpowiedź, w skrócie'),
       el('div.yt-code', line('a', ANSWER, k, ([name, value]) => `${name}: ${value}`)),
       picked ? el('div.yt-screen',
         el('div.yt-screen-title', picked[0]),
         el('p', { html: rich(picked[2]) }),
-        el('p.yt-why', el('b', side === 'q' ? 'Bez tego parametru. ' : 'Na co uważać. '), el('span', { html: rich(picked[3]) }))) : null);
+        el('p.yt-why', el('b', side === 'q' ? 'Bez tego parametru. ' : side === 'n' ? 'Co z tego wynika. ' : 'Na co uważać. '), el('span', { html: rich(picked[3]) }))) : null);
   };
   draw();
-  return frame(n, 'Jedno wywołanie search.list', host, caption('Kliknij parametr albo pole odpowiedzi. Klucza nie ma w tym wywołaniu, bo skrypt podaje go raz, przy tworzeniu klienta, i czyta ze zmiennej środowiskowej. Parametry według skryptu v3 projektu, opis według dokumentacji YouTube Data API v3 z listopada 2026 r. Wartości w odpowiedzi są pominięte.'));
+  return frame(n, 'Jedno wywołanie search.list', host, caption('Kliknij parametr albo pole odpowiedzi. Obiekt youtube tworzy biblioteka google-api-python-client, build("youtube", "v3", developerKey=...). Klucza nie ma w samym wywołaniu, bo skrypt podaje go raz, przy tworzeniu klienta, i czyta ze zmiennej środowiskowej. Parametry według skryptu v3 projektu, opis według dokumentacji YouTube Data API v3 z listopada 2026 r. Wartości w odpowiedzi są pominięte.'));
 }
 
 /** After yt1: the two daily buckets, for the test run and for the full plan. */
@@ -20272,7 +20289,7 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
           : `Pierwsza kończy się pula wyszukiwania. Komentarze do ok. ${fmt(videos1)} filmów z jednego dnia mieszczą się w drugiej puli, więc o czasie decyduje wyszukiwanie. Skrypt pracuje ${days} dni.${helped ? ' Większy limit jednostek skrócił pracę, ale dalej nie pomoże, bo wyszukiwanie ma własny limit.' : bigCap ? ' Większy limit jednostek nic tu nie zmienia, bo wyszukiwanie ma własny limit.' : ''}`));
   };
   draw();
-  return frame(n, 'Jeden dzień pracy skryptu', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r.: 100 wywołań wyszukiwania i 10 000 jednostek dziennie. Jednostka to opłata za jedno wywołanie innej metody, nie za jeden wynik. Większy limit jednostek nie zmienia limitu wyszukiwania, to osobna pula. Przeliczniki z testu: około 50 trafień na wywołanie, około 1 na 10 to powtórka, ${String(Math.round(perVideo * 10) / 10).replace('.', ',')} jednostki na film. W teście ${units(Q.total)} poza wyszukiwaniem to ${fmt(Q.comment_threads_list)} na commentThreads.list (strona do 100 komentarzy głównych), ${fmt(Q.comments_list)} na comments.list (odpowiedzi w wątkach, które mają ich więcej niż 5), ${fmt(Q.videos_list)} na videos.list (do 50 filmów w jednym wywołaniu) i ${fmt(Q.other)} na inne wywołania, w tym jedno z błędem. Pod filmami z dużych kanałów jest więcej komentarzy, więc jeden film kosztuje więcej jednostek. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu.`));
+  return frame(n, 'Jeden dzień pracy skryptu', host, caption(`Domyślne limity YouTube Data API v3 od czerwca 2026 r.: 100 wywołań wyszukiwania i 10 000 jednostek dziennie. Jednostka to opłata za jedno wywołanie innej metody, nie za jeden wynik. Większy limit jednostek nie zmienia limitu wyszukiwania, to osobna pula. Przeliczniki z testu: około 50 trafień na wywołanie, około 1 na 10 to powtórka, ${String(Math.round(perVideo * 10) / 10).replace('.', ',')} jednostki na film. W teście ${units(Q.total)} poza wyszukiwaniem to ${fmt(Q.comment_threads_list)} na commentThreads.list (strona do 100 komentarzy głównych), ${fmt(Q.comments_list)} na comments.list (odpowiedzi w wątkach, które mają ich więcej niż 5), ${fmt(Q.videos_list)} na videos.list (do 50 filmów w jednym wywołaniu) i ${fmt(Q.other)} na inne wywołania, w tym jedno z błędem. Pod filmami z dużych kanałów jest więcej komentarzy, więc jeden film kosztuje więcej jednostek. ${SRC} Skrypt sam naliczył ${units(D.testScriptUnits)}, bo liczy wyszukiwanie po staremu, więc przy małym limicie zatrzymałby się wcześniej, niż trzeba. Inne zapytania mogą mieć inne przeliczniki niż ten jeden test.`));
 }
 
 const fmt = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
@@ -20412,7 +20429,7 @@ function codesFigure({ num: n = 'Rysunek' } = {}) {
           : 'Dwie pierwsze litery łapią każdy zapis. Mianownik to filmy, o których coś wiadomo. Taki wynik trzeba opisać razem z liczbą braków.'));
   };
   draw();
-  return frame(n, 'Kody języka i mianownik', host, caption('Wiersze są wymyślone. Kody YouTube mają postać języka i, czasem, kraju albo regionu, na przykład en-US albo es-419.'));
+  return frame(n, 'Kody języka i mianownik', host, caption('Wiersze są wymyślone. Kody YouTube mają postać języka i, czasem, kraju albo regionu, na przykład en-US albo es-419. Kod es-419 to hiszpański z Ameryki Łacińskiej, a 419 to kod tego regionu w spisie ONZ.'));
 }
 
 /** After yt5: audio language of the test's videos, by the first part of the code. */
@@ -20708,7 +20725,7 @@ function runningFigure({ num: n = 'Rysunek' } = {}) {
       el('div.yt-meter-head', el('span', label), el('b', `${pct1(k / f12.total)} · ${fmt(k)}`)),
       el('div.yt-meter-track', el('span.yt-meter-bar', { style: `width:${(100 * k) / f12.total}%` })))),
     el('div.sq-read', `Prawie połowa przychodzi w pierwszej dobie, ale po miesiącu brakuje jeszcze ${pct1(1 - f12.month)}. Z tych późnych komentarzy ${pct1(f12.lateTop10)} jest pod 10 najczęściej komentowanymi filmami, które mają ${pct1(f12.allTop10)} wszystkich.`));
-  return frame(n, 'Komentarze narastająco', host, caption(`${SRC} Zebrane komentarze po usunięciu powtórek, ${fmt(f12.total)}. Liczby z pliku zbiorczego, bez treści i autorów.`));
+  return frame(n, 'Komentarze narastająco', host, caption(`${SRC} Zebrane komentarze po usunięciu powtórek, ${fmt(f12.total)}. Ten sam komentarz może przyjść dwa razy, gdy skrypt przechodzi przez strony komentarzy. ${fmt(f12.early)} komentarzy ma datę sprzed filmu, prawdopodobnie z premier, i liczymy je w pierwszym dniu. Liczby z pliku zbiorczego, bez treści i autorów.`));
 }
 
 /** The authors of the comments, in classes; counts only, no author is named or identified. */
@@ -20784,7 +20801,7 @@ function scatterFigure({ num: n = 'Rysunek' } = {}) {
   const host = el('div',
     el('div.yt-scatter-wrap', scatter(pts, { mark: top, log: true, xLabel: 'wyświetlenia, skala logarytmiczna', yLabel: 'komentarze, skala log.' })),
     el('div.sq-read', `Wyróżniony film ma najwięcej wyświetleń, ${fmt(pts[top][0])}, ale tylko ${pts[top][1]} komentarzy. r wszystkich filmów to ${r2(e11.r)}, bez niego ${r2(e11.r_without_top)}, a na rangach ${r2(e11.r_rank)}.`));
-  return frame(n, 'Wyświetlenia i komentarze w teście', host, caption(`${SRC} ${fmt(pts.length)} ${plural(pts.length, 'film', 'filmy', 'filmów')} z liczbą komentarzy. Do obu osi dodano 1, żeby filmy bez komentarzy też były widoczne.`));
+  return frame(n, 'Wyświetlenia i komentarze w teście', host, caption(`${SRC} ${fmt(pts.length)} ${plural(pts.length, 'film', 'filmy', 'filmów')} z liczbą komentarzy. Osie są logarytmiczne, bo liczby sięgają od kilku do setek tysięcy. Do obu osi dodano 1, żeby filmy bez komentarzy też były widoczne.`));
 }
 
 // ---------------------------------------------------------------- 3.14: the corpus panel
@@ -20855,7 +20872,7 @@ function pageChainFigure({ num: n = 'Rysunek' } = {}) {
         : 'Ostatnia strona nie ma tokenu. Film C przyszedł dwa razy, więc różnych filmów jest mniej niż trafień.'));
   };
   draw();
-  return frame(n, 'Strony wyników połączone tokenami', host, caption('Strony są wymyślone. Prawdziwe mają tyle elementów, ile ustawi `maxResults`, najwyżej 50, a token to długi ciąg znaków.'));
+  return frame(n, 'Strony wyników połączone tokenami', host, caption('Strony są wymyślone. Prawdziwe mają tyle elementów, ile ustawi parametr maxResults, najwyżej 50, a token to długi ciąg znaków.'));
 }
 
 function realPagesFigure({ num: n = 'Rysunek' } = {}) {

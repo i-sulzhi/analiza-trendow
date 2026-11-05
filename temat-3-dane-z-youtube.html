@@ -17025,7 +17025,7 @@ function corpusExample() {
       ['Filtry i co odrzucają', `Lista zapytań sprawdzona przed startem. Kanały z wiadomościami oznaczone, nie usunięte, ${L.yt6.expect.videos} filmów.`],
       ['Straty i pokrycie', `${n(L.yt3.expect.hits)} trafień, ${L.yt3.expect.videos} różnych filmów. ${L.yt4.facts.disabled} filmy z wyłączonymi komentarzami. Odpowiedzi to ${pct(L.yt4.expect.lost)} zebranych komentarzy.`],
       ['Język i szum', `Kod języka ma ${L.yt5.expect.known} z ${L.yt5.facts.all} filmów, ${pct(L.yt5.expect.share)} z nich po angielsku, polski kod ma ${L.yt5.facts.pl}.`],
-      ['Czego ten korpus nie powie?', `Niczego pewnego o polskiej manosferze, bo większość filmów nie jest po polsku. Typowy film ma ${String(L.yt7.expect.typical).replace('.', ',')} komentarza na 1000 wyświetleń, więc o odbiorze mówią głównie duże filmy.`],
+      ['Czego ten korpus nie powie?', `Niczego pewnego o polskiej manosferze. Polski kod języka ma tylko ${L.yt5.facts.pl} filmów, a ${L.yt5.facts.missing} nie ma żadnego. Typowy film ma ${String(L.yt7.expect.typical).replace('.', ',')} komentarza na 1000 wyświetleń, więc o odbiorze mówią głównie duże filmy.`],
     ],
   };
 }
@@ -17060,10 +17060,10 @@ const CHAPTER = {
     'Jedna odpowiedź API to jedna strona. Kolejne strony pobiera się tokenem, dopóki odpowiedź go ma.',
     'Ten sam film może przyjść dwa razy. Korpus to różne filmy, a nie wszystkie trafienia.',
     'Licz to, co przyszło, a nie to, o co proszono. Strona może mieć więcej elementów niż `maxResults`.',
+    'Bez odpowiedzi znika prawie połowa komentarzy. Liczba z API to nie to, co zebrano. Porównuje się jedno z drugim.',
     'Parametr języka w zapytaniu nie filtruje wyników. Kody „en”, „en-US” i „en-GB” to jeden język, a brak kodu to brak informacji, który trzeba opisać.',
     'Regułę tekstową sprawdza się na liście, a nie na liczbie. Patrzy się na to, co pominęła, i na to, co złapała przez pomyłkę.',
     'Wskaźnik na 1000 wyświetleń ma dwie wersje. Suma przez sumę mówi o całym zbiorze, a mediana o typowym filmie. Średnia z filmów nie mówi o żadnym z nich.',
-    'Bez odpowiedzi znika prawie połowa komentarzy. Liczba z API to nie to, co zebrano. Porównuje się jedno z drugim.',
   ],
   next: 'Temat 4 to profile z mediów społecznościowych. Karta korpusu przyda się tam od pierwszej minuty, bo profile też zbiera się przez API i skrypty.',
   prep: '',
@@ -17922,7 +17922,7 @@ function realPagesFigure({ num: n = 'Rysunek' } = {}) {
     el('div.sq-legend', el('span.sq-leg.yt-leg-new', 'nowy film'), el('span.sq-leg.yt-leg-rep', 'film z wcześniejszej strony')),
     el('div.yt-bars', rows),
     el('div.sq-read', `Razem ${hits} trafień i ${videos} różnych filmów. Pierwsza strona ma ${pages[0].items} elementy, choć skrypt prosił o 50.`));
-  return frame(n, 'Dziewięć stron z testu', host, caption(`${SRC} Strony odtworzone z zapisanych trafień. ${D.quotaSearch} jednostek limitu, po 100 za stronę.`));
+  return frame(n, 'Dziewięć stron z testu', host, caption(`${SRC} Strony odtworzone z zapisanych trafień. Każda strona to jedno wywołanie wyszukiwania, razem ${D.testSearchCalls}.`));
 }
 
 __modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };

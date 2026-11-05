@@ -1918,6 +1918,12 @@ textarea.kc-input { resize: vertical; }
 .yt-axis-text { font-size: 10px; fill: var(--ink-soft); }
 .yt-dot { fill: var(--accent); fill-opacity: .55; }
 .yt-dot-out { fill: var(--warn); stroke: var(--ink); stroke-width: 1; }
+.yt-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5em, 1fr)); gap: 8px; margin: 8px 0; }
+.yt-tile { display: grid; gap: 3px; align-content: start; min-width: 0; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.yt-tile strong { font: 700 22px var(--mono); }
+.yt-tile span { font-size: 13px; }
+.yt-tile small { font-size: 12px; color: var(--ink-soft); }
+.yt-tile-note { font-style: italic; }
 
 </style>
 </head>
@@ -18929,7 +18935,9 @@ const sections = [
     { p: 'Rysunek {rys:ytrozrzutreal} pokazuje wszystkie filmy na osiach logarytmicznych. Do karty korpusu zapisz każde r razem z tym, jak je policzono, na wszystkich filmach, bez największych czy na rangach.' },
   ]),
 
-  step('w3-9', '3.14', 'Karta korpusu', [
+  step('w3-9', '3.14', 'Panel i karta korpusu', [
+    { p: 'Druga część dała kilka liczb o korpusie. Na panelu w projekcie pokażesz takie liczby innym. Rysunek {rys:ytpanel} pokazuje cztery z nich, raz z mianownikiem, raz bez. Przełącz i spróbuj przeczytać drugą wersję.' },
+    { figure: 'ytpanel' },
     { p: 'Każdy krok tego tematu kończył się zdaniem „zapisz w karcie korpusu”. Karta to krótki opis danych, bez którego nikt nie oceni wyniku. Tak wyglądałaby karta testu, na którym pracowaliśmy.' },
     { table: corpusExample() },
     { p: 'Teraz zrób taką kartę dla źródła z własnego projektu. Nie musi to być YouTube. Pytania są te same dla każdego źródła zbieranego przez API albo skrypt.' },
@@ -18938,12 +18946,13 @@ const sections = [
       'Przeczytajcie sobie nawzajem karty. Czy z karty da się powtórzyć zbieranie danych?',
       'Które pole jest najsłabsze? Czego w nim brakuje, liczby czy decyzji?',
       'Jaki jeden błąd z tego tematu najbardziej grozi waszemu źródłu?',
+      'Która płytka waszego panelu nie ma jeszcze mianownika?',
     ] } },
     { p: 'Na koniec pobierz raport dla prowadzącego. Są w nim wszystkie laby tego tematu i karta.' },
   ]),
 ];
 
-/** The corpus card of the test itself, filled from the labs' numbers (section 3.9). */
+/** The corpus card of the test itself, filled from the labs' numbers of both parts (section 3.14). */
 function corpusExample() {
   const L = GENERATED3.labs;
   const n = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
@@ -18951,12 +18960,12 @@ function corpusExample() {
   return {
     head: ['Pole karty', 'Test „manosfera”'],
     rows: [
-      ['Zapytanie i okres', `„${D.query}”, filmy z kwietnia 2026 r., pobrane ${D.recorded.split('-').reverse().join('.')}. Pełny plan to ${L.yt2.expect.distinct} zapytań od 2020 r., ${L.yt1.expect.days} dni przy domyślnym limicie.`],
+      ['Zapytanie i okres', `„${D.query}”, filmy z kwietnia 2026 r., pobrane ${D.recorded.split('-').reverse().join('.')}. Pełny plan to ${L.yt2.expect.distinct} zapytań od 2020 r., ${L.yt1.expect.days} dni przy domyślnym limicie. Komentarze zebrano pół roku po publikacji, tydzień po niej byłoby ich ${pct(L.yt12.expect.week)}.`],
       ['Jak zebrano dane', `YouTube Data API v3, \`search.list\` z \`relevanceLanguage="pl"\`, wszystkie ${L.yt3.expect.pages} stron, komentarze razem z odpowiedziami.`],
-      ['Filtry i co odrzucają', `Lista zapytań sprawdzona przed startem. Kanały z wiadomościami oznaczone, nie usunięte, ${L.yt6.expect.videos} filmów.`],
+      ['Filtry i co odrzucają', `Lista zapytań sprawdzona przed startem. Kanały z wiadomościami oznaczone, nie usunięte, ${L.yt6.expect.videos} filmów. W grupie bez słów projektu nie ma filmów z polskim kodem, ale jest tam ${pct(L.yt10.expect.comments_no_terms)} komentarzy.`],
       ['Straty i pokrycie', `${n(L.yt3.expect.hits)} trafień, ${L.yt3.expect.videos} różnych filmów. ${L.yt4.facts.disabled} filmy z wyłączonymi komentarzami. Odpowiedzi to ${pct(L.yt4.expect.lost)} zebranych komentarzy.`],
       ['Język i szum', `Kod języka ma ${L.yt5.expect.known} z ${L.yt5.facts.all} filmów, ${pct(L.yt5.expect.share)} z nich po angielsku, polski kod ma ${L.yt5.facts.pl}.`],
-      ['Czego ten korpus nie powie?', `Niczego pewnego o polskiej manosferze. Polski kod języka ma tylko ${L.yt5.facts.pl} filmów, a ${L.yt5.facts.missing} nie ma żadnego. Typowy film ma ${String(L.yt7.expect.typical).replace('.', ',')} komentarza na 1000 wyświetleń, więc o odbiorze mówią głównie duże filmy.`],
+      ['Czego ten korpus nie powie?', `Niczego pewnego o polskiej manosferze. Polski kod języka ma tylko ${L.yt5.facts.pl} filmów, a ${L.yt5.facts.missing} nie ma żadnego. Typowy film ma ${String(L.yt7.expect.typical).replace('.', ',')} komentarza na 1000 wyświetleń, więc o odbiorze mówią głównie duże filmy. ${pct(L.yt8.expect.share)} filmów to klipy do 3 minut, ${L.yt9.expect.half} filmów ma połowę wyświetleń, a r wyświetleń i komentarzy zmienia się z ${String(L.yt11.expect.r).replace('.', ',')} na ${String(L.yt11.expect.r_without_top).replace('.', ',')} bez jednego filmu.`],
     ],
   };
 }
@@ -19006,7 +19015,7 @@ const CHAPTER = {
     'Komentarze przychodzą tygodniami. Data zbierania jest częścią korpusu, a część zebraną po tygodniu liczy się narastająco.',
     'Jeden duży film potrafi zmienić r o ponad jedną dziesiątą. r podaje się razem z wersją bez największych filmów albo na rangach.',
   ],
-  next: 'Temat 4 to profile z mediów społecznościowych. Karta korpusu przyda się tam od pierwszej minuty, bo profile też zbiera się przez API i skrypty.',
+  next: 'Temat 4 to profile z mediów społecznościowych. Karta korpusu i panel z mianownikami przydadzą się tam od pierwszej minuty, bo profile też zbiera się przez API i skrypty.',
   prep: '',
   datasets: [
     { name: 'YouTube Data API v3', url: 'https://developers.google.com/youtube/v3/docs/search/list', what: 'Wyszukiwanie filmów, strony wyników, tokeny.', licence: 'Warunki korzystania z YouTube API.' },
@@ -20363,6 +20372,37 @@ function scatterFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Wyświetlenia i komentarze w teście', host, caption(`${SRC} ${pts.length} filmów z liczbą komentarzy. Do obu osi dodano 1, żeby filmy bez komentarzy też były widoczne.`));
 }
 
+// ---------------------------------------------------------------- 3.14: the corpus panel
+
+/** Four tiles from part 2, each with what it is a share of; the toggle takes the denominators away. */
+function panelFigure({ num: n = 'Rysunek' } = {}) {
+  const L = GENERATED3.labs;
+  const tiles = [
+    { value: pct1(L.yt8.expect.share), short: 'Krótkie filmy', what: 'filmów trwa do 3 minut', of: `z ${fmt(L.yt8.facts.all)} filmów`, note: 'Długość to tylko przybliżenie Shorts.' },
+    { value: String(L.yt9.expect.half), short: 'Połowa wyświetleń', what: 'filmów daje połowę wyświetleń', of: `z ${fmt(L.yt9.facts.all)}, razem ${fmt(L.yt9.facts.total)} wyświetleń`, note: 'Każda średnia mówi głównie o nich.' },
+    { value: pct1(L.yt10.expect.comments_no_terms), short: 'Bez słów projektu', what: 'komentarzy jest pod filmami bez słów projektu', of: `z ${fmt(L.yt10.facts.allComments)} komentarzy według API`, note: 'W tej grupie nie ma filmów z polskim kodem.' },
+    { value: pct1(L.yt12.expect.week), short: 'Pierwszy tydzień', what: 'komentarzy przychodzi w pierwszym tygodniu', of: `z ${fmt(L.yt12.facts.total)} zebranych`, note: 'Test zbierano pół roku po publikacji.' },
+  ];
+  const state = { v: 'with' };
+  const host = el('div');
+  const draw = () => {
+    const withOf = state.v === 'with';
+    mount(host,
+      el('div.fg-toggles', [['with', 'z mianownikiem'], ['without', 'bez mianownika']].map(([v, label]) =>
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+      el('div.yt-panel', tiles.map((t) => el('div.yt-tile',
+        el('strong', t.value),
+        el('span', withOf ? t.what : t.short),
+        withOf ? el('small', t.of) : null,
+        withOf ? el('small.yt-tile-note', t.note) : null))),
+      el('div.sq-read', withOf
+        ? 'Każda płytka mówi, z czego jest częścią, i ma jedno zdanie zastrzeżenia. Tak wygląda panel, który da się przeczytać bez autora.'
+        : `Te same liczby z samym tytułem, jak na wielu prawdziwych panelach. Czy ${pct1(L.yt10.expect.comments_no_terms)} przy „Bez słów projektu” to filmy, czy komentarze? A 6 przy „Połowa wyświetleń” to 6 z ilu? Takiego panelu nie da się przeczytać.`));
+  };
+  draw();
+  return frame(n, 'Panel korpusu', host, caption(`${SRC} Liczby z Lab 8, Lab 9, Lab 10 i Lab 11.`));
+}
+
 // ---------------------------------------------------------------- yt3: pages
 
 // invented pages, so the figure shows the mechanism and not the lab's answer
@@ -20421,7 +20461,7 @@ function realPagesFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Dziewięć stron z testu', host, caption(`${SRC} Strony odtworzone z zapisanych trafień. Każda strona to jedno wywołanie wyszukiwania, razem ${D.testSearchCalls}.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "outlierFigure": outlierFigure, "scatterFigure": scatterFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
+__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "outlierFigure": outlierFigure, "scatterFigure": scatterFigure, "panelFigure": panelFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/main3.js ===== */
@@ -20439,7 +20479,7 @@ const { setUp: setUpCourse, restoreOptions } = __modules["../../analiza-trendow-
 const { CHAPTER, CORPUS_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter3.js"];
 const { labExercise, labAnswer, restoreLab } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS3, FILES3, explainError3 } = __modules["../../analiza-trendow-w-internecie/src/tasks3.js"];
-const { keyFigure, limitFigure, gluedFigure, realQueriesFigure, pageChainFigure, realPagesFigure, threadFigure, commentsFigure, codesFigure, languagesFigure, rulesFigure, channelsFigure, ratioFigure, countsFigure, durationFigure, formatFigure, halfFigure, curveFigure, groupsFigure, labelsFigure, timingFigure, runningFigure, authorsFigure, outlierFigure, scatterFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
+const { keyFigure, limitFigure, gluedFigure, realQueriesFigure, pageChainFigure, realPagesFigure, threadFigure, commentsFigure, codesFigure, languagesFigure, rulesFigure, channelsFigure, ratioFigure, countsFigure, durationFigure, formatFigure, halfFigure, curveFigure, groupsFigure, labelsFigure, timingFigure, runningFigure, authorsFigure, outlierFigure, scatterFigure, panelFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
 const FIGURES3 = {
   ytsklejanie: gluedFigure,
   ytzapytania: realQueriesFigure,
@@ -20466,6 +20506,7 @@ const FIGURES3 = {
   ytautorzy: authorsFigure,
   ytrozrzut: outlierFigure,
   ytrozrzutreal: scatterFigure,
+  ytpanel: panelFigure,
 };
 
 /** Make the engine topic 3: the course's stores and strings, then this topic's labs, figures and card. */

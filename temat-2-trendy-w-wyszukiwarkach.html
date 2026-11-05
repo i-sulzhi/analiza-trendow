@@ -1918,6 +1918,12 @@ textarea.kc-input { resize: vertical; }
 .yt-axis-text { font-size: 10px; fill: var(--ink-soft); }
 .yt-dot { fill: var(--accent); fill-opacity: .55; }
 .yt-dot-out { fill: var(--warn); stroke: var(--ink); stroke-width: 1; }
+.yt-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5em, 1fr)); gap: 8px; margin: 8px 0; }
+.yt-tile { display: grid; gap: 3px; align-content: start; min-width: 0; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.yt-tile strong { font: 700 22px var(--mono); }
+.yt-tile span { font-size: 13px; }
+.yt-tile small { font-size: 12px; color: var(--ink-soft); }
+.yt-tile-note { font-style: italic; }
 
 </style>
 </head>

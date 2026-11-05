@@ -1924,6 +1924,8 @@ textarea.kc-input { resize: vertical; }
 .yt-tile span { font-size: 13px; }
 .yt-tile small { font-size: 12px; color: var(--ink-soft); }
 .yt-tile-note { font-style: italic; }
+.yt-why-list { margin: 6px 0 0; padding-left: 1.2em; font-size: 13px; color: var(--ink-soft); }
+.yt-why-list li { margin: 2px 0; }
 
 </style>
 </head>
@@ -16974,6 +16976,62 @@ const GENERATED3 = {
    "other": 4,
    "total": 642
   },
+  "langSignals": {
+   "codePl": 7,
+   "captionsPl": 16,
+   "autoPl": 13,
+   "autoPlCodePl": 6,
+   "autoPlNoCode": 6,
+   "autoPlOther": 1,
+   "codePlWithCaptions": 7,
+   "noTranscript": 392
+  },
+  "coreTerms": [
+   [
+    "red pill",
+    "\\bred[ -]?pill\\w*"
+   ],
+   [
+    "black pill",
+    "\\bblack[ -]?pill\\w*"
+   ],
+   [
+    "manosfera",
+    "\\bmanosfer\\w*"
+   ],
+   [
+    "mgtow",
+    "\\bmgtow\\b"
+   ],
+   [
+    "incel",
+    "\\bincel\\w*"
+   ],
+   [
+    "przegryw",
+    "\\bprzegryw\\w*"
+   ],
+   [
+    "samiec alfa/beta/sigma",
+    "\\bsam(?:iec|c\\w*) (?:alfa|beta|sigma)\\b"
+   ],
+   [
+    "pua",
+    "\\bpua\\b|\\bpick[ -]?up artist\\w*"
+   ],
+   [
+    "podryw",
+    "\\bpodryw\\w*"
+   ],
+   [
+    "manfluencer",
+    "\\bmanfluencer\\w*"
+   ],
+   [
+    "looksmaxxing",
+    "\\blooksmax\\w*"
+   ]
+  ],
   "searchPerDay": 100,
   "unitsPerDay": 10000,
   "v2": {
@@ -18801,6 +18859,7 @@ const { CHAPTER: BASE } = __modules["src/book/chapter2.js"];
 const { COURSE } = __modules["../../analiza-trendow-w-internecie/src/chapter1.js"];
 const { GENERATED3 } = __modules["../../analiza-trendow-w-internecie/src/generated3.js"];
 const D = GENERATED3.data;
+const LS = D.langSignals;
 // pages after the first that repeat a video from an earlier page (said after the lab)
 const REPEAT_PAGES = D.pages.slice(1).filter((p) => p.repeat > 0).length;
 
@@ -18841,6 +18900,7 @@ const sections = [
     { p: 'Zanim skrypt cokolwiek pobierze, ktoś decyduje, o co pyta. W tym projekcie to lista słów, takich jak „manosfera” czy „przegryw”. Skrypt wysyła do API każdy element listy jako osobne zapytanie.' },
     { p: 'Lista w Pythonie to napisy oddzielone przecinkami. Rysunek {rys:ytsklejanie} pokazuje, co się dzieje, gdy przecinka zabraknie.' },
     { figure: 'ytsklejanie' },
+    { p: 'Python łączy w jeden dwa napisy, które stoją obok siebie. To celowe, bo tak dzieli się długi napis na kilka linii kodu. Na liście ta sama reguła sprawia, że brak przecinka nie jest błędem, tylko innym napisem.' },
     { exercise: 'yt2', num: 'Lab 1', title: 'Ile zapytań naprawdę poszło?', toc: 'Lab 1. Lista zapytań' },
     { figure: 'ytzapytania' },
     { p: 'Na rysunku {rys:ytzapytania} widać całą listę pierwszego skryptu. Poszła tylko część zapytań, a reszta zniknęła bez śladu. Druga wersja skryptu ma tę samą listę z przecinkami i bez powtórki. Listę sprawdza się przed startem, bo potem zgubione zapytanie widać tylko po tym, czego brakuje.' },
@@ -18850,6 +18910,8 @@ const sections = [
     { p: 'Skrypt pyta YouTube w imieniu projektu. Do tego potrzebny jest klucz API, czyli coś w rodzaju hasła projektu. Rysunek {rys:ytklucz} pokazuje drogę do klucza krok po kroku.' },
     { figure: 'ytklucz' },
     { p: 'Klucz ma dzienny limit. Od czerwca 2026 r. YouTube liczy go w dwóch pulach. Wyszukiwanie, czyli `search.list`, ma domyślnie 100 wywołań dziennie. Pozostałe metody, na przykład komentarze i statystyki filmów, mają razem 10 000 jednostek, zwykle 1 za wywołanie. Obie pule odnawiają się o północy czasu pacyficznego, czyli około 9 rano w Polsce.' },
+    { p: 'Limit liczy wywołania, a nie wyniki. Jedno wywołanie to jedna odpowiedź API, a ile w niej jest, zależy od metody.' },
+    { table: callCosts() },
     { exercise: 'yt1', num: 'Lab 2', title: 'Ile dni potrwa zbieranie?', toc: 'Lab 2. Klucz i limit' },
     { figure: 'ytlimit' },
     { p: 'Na rysunku {rys:ytlimit} zmień plan i patrz, która pula kończy się pierwsza. Przy filmach podobnych do testu jest to wyszukiwanie, więc pełny plan wymaga tygodni. Prawie całą drugą pulę zużywają komentarze i odpowiedzi, a statystyki filmów kosztują bardzo mało. Jeden film kosztuje tym więcej jednostek, im więcej ma komentarzy. Przesuń suwak jednostek na film w prawo, tak wygląda korpus z setkami komentarzy pod filmem. Wtedy pierwsza kończy się pula jednostek. Większy limit można dostać od Google na wniosek, ale pomaga on tylko tej puli, która kończy się pierwsza. Do karty korpusu zapisz, ile dni trwało zbieranie i czy skrypt przerywał pracę na limicie.' },
@@ -18866,7 +18928,7 @@ const sections = [
   ]),
 
   step('w3-5', '3.5', 'Komentarze i odpowiedzi', [
-    { p: 'Pod filmem są komentarze główne, a pod nimi odpowiedzi. API oddaje je dwiema metodami. `commentThreads.list` daje komentarze główne i tylko część odpowiedzi do każdego. Resztę odpowiedzi pobiera się osobno, `comments.list`.' },
+    { p: 'Pod filmem są komentarze główne, a pod nimi odpowiedzi. API oddaje je dwiema metodami. `commentThreads.list` daje komentarze główne i najwyżej 5 odpowiedzi do każdego. Resztę odpowiedzi pobiera się osobno, `comments.list`.' },
     { p: 'Rysunek {rys:ytwatek} pokazuje to na jednym wymyślonym wątku. Przełącz trzy sposoby pobierania i patrz, ile zostaje.' },
     { figure: 'ytwatek' },
     { exercise: 'yt4', num: 'Lab 4', title: 'Ile rozmowy znika bez odpowiedzi?', toc: 'Lab 4. Komentarze i odpowiedzi' },
@@ -18880,7 +18942,9 @@ const sections = [
     { figure: 'ytkody' },
     { exercise: 'yt5', num: 'Lab 5', title: 'Po jakiemu mówi korpus?', toc: 'Lab 5. Język' },
     { figure: 'ytjezyki' },
-    { p: 'Rysunek {rys:ytjezyki} pokazuje cały test. Najwięcej filmów nie ma kodu, a wśród znanych przeważa angielski i hiszpański. Projekt musi więc sam ustalić język filmu, zanim zacznie analizę polskiej manosfery. Do karty korpusu zapisz, jak sprawdzasz język i ile filmów zostaje bez odpowiedzi.' },
+    { p: 'Rysunek {rys:ytjezyki} pokazuje cały test. Najwięcej filmów nie ma kodu, a wśród znanych przeważa angielski i hiszpański. Projekt musi więc sam ustalić język filmu, zanim zacznie analizę polskiej manosfery. Jeden sposób skrypt już ma, bo pobiera napisy do filmów. Automatyczne napisy tworzy YouTube, który sam rozpoznaje mowę w filmie.' },
+    { table: languageTraces() },
+    { p: `Automatyczne napisy po polsku ma ${LS.autoPl} filmów, prawie dwa razy tyle co polski kod. ${LS.autoPlNoCode} z nich nie ma kodu języka wcale. Kod języka od autora to więc dolna granica, a napisy to drugi ślad. Do karty korpusu zapisz, jak sprawdzasz język i ile filmów zostaje bez odpowiedzi.` },
   ]),
 
   step('w3-7', '3.7', 'Kanały', [
@@ -18903,6 +18967,8 @@ const sections = [
 
   step('w3-a1', '3.9', 'Jakie to filmy?', [
     { note: 'Druga część tematu, po przerwie. Dane są zebrane i sprawdzone. Teraz pytamy, co w nich jest i którym liczbom o nich można ufać.', tone: 'info' },
+    { p: 'Najpierw cała pierwsza część w jednej tabeli. W każdym kroku była pułapka, która nie daje żadnego błędu, a test nowego skryptu pokazał, ile to zmienia.' },
+    { table: partOne() },
     { p: 'Zanim policzysz cokolwiek o filmach, sprawdź, jakie to filmy. Rozmowa pod godzinnym wywiadem i pod 30-sekundowym klipem to dwie różne rzeczy. Długość filmu API podaje w polu `duration`, ale jako tekst w zapisie ISO 8601.' },
     { p: 'YouTube pisze, że Short trwa do 3 minut. Rysunek {rys:ytdlugosc} pokazuje, co się dzieje, gdy taki tekst porównać z „PT3M” wprost.' },
     { figure: 'ytdlugosc' },
@@ -18922,6 +18988,8 @@ const sections = [
 
   step('w3-a3', '3.11', 'Rdzeń czy szum?', [
     { p: 'W Lab 5 i Lab 6 korpus okazał się w dużej części angielski i hiszpański. Projekt ma na to własną etykietę. Film dostaje ją, gdy w jego tytule, opisie albo tagach jest jedno ze słów projektu. Sprawdzimy, czy ta etykieta oddziela polski materiał od reszty.' },
+    { p: 'Słowa projektu to wyrażenia regularne, takie jak w Lab 6. Wielkość liter nie ma znaczenia, a `\\b` pilnuje granicy słowa. Dlatego „alfabet” ani „Alfa Romeo” nie pasują, a „samca alfa” pasuje.' },
+    { table: projectTerms() },
     { p: 'Grupy porównuje się na dwa sposoby, po liczbie filmów albo po sumie komentarzy. Rysunek {rys:ytgrupy} pokazuje, jak bardzo te dwie liczby mogą się różnić.' },
     { figure: 'ytgrupy' },
     { exercise: 'yt10', num: 'Lab 10', title: 'Rdzeń czy szum?', toc: 'Lab 10. Rdzeń czy szum' },
@@ -18941,6 +19009,7 @@ const sections = [
 
   step('w3-a4', '3.13', 'Jedna liczba r', [
     { p: 'W temacie 2 współczynnik r liczyliśmy dla 13 kandydatów. Tu mamy kilkaset filmów, więc jeden film powinien mniej znaczyć. Lab 9 pokazał jednak, że kilka filmów niesie cały korpus.' },
+    { p: 'Przypomnienie. r bliskie 1 znaczy, że film z większą liczbą wyświetleń prawie zawsze ma też więcej komentarzy. r bliskie 0 znaczy, że jedna liczba nic nie mówi o drugiej. r na rangach patrzy tylko na kolejność filmów, więc ogromny film waży w nim tyle samo co każdy inny.' },
     { p: 'Rysunek {rys:ytrozrzut} pokazuje, co jeden nietypowy punkt robi z r na dwunastu wymyślonych filmach.' },
     { figure: 'ytrozrzut' },
     { exercise: 'yt11', num: 'Lab 12', title: 'Jedna liczba r', toc: 'Lab 12. Jedna liczba r' },
@@ -18964,6 +19033,61 @@ const sections = [
     { p: 'Na koniec pobierz raport dla prowadzącego. Są w nim wszystkie laby tego tematu i karta.' },
   ]),
 ];
+
+/** 3.3, before Lab 2: what one call returns and costs, by method (YouTube Data API v3 docs, read 2026-11-03). */
+function callCosts() {
+  return {
+    head: ['Metoda', 'Co daje jedno wywołanie i ile kosztuje'],
+    rows: [
+      ['`search.list`', 'jedna strona wyników, do 50 filmów. Kosztuje 1 ze 100 wywołań wyszukiwania.'],
+      ['`videos.list`', 'statystyki i długość do 50 filmów. Kosztuje 1 z 10 000 jednostek.'],
+      ['`commentThreads.list`', 'do 100 komentarzy głównych, każdy z najwyżej 5 odpowiedziami. Kosztuje 1 jednostkę.'],
+      ['`comments.list`', 'do 100 dalszych odpowiedzi w jednym wątku. Kosztuje 1 jednostkę.'],
+    ],
+  };
+}
+
+/** 3.6, after Lab 5: two traces of Polish in the test, the uploader's code and YouTube's captions. */
+function languageTraces() {
+  return {
+    head: ['Ślad polskiego', 'Filmy'],
+    rows: [
+      ['Kod języka „pl” od autora filmu', String(LS.codePl)],
+      ['Napisy po polsku, dowolne', String(LS.captionsPl)],
+      ['w tym automatyczne, czyli YouTube rozpoznał polską mowę', String(LS.autoPl)],
+      ['automatyczne po polsku w filmach bez kodu języka', String(LS.autoPlNoCode)],
+      ['automatyczne po polsku w filmach z innym kodem', String(LS.autoPlOther)],
+    ],
+  };
+}
+
+/** 3.9, the start of part 2: each step of part 1, what went wrong silently and what the test showed. */
+function partOne() {
+  const L = GENERATED3.labs;
+  const n = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  const pct = (x) => `${String(Math.round(x * 1000) / 10).replace('.', ',')}%`;
+  const one = (x) => String(x).replace('.', ',');
+  return {
+    head: ['Krok', 'Pułapka', 'Co pokazał test'],
+    rows: [
+      ['Lista zapytań', `brak przecinków w pierwszym skrypcie, ${L.yt2.facts.elements} elementów zamiast ${L.yt2.expect.in_list} linii`, `${L.yt2.expect.distinct} różnych zapytań`],
+      ['Klucz i limit', 'plan liczony bez stron i bez dni', `${n(L.yt1.expect.calls)} wywołań, ${L.yt1.expect.days} dni`],
+      ['Strony', 'pierwszy skrypt brał tylko pierwszą stronę', `${L.yt3.expect.pages} stron, ${L.yt3.expect.videos} różnych filmów zamiast ${L.yt3.facts.firstPage}`],
+      ['Odpowiedzi', 'pierwszy skrypt brał same komentarze główne', `odpowiedzi to ${pct(L.yt4.expect.lost)} zebranych komentarzy`],
+      ['Język', 'parametr języka w zapytaniu wzięty za filtr', `polski kod ma ${L.yt5.facts.pl} z ${L.yt5.facts.all} filmów`],
+      ['Kanały', `pierwszy skrypt sam dobierał kanały, ${D.v2News.channel} z ${D.v2News.videos} filmami`, `oznaczone regułą, ${L.yt6.expect.videos} filmów`],
+      ['Liczby na film', `średnia z filmów, ${one(L.yt7.facts.meanRatios)}, nie mówi o żadnym`, `korpus ${one(L.yt7.expect.corpus)}, typowy film ${one(L.yt7.expect.typical)}`],
+    ],
+  };
+}
+
+/** 3.11, before Lab 10: the project's terms (scraper v3 CORE_TERMS). */
+function projectTerms() {
+  return {
+    head: ['Słowo projektu', 'Wzorzec'],
+    rows: D.coreTerms.map(([name, pattern]) => [name, `\`${pattern}\``]),
+  };
+}
 
 /** The corpus card of the test itself, filled from the labs' numbers of both parts (section 3.14). */
 function corpusExample() {
@@ -20181,6 +20305,7 @@ function countsFigure({ num: n = 'Rysunek' } = {}) {
 
 // invented durations; text order and time order disagree on both sides of "PT3M"
 const DURATIONS = ['PT45S', 'PT2M30S', 'PT10M', 'PT3M', 'PT58S', 'PT5M'];
+const ORDINAL = ['pierwszym', 'drugim', 'trzecim', 'czwartym', 'piątym'];
 const secondsOf = (d) => {
   const m = d.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
   return (Number(m[1] || 0) * 3600) + (Number(m[2] || 0) * 60) + Number(m[3] || 0);
@@ -20202,7 +20327,13 @@ function durationFigure({ num: n = 'Rysunek' } = {}) {
       el('div.yt-count', `3 minuty albo krócej: ${sorted.filter(isShort).length} z ${DURATIONS.length}`),
       el('div.sq-read', text
         ? `Tekst porównuje się znak po znaku. Wyróżnione wyszły źle: ${wrong.map((d) => `„${d}”`).join(', ')}. Błędu nie ma, jest tylko zła liczba.`
-        : 'Po zamianie na sekundy porządek jest prawdziwy. 3 minuty to 180 sekund, a „albo krócej” obejmuje też dokładnie 180.'));
+        : 'Po zamianie na sekundy porządek jest prawdziwy. 3 minuty to 180 sekund, a „albo krócej” obejmuje też dokładnie 180.'),
+      // why each wrong row is wrong: the first character where it differs from "PT3M" decides
+      text ? el('ul.yt-why-list', wrong.map((d) => {
+        const k = [...d].findIndex((ch, i) => ch !== 'PT3M'[i]);
+        const later = d[k] > 'PT3M'[k];
+        return el('li', `„${d}” i „PT3M” różnią się dopiero na ${ORDINAL[k]} znaku: ${d[k]} ${later ? 'jest dalej' : 'jest wcześniej'} niż ${'PT3M'[k]}. Dlatego tekst wychodzi ${later ? 'dłuższy' : 'krótszy'} niż 3 minuty, choć to ${asTime(secondsOf(d))}.`);
+      })) : null);
   };
   draw();
   return frame(n, 'Długość jako tekst i jako czas', host, caption('Długości są wymyślone, ale mają ten sam zapis ISO 8601 co w API: PT, potem godziny H, minuty M i sekundy S.'));

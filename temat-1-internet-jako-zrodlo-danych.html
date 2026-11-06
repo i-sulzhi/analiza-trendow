@@ -1943,6 +1943,23 @@ textarea.kc-input { resize: vertical; }
 .yt-walk .yt-param-bad.yt-param-on { box-shadow: inset 3px 0 0 var(--warn); }
 .yt-walk .yt-code-line { padding: 0 4px; }
 
+/* phones and touch screens: targets of at least 40 px and text of at least 14 px (audit 2026-11-05).
+   :root and the doubled class win over the engine's narrower rules (for example .tx-rate .fg-toggle). */
+@media (pointer: coarse), (max-width: 640px) {
+  :root .fg-toggle.fg-toggle, :root .py-file.py-file, :root .ls-check, :root .rp-btn, :root .who-link, :root .bk-toc-btn { min-height: 40px; }
+  :root .fg-toggle.fg-toggle, :root .py-file.py-file { font-size: 14px; }
+  :root .py-file.py-file, :root .who-link { display: inline-flex; align-items: center; padding-left: 10px; padding-right: 10px; }
+  :root .yt-item, :root .yt-bar-label, :root .yt-sub, :root .yt-code, :root .yt-q-line { font-size: 14px; }
+  :root .yt-bar-val { font-size: 13px; }
+  :root input[type=range] { min-height: 40px; }
+  :root .py-input, :root .yt-steps button, :root .brand { min-height: 40px; }
+  :root .cm-meet, :root .qx-card, :root .ghost-btn, :root .cv-seg, :root .cb-chip, :root .lv-btn, :root .data-item, :root .va-input, :root .ls-chip, :root .va-post, :root .er-step, :root .at-chip { min-height: 40px; }
+  :root .at-source { display: inline-flex; align-items: center; min-height: 40px; }
+  :root .yt-steps button, :root .brand { display: inline-flex; align-items: center; }
+}
+/* a figure's body is a grid: its items may shrink below their longest code line, which then scrolls in its own box */
+.fg-body > * { min-width: 0; }
+
 </style>
 </head>
 <body>
@@ -16318,7 +16335,7 @@ const { toggles } = __modules["src/book/figures/common.js"];
 const { rich } = __modules["src/book/rich.js"];
 const { t } = __modules["src/i18n/index.js"];
 const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
-const { runPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
+const { runPython, loadPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
 const { LABS, FILES, checkCode, checkBase, explainError } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
 const { walkView } = __modules["../../analiza-trendow-w-internecie/src/walk.js"];
 const { download } = __modules["src/ui/download.js"];
@@ -16460,6 +16477,10 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       runBtn.textContent = t('py.run');
     };
     runBtn.addEventListener('click', run);
+    // start loading Python at the first sign of intent, so the first run does not wait the whole time
+    const warm = () => { loadPython().catch(() => {}); };
+    area.addEventListener('focus', warm, { once: true });
+    runBtn.addEventListener('pointerenter', warm, { once: true });
     hintBtn.addEventListener('click', () => {
       state.hint = Math.min(lab.hints.length, state.hint + 1);
       mount(hintBox, lab.hints.slice(0, state.hint).map((h) => el('p.py-hint', { html: rich(h) })));

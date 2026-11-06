@@ -1943,6 +1943,23 @@ textarea.kc-input { resize: vertical; }
 .yt-walk .yt-param-bad.yt-param-on { box-shadow: inset 3px 0 0 var(--warn); }
 .yt-walk .yt-code-line { padding: 0 4px; }
 
+/* phones and touch screens: targets of at least 40 px and text of at least 14 px (audit 2026-11-05).
+   :root and the doubled class win over the engine's narrower rules (for example .tx-rate .fg-toggle). */
+@media (pointer: coarse), (max-width: 640px) {
+  :root .fg-toggle.fg-toggle, :root .py-file.py-file, :root .ls-check, :root .rp-btn, :root .who-link, :root .bk-toc-btn { min-height: 40px; }
+  :root .fg-toggle.fg-toggle, :root .py-file.py-file { font-size: 14px; }
+  :root .py-file.py-file, :root .who-link { display: inline-flex; align-items: center; padding-left: 10px; padding-right: 10px; }
+  :root .yt-item, :root .yt-bar-label, :root .yt-sub, :root .yt-code, :root .yt-q-line { font-size: 14px; }
+  :root .yt-bar-val { font-size: 13px; }
+  :root input[type=range] { min-height: 40px; }
+  :root .py-input, :root .yt-steps button, :root .brand { min-height: 40px; }
+  :root .cm-meet, :root .qx-card, :root .ghost-btn, :root .cv-seg, :root .cb-chip, :root .lv-btn, :root .data-item, :root .va-input, :root .ls-chip, :root .va-post, :root .er-step, :root .at-chip { min-height: 40px; }
+  :root .at-source { display: inline-flex; align-items: center; min-height: 40px; }
+  :root .yt-steps button, :root .brand { display: inline-flex; align-items: center; }
+}
+/* a figure's body is a grid: its items may shrink below their longest code line, which then scrolls in its own box */
+.fg-body > * { min-width: 0; }
+
 </style>
 </head>
 <body>
@@ -16318,7 +16335,7 @@ const { toggles } = __modules["src/book/figures/common.js"];
 const { rich } = __modules["src/book/rich.js"];
 const { t } = __modules["src/i18n/index.js"];
 const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
-const { runPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
+const { runPython, loadPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
 const { LABS, FILES, checkCode, checkBase, explainError } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
 const { walkView } = __modules["../../analiza-trendow-w-internecie/src/walk.js"];
 const { download } = __modules["src/ui/download.js"];
@@ -16460,6 +16477,10 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       runBtn.textContent = t('py.run');
     };
     runBtn.addEventListener('click', run);
+    // start loading Python at the first sign of intent, so the first run does not wait the whole time
+    const warm = () => { loadPython().catch(() => {}); };
+    area.addEventListener('focus', warm, { once: true });
+    runBtn.addEventListener('pointerenter', warm, { once: true });
     hintBtn.addEventListener('click', () => {
       state.hint = Math.min(lab.hints.length, state.hint + 1);
       mount(hintBox, lab.hints.slice(0, state.hint).map((h) => el('p.py-hint', { html: rich(h) })));
@@ -19021,7 +19042,7 @@ const sections = [
   step('w3-1', '3.1', 'Projekt i droga danych', [
     { p: 'W tym temacie dane zbierasz samodzielnie przez API, a nie dostajesz gotowego pliku. Pracujemy na prawdziwym projekcie. To badanie doktorskie mgr. Marcina Baumanna na AGH o polskiej manosferze na YouTube, czyli o kanałach i filmach o „prawdziwej męskości”, relacjach i roli mężczyzn.' },
     { p: 'Pierwsza wersja skryptu tego projektu zgubiła po cichu sporo danych. Nie było żadnego błędu, tylko mniej filmów i komentarzy, niż powinno być. Każdy krok tego tematu pokazuje jedno takie miejsce.' },
-    { p: 'Każda tabela z YouTube powstaje w tych samych krokach.' },
+    { p: 'Temat to dwa spotkania po 90 minut, jedno po drugim. Pierwsza część, od 3.1 do 3.8, to zbieranie danych. Po przerwie, od 3.9 do 3.14, analizujemy to, co zebraliśmy. Każda tabela z YouTube powstaje w tych samych krokach.' },
     { steps: [
       ['Zapytanie', 'słowo, okres i parametry, które wysyłasz do API'],
       ['Strony', 'API oddaje wyniki porcjami, strona po stronie'],
@@ -19551,7 +19572,7 @@ const LABS3 = {
       const f = G.yt3.facts;
       return `Tak. ${value.pages} stron i ${n(value.hits)} trafień, ale tylko ${value.videos} różnych filmów. ${f.repeats} filmy przyszły dwa razy. Pierwsza strona miała ${f.firstPage} elementy, choć prosiliśmy o ${f.pageSize}. Liczymy to, co przyszło.`;
     },
-    more: 'Dla chętnych. Skrypt badawczy pobiera najwyżej 10 stron na miesiąc. Gdy dojdzie do 10, dzieli miesiąc na pół i pyta o każdą połowę osobno, bo dalszych stron API nie odda. W kwietniu wystarczyło 9 stron.',
+    more: 'Dla chętnych. Skrypt badawczy pobiera najwyżej 10 stron na miesiąc. Gdy dojdzie do 10, dzieli miesiąc na pół i pyta o każdą połowę osobno, bo projekt zakłada, że dalszych stron API nie odda. W kwietniu wystarczyło 9 stron.',
     base: {
       say: WALK_SAY,
       walk: WALK.yt3,
@@ -20099,8 +20120,8 @@ const SRC = `Źródło: testowy przebieg skryptu v3, zapytanie „${D.query}”,
 // Drawn after Google's docs read on 2026-11-03 (developers.google.com/youtube/v3/getting-started,
 // docs.cloud.google.com/docs/authentication/api-keys). Schematic on purpose: the console changes.
 const KEY_STEPS = [
-  ['Projekt', 'W Google Cloud Console tworzysz projekt. Do niego należy klucz i limit.', 'Limit liczy się na projekt, nie na osobę.'],
-  ['Włącz API', 'W bibliotece API wybierasz YouTube Data API v3 i klikasz Włącz.', 'Bez tego klucz działa, ale YouTube odpowie błędem.'],
+  ['Projekt', 'W Google Cloud Console tworzysz projekt. Do niego należy klucz i limit. Do konsoli potrzebne jest konto Google. W dokumentacji, którą czytaliśmy, nie ma mowy o opłatach ani o karcie za YouTube Data API.', 'Limit liczy się na projekt, nie na osobę. Konto uczelni może mieć konsolę wyłączoną przez administratora, wtedy użyj prywatnego konta Google.'],
+  ['Włącz API', 'W bibliotece API wybierasz YouTube Data API v3 i klikasz Włącz. Zużycie limitu zobaczysz potem na stronie limitów tego API w konsoli, Quotas.', 'Bez tego klucz działa, ale YouTube odpowie błędem.'],
   ['Utwórz klucz', 'W danych logowania wybierasz Utwórz dane logowania, a potem Klucz API.', 'Klucz to długi ciąg znaków. Kto go ma, zużywa Twój limit.'],
   ['Ogranicz klucz', 'Ustawiasz, że klucz działa tylko z YouTube Data API v3, i najlepiej tylko z Twojego komputera albo serwera.', 'Google pisze wprost, że klucz bez ograniczeń nie jest bezpieczny.'],
   ['Schowaj klucz', 'Masz klucz. Skrypt musi go znaleźć przy każdym uruchomieniu. Zdecyduj, gdzie będzie leżał.', 'Kod można pokazać innym. Klucza nie.'],
@@ -20123,7 +20144,7 @@ function keyFigure({ num: n = 'Rysunek' } = {}) {
         el('button', { type: 'button', 'aria-current': k === state.step ? 'step' : null, onClick: () => { state.step = k; draw(); } }, `${k + 1}. ${t}`)))),
       el('div.yt-screen', el('div.yt-screen-title', title), el('p', what), el('p.yt-why', why)),
       last ? el('div.yt-keep', el('div.yt-keep-q', 'Gdzie trzymać klucz?'),
-        KEEP.map(([label, good], k) => el(`button.fg-toggle${state.pick === k ? (good ? '.yt-good' : '.yt-bad') : ''}`, { type: 'button', onClick: () => { state.pick = k; draw(); } }, label)),
+        KEEP.map(([label, good], k) => el(`button.fg-toggle${state.pick === k ? (good ? '.yt-good' : '.yt-bad') : ''}`, { type: 'button', 'aria-pressed': state.pick === k ? 'true' : 'false', onClick: () => { state.pick = k; draw(); } }, label)),
         state.pick == null ? null : el('div.sq-read', `${KEEP[state.pick][1] ? 'Dobrze.' : 'Nie.'} ${KEEP[state.pick][2]}`)) : null,
       el('div.fg-toggles',
         state.step > 0 ? el('button.fg-toggle', { type: 'button', onClick: () => { state.step = Math.max(0, state.step - 1); draw(); } }, '‹ Wstecz') : null,
@@ -20163,6 +20184,47 @@ const ANSWER = [
   ['items[].snippet.title', '"…"', 'Tytuł filmu.', 'W odpowiedzi wyszukiwania nie ma liczby wyświetleń ani komentarzy. Po nie skrypt wysyła drugie wywołanie, `videos.list`.'],
 ];
 
+// for those who want it: the same call on one's own computer, with one's own key from the environment.
+// The parameters the project's script leaves out are set here on purpose, so the student sees them.
+const HOME_SCRIPT = `import os
+
+import requests
+
+# Klucz czytamy ze zmiennej środowiskowej YOUTUBE_API_KEY, nigdy z kodu.
+key = os.environ["YOUTUBE_API_KEY"]
+params = {
+    "part": "id,snippet",
+    "q": "manosfera",
+    "type": "video",
+    "maxResults": 50,
+    "relevanceLanguage": "pl",
+    # Tych trzech skrypt projektu nie ustawia. Tu są jawnie, żeby było widać wybór.
+    "order": "relevance",
+    "safeSearch": "none",
+    "regionCode": "PL",
+    "publishedAfter": "2026-04-01T00:00:00Z",
+    "publishedBefore": "2026-05-01T00:00:00Z",
+    "key": key,
+}
+
+ids, pages = [], 0
+while True:
+    answer = requests.get("https://www.googleapis.com/youtube/v3/search", params=params, timeout=30)
+    if answer.status_code == 403 and "quotaExceeded" in answer.text:
+        print("Limit na dziś się skończył. Spróbuj po północy czasu pacyficznego.")
+        break
+    answer.raise_for_status()
+    page = answer.json()
+    pages += 1
+    ids += [item["id"]["videoId"] for item in page["items"]]
+    token = page.get("nextPageToken")
+    if not token or pages == 10:   # najwyżej 10 stron, czyli 10 ze 100 wywołań dziennie
+        break
+    params["pageToken"] = token
+
+print(pages, "stron,", len(ids), "trafień,", len(set(ids)), "różnych filmów")
+`;
+
 function requestFigure({ num: n = 'Rysunek' } = {}) {
   const state = { pick: ['q', 0] };
   const host = el('div');
@@ -20191,7 +20253,11 @@ function requestFigure({ num: n = 'Rysunek' } = {}) {
       picked ? el('div.yt-screen',
         el('div.yt-screen-title', picked[0]),
         el('p', { html: rich(picked[2]) }),
-        el('p.yt-why', el('b', side === 'q' ? 'Bez tego parametru. ' : side === 'n' ? 'Co z tego wynika. ' : 'Na co uważać. '), el('span', { html: rich(picked[3]) }))) : null);
+        el('p.yt-why', el('b', side === 'q' ? 'Bez tego parametru. ' : side === 'n' ? 'Co z tego wynika. ' : 'Na co uważać. '), el('span', { html: rich(picked[3]) }))) : null,
+      el('details.py-pandas',
+        el('summary', 'Dla chętnych. To samo wywołanie na własnym komputerze'),
+        el('p.py-note', { html: rich('Potrzebny jest własny klucz w zmiennej środowiskowej `YOUTUBE_API_KEY` i biblioteka `requests`. Skrypt zużywa najwyżej 10 ze 100 wywołań wyszukiwania na dziś. Wynik będzie inny niż w teście, bo ranking i filmy zmieniają się z dnia na dzień, a tu wyłączony jest filtr treści.') }),
+        el('pre.py-pandas-code', HOME_SCRIPT)));
   };
   draw();
   return frame(n, 'Jedno wywołanie search.list', host, caption('Kliknij parametr albo pole odpowiedzi. Obiekt youtube tworzy biblioteka google-api-python-client, build("youtube", "v3", developerKey=...). Klucza nie ma w samym wywołaniu, bo skrypt podaje go raz, przy tworzeniu klienta, i czyta ze zmiennej środowiskowej. Parametry według skryptu v3 projektu, opis według dokumentacji YouTube Data API v3 z listopada 2026 r. Wartości w odpowiedzi są pominięte.'));
@@ -20249,8 +20315,8 @@ function limitFigure({ num: n = 'Rysunek' } = {}) {
     slider('u', 'Jednostki na jeden film', { min: 0.5, max: 5, step: 0.1, show: dec1, plan: false }),
     el('div.fg-toggles', capButtons), results);
   const draw = () => {
-    for (const b of buttons) b.className = `fg-toggle${b.dataset.v === state.v ? ' fg-toggle-on' : ''}`;
-    for (const b of capButtons) b.className = `fg-toggle${Number(b.dataset.cap) === state.cap ? ' fg-toggle-on' : ''}`;
+    for (const b of buttons) { b.className = `fg-toggle${b.dataset.v === state.v ? ' fg-toggle-on' : ''}`; b.setAttribute('aria-pressed', String(b.dataset.v === state.v)); }
+    for (const b of capButtons) { b.className = `fg-toggle${Number(b.dataset.cap) === state.cap ? ' fg-toggle-on' : ''}`; b.setAttribute('aria-pressed', String(Number(b.dataset.cap) === state.cap)); }
     for (const [key, { input, out, show }] of Object.entries(sliders)) {
       if (Math.abs(Number(input.value) - state[key]) > 0.05) input.value = String(state[key]);
       out.textContent = show(state[key]);
@@ -20363,7 +20429,7 @@ function threadFigure({ num: n = 'Rysunek' } = {}) {
     const api = 1 + THREAD.replies.length;
     mount(host,
       el('div.fg-toggles', [['top', 'Tylko komentarze główne'], ['threads', 'commentThreads.list'], ['all', 'I jeszcze comments.list']].map(([v, label]) =>
-        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.v === v ? 'true' : 'false', onClick: () => { state.v = v; draw(); } }, label))),
       el('ul.yt-items.yt-thread',
         el('li.yt-item.yt-thread-top', THREAD.top),
         THREAD.replies.map((r, k) => {
@@ -20418,9 +20484,9 @@ function codesFigure({ num: n = 'Rysunek' } = {}) {
     const hits = CODES.filter(test).length;
     const den = state.den === 'all' ? CODES.length : CODES.filter(Boolean).length;
     mount(host,
-      el('div.fg-toggles', RULES.map(([id, label]) => el(`button.fg-toggle${state.rule === id ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.rule = id; draw(); } }, label))),
+      el('div.fg-toggles', RULES.map(([id, label]) => el(`button.fg-toggle${state.rule === id ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.rule === id ? 'true' : 'false', onClick: () => { state.rule = id; draw(); } }, label))),
       el('ul.yt-items.yt-elements', CODES.map((c) => el(`li.yt-item${!c ? '.yt-missing' : test(c) ? '.yt-hit' : ''}`, c || 'brak kodu'))),
-      el('div.fg-toggles', [['all', 'dziel przez wszystkie'], ['known', 'dziel przez znane']].map(([id, label]) => el(`button.fg-toggle${state.den === id ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.den = id; draw(); } }, label))),
+      el('div.fg-toggles', [['all', 'dziel przez wszystkie'], ['known', 'dziel przez znane']].map(([id, label]) => el(`button.fg-toggle${state.den === id ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.den === id ? 'true' : 'false', onClick: () => { state.den = id; draw(); } }, label))),
       el('div.yt-count', `${hits} z ${den}`),
       el('div.sq-read', state.rule === 'exact'
         ? 'Porównanie z „en” łapie tylko ten jeden zapis. „en-US” i „en-GB” to też angielski.'
@@ -20469,7 +20535,7 @@ function rulesFigure({ num: n = 'Rysunek' } = {}) {
     const missed = CHANNELS.filter(([t, news]) => news && !test(t)).map(([t]) => t);
     const wrong = CHANNELS.filter(([t, news]) => !news && test(t)).map(([t]) => t);
     mount(host,
-      el('div.fg-toggles', CH_RULES.map(([id, label]) => el(`button.fg-toggle${state.rule === id ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.rule = id; draw(); } }, label))),
+      el('div.fg-toggles', CH_RULES.map(([id, label]) => el(`button.fg-toggle${state.rule === id ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.rule === id ? 'true' : 'false', onClick: () => { state.rule = id; draw(); } }, label))),
       el('ul.yt-items.yt-elements', CHANNELS.map(([t, news]) => {
         const hit = test(t);
         const cls = hit && news ? '.yt-hit' : hit ? '.yt-again' : news ? '.yt-missing' : '';
@@ -20520,7 +20586,7 @@ function ratioFigure({ num: n = 'Rysunek' } = {}) {
     const max = Math.max(...ratios);
     mount(host,
       el('div.fg-toggles', [['corpus', 'suma przez sumę'], ['mean', 'średnia z filmów'], ['median', 'mediana z filmów']].map(([id, label]) =>
-        el(`button.fg-toggle${state.v === id ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = id; draw(); } }, label))),
+        el(`button.fg-toggle${state.v === id ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.v === id ? 'true' : 'false', onClick: () => { state.v = id; draw(); } }, label))),
       el('div.yt-bars', RATIO_DEMO.map(([name, w, c]) => el('div.yt-bar-row',
         el('span.yt-bar-label', name),
         el('span.yt-bar', el('span.yt-bar-new', { style: `width:${(100 * per(c, w)) / max}%` })),
@@ -20571,7 +20637,7 @@ function durationFigure({ num: n = 'Rysunek' } = {}) {
     const wrong = DURATIONS.filter((d) => (d <= 'PT3M') !== (secondsOf(d) <= 180));
     mount(host,
       el('div.fg-toggles', [['text', 'jako tekst, <= "PT3M"'], ['time', 'jako czas, <= 180 s']].map(([v, label]) =>
-        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.v === v ? 'true' : 'false', onClick: () => { state.v = v; draw(); } }, label))),
       el('ul.yt-items.yt-elements', sorted.map((d) => el(`li.yt-item${isShort(d) ? '.yt-hit' : ''}${text && wrong.includes(d) ? '.yt-again' : ''}`, `${d} · ${asTime(secondsOf(d))}`))),
       el('div.yt-count', `3 minuty albo krócej: ${sorted.filter(isShort).length} z ${DURATIONS.length}`),
       el('div.sq-read', text
@@ -20628,7 +20694,7 @@ function halfFigure({ num: n = 'Rysunek' } = {}) {
     });
     mount(host,
       el('div.fg-toggles', [['file', 'kolejność z pliku'], ['sorted', 'od najczęściej oglądanego']].map(([v, label]) =>
-        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.v === v ? 'true' : 'false', onClick: () => { state.v = v; draw(); } }, label))),
       el('div.yt-bars', rows),
       el('div.yt-count', `Połowa wyświetleń po ${crossed} ${plural(crossed, 'filmie', 'filmach', 'filmach')}`),
       el('div.sq-read', state.v === 'file'
@@ -20665,7 +20731,7 @@ function groupsFigure({ num: n = 'Rysunek' } = {}) {
     const total = GROUPS_DEMO.reduce((a, g) => a + value(g), 0);
     mount(host,
       el('div.fg-toggles', [['videos', 'liczę filmy, size()'], ['comments', 'sumuję komentarze, sum()']].map(([v, label]) =>
-        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.v === v ? 'true' : 'false', onClick: () => { state.v = v; draw(); } }, label))),
       el('div.yt-bars', GROUPS_DEMO.map((g) => el('div.yt-bar-row',
         el('span.yt-bar-label', `grupa ${g[0]}: ${g[1].join(', ')}`),
         el('span.yt-bar', el(`span.${g[0] === 'B' ? 'yt-bar-rep' : 'yt-bar-new'}`, { style: `width:${(100 * value(g)) / total}%` })),
@@ -20704,7 +20770,7 @@ function timingFigure({ num: n = 'Rysunek' } = {}) {
   const draw = () => {
     const got = DAYS_DEMO.filter((d) => d <= state.at).length;
     mount(host,
-      el('div.fg-toggles', WHEN.map(([at, label]) => el(`button.fg-toggle${state.at === at ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.at = at; draw(); } }, label))),
+      el('div.fg-toggles', WHEN.map(([at, label]) => el(`button.fg-toggle${state.at === at ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.at === at ? 'true' : 'false', onClick: () => { state.at = at; draw(); } }, label))),
       el('ul.yt-items.yt-elements', DAYS_DEMO.map((d) => el(`li.yt-item${d <= state.at ? '.yt-hit' : '.yt-missing'}`, d < 1 ? `${Math.round(d * 24)} h po publikacji` : `dzień ${Math.floor(d) + 1}`))),
       el('div.yt-count', `Zebrane: ${got} z ${DAYS_DEMO.length}`),
       el('div.sq-read', state.at === Infinity
@@ -20782,7 +20848,7 @@ function outlierFigure({ num: n = 'Rysunek' } = {}) {
     const pts = all ? SCATTER_DEMO : SCATTER_DEMO.slice(0, -1);
     mount(host,
       el('div.fg-toggles', [['all', 'wszystkie filmy'], ['without', 'bez największego']].map(([v, label]) =>
-        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.v === v ? 'true' : 'false', onClick: () => { state.v = v; draw(); } }, label))),
       el('div.yt-scatter-wrap', scatter(pts, { mark: all ? pts.length - 1 : -1, xLabel: 'wyświetlenia', yLabel: 'komentarze' })),
       el('div.yt-count', `r = ${r2(pearsonR(pts))}`),
       el('div.sq-read', all
@@ -20821,7 +20887,7 @@ function panelFigure({ num: n = 'Rysunek' } = {}) {
     const withOf = state.v === 'with';
     mount(host,
       el('div.fg-toggles', [['with', 'z mianownikiem'], ['without', 'bez mianownika']].map(([v, label]) =>
-        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', onClick: () => { state.v = v; draw(); } }, label))),
+        el(`button.fg-toggle${state.v === v ? '.fg-toggle-on' : ''}`, { type: 'button', 'aria-pressed': state.v === v ? 'true' : 'false', onClick: () => { state.v = v; draw(); } }, label))),
       el('div.yt-panel', tiles.map((t) => el('div.yt-tile',
         el('strong', t.value),
         el('span', withOf ? t.what : t.short),
@@ -20893,7 +20959,7 @@ function realPagesFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Dziewięć stron z testu', host, caption(`${SRC} Strony odtworzone z zapisanych trafień. Każda strona to jedno wywołanie wyszukiwania, razem ${D.testSearchCalls}.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "requestFigure": requestFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "outlierFigure": outlierFigure, "scatterFigure": scatterFigure, "panelFigure": panelFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
+__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "HOME_SCRIPT": HOME_SCRIPT, "requestFigure": requestFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "outlierFigure": outlierFigure, "scatterFigure": scatterFigure, "panelFigure": panelFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/main3.js ===== */

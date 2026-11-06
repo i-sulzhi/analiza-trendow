@@ -1984,6 +1984,35 @@ textarea.kc-input { resize: vertical; }
 .skip-link:focus-visible { top: 8px; }
 .py-keys { margin: 4px 0 0; font-size: 13px; color: var(--ink-soft); }
 
+/* figure 3.4b: the files of the script and the keys that join them */
+.yt-files-pick { display: grid; gap: 6px; margin-bottom: 10px; }
+.yt-files-lead { font-size: 13px; color: var(--ink-soft); }
+.yt-files-pick .fg-toggle { font-family: var(--mono); font-size: 12px; }
+.yt-files { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.yt-file { display: grid; gap: 4px; align-content: start; padding: 8px 10px; text-align: left; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); color: var(--ink); cursor: pointer; font: inherit; }
+.yt-file:hover { border-color: var(--accent); }
+.yt-file-on, .yt-file-on:hover { border: 2px solid var(--accent); padding: 7px 9px; }
+.yt-file-name { font: 600 13px var(--mono); overflow-wrap: anywhere; }
+.yt-file-row, .yt-file-more, .yt-file-count { font-size: 12px; color: var(--ink-soft); }
+.yt-file-count { color: var(--ink); }
+.yt-file-keys { display: flex; flex-wrap: wrap; gap: 4px; }
+.yt-key { padding: 0 6px; border: 1px solid; border-radius: 4px; font: 12px var(--mono); color: var(--ink); }
+.yt-key-v { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.yt-key-c { border-color: var(--warn); background: var(--warn-bg); }
+.yt-key-k { border-color: var(--ok); background: var(--ok-bg); }
+td.yt-key-v, td.yt-key-c, td.yt-key-k { border-width: 0 0 1px; border-style: solid; border-color: var(--line); }
+.yt-files-rows { margin-top: 10px; }
+
+/* references: a long URL as link text must wrap, or it widens the page on a phone (found 2026-11-06) */
+.bk-refs li, .bk-refs a { overflow-wrap: anywhere; }
+.bk-refs li { min-width: 0; }
+/* the top bar at 320 px was 342 px wide (found 2026-11-06): on the narrowest phones drop the topic
+   label (the page title says it) and tighten the gaps */
+@media (max-width: 360px) {
+  .bk-top { gap: 8px; padding: 8px 10px; }
+  .bk-top-title { display: none; }
+}
+
 </style>
 </head>
 <body>

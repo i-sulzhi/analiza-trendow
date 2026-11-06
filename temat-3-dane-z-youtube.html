@@ -1984,6 +1984,35 @@ textarea.kc-input { resize: vertical; }
 .skip-link:focus-visible { top: 8px; }
 .py-keys { margin: 4px 0 0; font-size: 13px; color: var(--ink-soft); }
 
+/* figure 3.4b: the files of the script and the keys that join them */
+.yt-files-pick { display: grid; gap: 6px; margin-bottom: 10px; }
+.yt-files-lead { font-size: 13px; color: var(--ink-soft); }
+.yt-files-pick .fg-toggle { font-family: var(--mono); font-size: 12px; }
+.yt-files { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.yt-file { display: grid; gap: 4px; align-content: start; padding: 8px 10px; text-align: left; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); color: var(--ink); cursor: pointer; font: inherit; }
+.yt-file:hover { border-color: var(--accent); }
+.yt-file-on, .yt-file-on:hover { border: 2px solid var(--accent); padding: 7px 9px; }
+.yt-file-name { font: 600 13px var(--mono); overflow-wrap: anywhere; }
+.yt-file-row, .yt-file-more, .yt-file-count { font-size: 12px; color: var(--ink-soft); }
+.yt-file-count { color: var(--ink); }
+.yt-file-keys { display: flex; flex-wrap: wrap; gap: 4px; }
+.yt-key { padding: 0 6px; border: 1px solid; border-radius: 4px; font: 12px var(--mono); color: var(--ink); }
+.yt-key-v { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.yt-key-c { border-color: var(--warn); background: var(--warn-bg); }
+.yt-key-k { border-color: var(--ok); background: var(--ok-bg); }
+td.yt-key-v, td.yt-key-c, td.yt-key-k { border-width: 0 0 1px; border-style: solid; border-color: var(--line); }
+.yt-files-rows { margin-top: 10px; }
+
+/* references: a long URL as link text must wrap, or it widens the page on a phone (found 2026-11-06) */
+.bk-refs li, .bk-refs a { overflow-wrap: anywhere; }
+.bk-refs li { min-width: 0; }
+/* the top bar at 320 px was 342 px wide (found 2026-11-06): on the narrowest phones drop the topic
+   label (the page title says it) and tighten the gaps */
+@media (max-width: 360px) {
+  .bk-top { gap: 8px; padding: 8px 10px; }
+  .bk-top-title { display: none; }
+}
+
 </style>
 </head>
 <body>
@@ -19513,6 +19542,173 @@ const GENERATED3 = {
   "v2News": {
    "channel": "polsatnews.pl",
    "videos": 506
+  },
+  "fileMap": {
+   "videos": [
+    {
+     "video_id": "uY7EHu3-NQg",
+     "channel_title": "No Censorship Podcast",
+     "search": [
+      [
+       "uY7EHu3-NQg",
+       "UC754sxPEu-x4iNi6QzF5APg",
+       "manosfera",
+       "188"
+      ],
+      [
+       "uY7EHu3-NQg",
+       "UC754sxPEu-x4iNi6QzF5APg",
+       "manosfera",
+       "234"
+      ]
+     ],
+     "videos": [
+      [
+       "uY7EHu3-NQg",
+       "UC754sxPEu-x4iNi6QzF5APg",
+       "2026-04-15T09:22:07Z",
+       "630",
+       "6"
+      ]
+     ],
+     "channels": [
+      [
+       "UC754sxPEu-x4iNi6QzF5APg",
+       "No Censorship Podcast",
+       "4",
+       "1"
+      ]
+     ],
+     "comments": [
+      2,
+      4
+     ],
+     "status": [
+      [
+       "uY7EHu3-NQg",
+       "6",
+       "2",
+       "4",
+       "ok"
+      ]
+     ],
+     "transcripts": [
+      [
+       "uY7EHu3-NQg",
+       "",
+       "",
+       "no_polish_transcript"
+      ]
+     ]
+    },
+    {
+     "video_id": "pRONCR0_InU",
+     "channel_title": "Czasem czuły, czasem barbarzyńca",
+     "search": [
+      [
+       "pRONCR0_InU",
+       "UCg86-00TAGQYFyzFP4LzFGw",
+       "manosfera",
+       "25"
+      ]
+     ],
+     "videos": [
+      [
+       "pRONCR0_InU",
+       "UCg86-00TAGQYFyzFP4LzFGw",
+       "2026-04-14T16:01:31Z",
+       "26225",
+       "575"
+      ]
+     ],
+     "channels": [
+      [
+       "UCg86-00TAGQYFyzFP4LzFGw",
+       "Czasem czuły, czasem barbarzyńca",
+       "3",
+       "1"
+      ]
+     ],
+     "comments": [
+      131,
+      444
+     ],
+     "status": [
+      [
+       "pRONCR0_InU",
+       "575",
+       "131",
+       "444",
+       "ok"
+      ]
+     ],
+     "transcripts": [
+      [
+       "pRONCR0_InU",
+       "pl",
+       "True",
+       "ok"
+      ]
+     ]
+    },
+    {
+     "video_id": "ZKSaCr5ng-Q",
+     "channel_title": "Aitysta",
+     "search": [
+      [
+       "ZKSaCr5ng-Q",
+       "UC_SM5bhfwmyX8E41_BkZQMQ",
+       "manosfera",
+       "67"
+      ]
+     ],
+     "videos": [
+      [
+       "ZKSaCr5ng-Q",
+       "UC_SM5bhfwmyX8E41_BkZQMQ",
+       "2026-04-22T19:28:53Z",
+       "279",
+       "0"
+      ]
+     ],
+     "channels": [
+      [
+       "UC_SM5bhfwmyX8E41_BkZQMQ",
+       "Aitysta",
+       "1",
+       "1"
+      ]
+     ],
+     "comments": [
+      0,
+      0
+     ],
+     "status": [
+      [
+       "ZKSaCr5ng-Q",
+       "0",
+       "0",
+       "0",
+       "zero_comments"
+      ]
+     ],
+     "transcripts": [
+      [
+       "ZKSaCr5ng-Q",
+       "pl",
+       "True",
+       "ok"
+      ]
+     ]
+    }
+   ],
+   "rows": {
+    "search": 451,
+    "videos": 408,
+    "channels": 288,
+    "status": 407,
+    "transcripts": 408
+   }
   }
  }
 };
@@ -19609,6 +19805,9 @@ const sections = [
     { table: videoColumns() },
     { p: `Liczniki to stan z chwili pobrania, tutaj z ${D.recorded.split('-').reverse().join('.')}. Ten sam film pobrany za tydzień może mieć inne liczby, a w Data API nie ma ich historii. Film znaleziony w wyszukiwaniu może też zniknąć albo stać się prywatny, zanim skrypt pobierze jego liczby.` },
     { p: 'Migawką jest też sama lista filmów. Kolejność ustala ranking YouTube, a wyszukiwanie domyślnie odfiltrowuje część treści, co pokazuje rysunek {rys:ytwywolanie}. Ten sam skrypt jutro może dać inną listę. Dlatego w karcie korpusu zapisuje się datę zbierania i parametry wyszukiwania, także te, których skrypt nie ustawia.' },
+    { p: 'Na końcu pracy skrypt projektu zostawia nie jeden plik, ale kilka. W każdym jeden wiersz to co innego: trafienie w wyszukiwaniu, film, kanał, komentarz. Pliki łączy identyfikator filmu `video_id`. Kanały mają własny identyfikator `channel_id`, a komentarze `comment_id`. Rysunek {rys:ytpliki} pokazuje te pliki. Wybierz film i kliknij plik, a zobaczysz, ile wierszy ma w nim ten sam film.' },
+    { figure: 'ytpliki' },
+    { p: 'Kolumnę, po której łączy się dwa pliki, nazywa się kluczem. W `videos.csv` każdy `video_id` występuje raz. W pliku trafień film występuje tyle razy, ile razy wyszedł w wyszukiwaniu, a w pliku komentarzy tyle razy, ile ma komentarzy. Gdy dołączasz do trafień liczby z `videos.csv`, film znaleziony dwa razy dostaje swoje wyświetlenia dwa razy. Suma wyświetleń jest wtedy za duża. Dlatego przed łączeniem sprawdza się, w którym pliku klucz jest unikalny. Komentarze w tym kursie są tylko liczbami. Dalsze laby czytają pliki przycięte z tych na rysunku: same identyfikatory, liczby i statusy, bez tekstów i autorów.' },
   ]),
 
   step('w3-5', '3.5', 'Komentarze i odpowiedzi', [
@@ -21493,7 +21692,94 @@ function realPagesFigure({ num: n = 'Rysunek' } = {}) {
   return frame(n, 'Dziewięć stron z testu', host, caption(`${SRC} Strony odtworzone z zapisanych trafień. Każda strona to jedno wywołanie wyszukiwania, razem ${D.testSearchCalls}.`));
 }
 
-__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "HOME_SCRIPT": HOME_SCRIPT, "requestFigure": requestFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "outlierFigure": outlierFigure, "scatterFigure": scatterFigure, "panelFigure": panelFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure };
+// ---------------------------------------------------------------- 3.4: the files of the script and their keys
+
+// The files the project's script (v3) writes, what one row is, and the ids that join them.
+// Rows shown are real (generated3.js, data.fileMap), except comments.csv: it holds author names
+// and texts, so the figure gives only the counts and an invented example of its rows.
+const KEY_CLASS = { video_id: 'yt-key-v', channel_id: 'yt-key-c', comment_id: 'yt-key-k', parent_id: 'yt-key-k' };
+const FILE_MAP = [
+  { id: 'search', file: 'search_hits.jsonl', row: 'jedno trafienie w wyszukiwaniu', keys: ['video_id', 'channel_id'], more: 'query, rank, tytuł, opis', cols: ['video_id', 'channel_id', 'query', 'rank'] },
+  { id: 'videos', file: 'videos.csv', row: 'jeden film', keys: ['video_id', 'channel_id'], more: 'data, liczniki, długość, trafność', cols: ['video_id', 'channel_id', 'published_at', 'view_count', 'comment_count'] },
+  { id: 'channels', file: 'channel_candidates.csv', row: 'jeden kanał z wyników', keys: ['channel_id'], more: 'liczba filmów, zapytań, decyzja', cols: ['channel_id', 'channel_title', 'videos_in_search', 'n_queries'] },
+  { id: 'comments', file: 'comments.csv', row: 'jeden komentarz albo odpowiedź', keys: ['comment_id', 'parent_id', 'video_id'], more: 'tekst, autor, polubienia, data', cols: ['comment_id', 'parent_id', 'video_id', 'text'] },
+  { id: 'status', file: 'comments_status.csv', row: 'jeden film, stan pobrania komentarzy', keys: ['video_id'], more: 'licznik z API, zebrane, status', cols: ['video_id', 'api_comment_count', 'n_top', 'n_replies', 'status'] },
+  { id: 'transcripts', file: 'transcripts.csv', row: 'jeden film, napisy', keys: ['video_id'], more: 'język, automatyczne, tekst', cols: ['video_id', 'language', 'is_generated', 'status', 'transcript'] },
+];
+const SKIP = '(pominięte w kursie)';
+
+/** The rows of one file for one followed video; comments are invented, see above. */
+function fileRows(f, v) {
+  if (f.id === 'comments') {
+    const [top, replies] = v.comments;
+    if (!top) return [];
+    const rows = [['przykład_1', '', v.video_id, SKIP]];
+    if (replies) rows.push(['przykład_2', 'przykład_1', v.video_id, SKIP]);
+    if (top > 1) rows.push(['przykład_3', '', v.video_id, SKIP]);
+    return rows;
+  }
+  if (f.id === 'transcripts') return v.transcripts.map((r) => [...r, r[3] === 'ok' ? SKIP : '']);
+  return v[f.id];
+}
+
+/** How many rows the file has for that video (comments: what the script collected, before removing repeats). */
+function fileCount(f, v) {
+  return f.id === 'comments' ? v.comments[0] + v.comments[1] : v[f.id].length;
+}
+
+function fileSay(f, v) {
+  const k = fileCount(f, v);
+  const ch = v.channels[0];
+  if (f.id === 'search') return k > 1
+    ? `Ten film wyszedł w wyszukiwaniu ${k} razy, na pozycjach ${v.search.map((r) => r[3]).join(' i ')}, więc ma tu ${k} wiersze. W videos.csv ma jeden. Kolumna rank to pozycja w całym przebiegu: numer strony od zera razy 50 plus miejsce na stronie.`
+    : 'Ten film wyszedł w wyszukiwaniu raz, więc ma tu jeden wiersz. Film znaleziony dwa razy miałby dwa, a w videos.csv nadal jeden.';
+  if (f.id === 'videos') return 'Jeden film, jeden wiersz. Ten plik łączy pozostałe: ma video_id, po którym dochodzą trafienia, komentarze i napisy, oraz channel_id, po którym dochodzi kanał.';
+  if (f.id === 'channels') return `Tu kluczem jest channel_id, a nie video_id. Kanał „${ch[1]}” ma w wynikach ${ch[2]} ${plural(Number(ch[2]), 'film', 'filmy', 'filmów')}, więc jego jeden wiersz pasuje do ${ch[2]} ${plural(Number(ch[2]), 'wiersza', 'wierszy', 'wierszy')} videos.csv. W kolumnie n_queries jest 1, bo test miał jedno zapytanie.`;
+  if (f.id === 'comments') return k
+    ? `Pod tym filmem skrypt zebrał ${v.comments[0]} ${plural(v.comments[0], 'komentarz główny', 'komentarze główne', 'komentarzy głównych')} i ${v.comments[1]} ${plural(v.comments[1], 'odpowiedź', 'odpowiedzi', 'odpowiedzi')}, więc ten film ma w comments.csv około ${k} ${plural(k, 'wiersza', 'wierszy', 'wierszy')}. Wiersze w tabeli są wymyślone, bo prawdziwe mają imiona autorów i teksty, a te nie wychodzą poza projekt. Odpowiedź ma w parent_id identyfikator komentarza głównego, a komentarz główny ma tam pustą komórkę.`
+    : 'Ten film nie ma komentarzy, więc w comments.csv nie ma ani jednego jego wiersza. Sam brak wierszy nie mówi, dlaczego tak jest. To mówi plik comments_status.csv.';
+  if (f.id === 'status') return `Jeden wiersz na film, także bez komentarzy. Dlatego dopiero ten plik mówi, czy zero to brak komentarzy, czy błąd pobrania. Tu status to ${v.status[0]?.[4]}.`;
+  return v.transcripts[0][3] === 'ok'
+    ? 'Jeden wiersz na film. Ten film ma polskie napisy, a w pliku projektu w kolumnie transcript stoi ich tekst.'
+    : `Jeden wiersz na film, także bez napisów. Status ${v.transcripts[0][3]} mówi, że polskich napisów nie było, więc język i tekst są puste.`;
+}
+
+const cell = (c, x, mark) => (x === '' ? el('td.yt-preview-empty', { 'aria-label': 'puste' }, '(puste)') : el(`td${mark ? `.${KEY_CLASS[c]}` : ''}`, x));
+
+function filesFigure({ num: n = 'Rysunek' } = {}) {
+  const M = D.fileMap;
+  const total = { ...M.rows, comments: D.authors.comments };
+  const state = { v: 0, f: 'videos' };
+  const host = el('div');
+  const draw = () => {
+    const v = M.videos[state.v];
+    const f = FILE_MAP.find((x) => x.id === state.f);
+    const rows = fileRows(f, v);
+    mount(host,
+      el('div.yt-files-pick', el('span.yt-files-lead', 'Śledzony film:'),
+        el('div.fg-toggles', M.videos.map((x, k) => el(`button.fg-toggle${state.v === k ? '.fg-toggle-on' : ''}`,
+          { type: 'button', 'aria-pressed': state.v === k ? 'true' : 'false', onClick: () => { state.v = k; draw(); } }, `${x.video_id} (${x.channel_title})`)))),
+      el('div.yt-files', FILE_MAP.map((x) => el(`button.yt-file${state.f === x.id ? '.yt-file-on' : ''}`,
+        { type: 'button', 'aria-pressed': state.f === x.id ? 'true' : 'false', onClick: () => { state.f = x.id; draw(); } },
+        el('span.yt-file-name', x.file),
+        el('span.yt-file-row', `1 wiersz = ${x.row}`),
+        el('span.yt-file-keys', x.keys.map((c) => el(`span.yt-key.${KEY_CLASS[c]}`, c))),
+        el('span.yt-file-more', `oraz: ${x.more}`),
+        el('span.yt-file-count', `w teście ${fmt(total[x.id])} ${plural(total[x.id], 'wiersz', 'wiersze', 'wierszy')}, dla tego filmu ${fileCount(x, v)}`)))),
+      el('div.yt-preview.yt-files-rows',
+        el('p.py-note', { html: rich(`\`${f.file}\`, wiersze z video_id \`${v.video_id}\`${f.id === 'comments' && rows.length ? ', przykład wymyślony' : ''}`) }),
+        rows.length
+          ? el('div.yt-preview-wrap', el('table.yt-preview-table',
+            el('thead', el('tr', f.cols.map((c) => el('th', c)))),
+            el('tbody', rows.map((r) => el('tr', r.map((x, i) => cell(f.cols[i], x, f.cols[i] in KEY_CLASS && x !== SKIP)))))))
+          : el('p.py-note', 'Brak wierszy.')),
+      el('div.sq-read', fileSay(f, v)));
+  };
+  draw();
+  return frame(n, 'Pliki ze skryptu i klucze, które je łączą', host, caption(`Pliki i kolumny według skryptu v3 projektu, bez plików pomocniczych, takich jak errors.jsonl. Kolor oznacza ten sam klucz: video_id, channel_id albo parę comment_id i parent_id. Wiersze trafień, filmów, stanu komentarzy i napisów są prawdziwe, tylko tekst napisów pominięto. Wiersz kanału jest przeliczony z trafień tak samo jak w skrypcie. ${SRC}`));
+}
+
+__modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure": keyFigure, "HOME_SCRIPT": HOME_SCRIPT, "requestFigure": requestFigure, "limitFigure": limitFigure, "plural": plural, "gluedFigure": gluedFigure, "realQueriesFigure": realQueriesFigure, "threadFigure": threadFigure, "commentsFigure": commentsFigure, "codesFigure": codesFigure, "languagesFigure": languagesFigure, "rulesFigure": rulesFigure, "channelsFigure": channelsFigure, "ratioFigure": ratioFigure, "countsFigure": countsFigure, "durationFigure": durationFigure, "formatFigure": formatFigure, "halfFigure": halfFigure, "curveFigure": curveFigure, "groupsFigure": groupsFigure, "labelsFigure": labelsFigure, "timingFigure": timingFigure, "runningFigure": runningFigure, "authorsFigure": authorsFigure, "outlierFigure": outlierFigure, "scatterFigure": scatterFigure, "panelFigure": panelFigure, "pageChainFigure": pageChainFigure, "realPagesFigure": realPagesFigure, "FILE_MAP": FILE_MAP, "fileRows": fileRows, "fileCount": fileCount, "fileSay": fileSay, "filesFigure": filesFigure };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/main3.js ===== */
@@ -21511,7 +21797,7 @@ const { setUp: setUpCourse, restoreOptions, focusSkip } = __modules["../../anali
 const { CHAPTER, CORPUS_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter3.js"];
 const { labExercise, labAnswer, restoreLab } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS3, FILES3, explainError3 } = __modules["../../analiza-trendow-w-internecie/src/tasks3.js"];
-const { keyFigure, requestFigure, limitFigure, gluedFigure, realQueriesFigure, pageChainFigure, realPagesFigure, threadFigure, commentsFigure, codesFigure, languagesFigure, rulesFigure, channelsFigure, ratioFigure, countsFigure, durationFigure, formatFigure, halfFigure, curveFigure, groupsFigure, labelsFigure, timingFigure, runningFigure, authorsFigure, outlierFigure, scatterFigure, panelFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
+const { keyFigure, requestFigure, limitFigure, gluedFigure, realQueriesFigure, pageChainFigure, realPagesFigure, threadFigure, commentsFigure, codesFigure, languagesFigure, rulesFigure, channelsFigure, ratioFigure, countsFigure, durationFigure, formatFigure, halfFigure, curveFigure, groupsFigure, labelsFigure, timingFigure, runningFigure, authorsFigure, outlierFigure, scatterFigure, panelFigure, filesFigure } = __modules["../../analiza-trendow-w-internecie/src/figures3.js"];
 const FIGURES3 = {
   ytsklejanie: gluedFigure,
   ytzapytania: realQueriesFigure,
@@ -21520,6 +21806,7 @@ const FIGURES3 = {
   ytlimit: limitFigure,
   ytstrony: pageChainFigure,
   ytstronyreal: realPagesFigure,
+  ytpliki: filesFigure,
   ytwatek: threadFigure,
   ytkomentarze: commentsFigure,
   ytkody: codesFigure,

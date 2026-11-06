@@ -1960,6 +1960,18 @@ textarea.kc-input { resize: vertical; }
 /* a figure's body is a grid: its items may shrink below their longest code line, which then scrolls in its own box */
 .fg-body > * { min-width: 0; }
 
+/* topic 3: a snapshot of the real data above a lab */
+.yt-preview { margin: 8px 0 12px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.yt-preview summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.yt-preview-wrap { overflow-x: auto; max-width: 100%; }
+.yt-preview-table { border-collapse: collapse; font: 13px/1.4 var(--mono); white-space: nowrap; }
+.yt-preview-table th, .yt-preview-table td { padding: 3px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.yt-preview-table th { font-weight: 600; color: var(--ink-soft); }
+.yt-preview-empty { color: var(--ink-soft); font-style: italic; }
+/* the snapshot scrolls inside its own frame and never widens the lab or the page */
+.py, .yt-preview { min-width: 0; max-width: 100%; }
+.yt-preview-wrap { width: 100%; }
+
 </style>
 </head>
 <body>
@@ -16316,6 +16328,42 @@ function walkView({ say, starter, solution, notes, isOpen = () => true, noPython
 __modules["../../analiza-trendow-w-internecie/src/walk.js"] = { "codeOf": codeOf, "changeBlocks": changeBlocks, "walkView": walkView };
 })();
 
+/* ===== ../../analiza-trendow-w-internecie/src/preview.js ===== */
+(function () {
+/**
+ * Topic 3: a snapshot of the real data above a lab, so a student sees the rows before the code.
+ * The generator takes the first rows of the file the code reads, only the task's columns, values
+ * exactly as in the file; an empty cell is shown as empty on purpose, since several traps of the
+ * topic live there.
+ */
+const { el } = __modules["src/ui/dom.js"];
+const { rich } = __modules["src/book/rich.js"];
+const plural = (x, one, few, many) => (x === 1 ? one : [2, 3, 4].includes(x % 10) && ![12, 13, 14].includes(x % 100) ? few : many);
+const fmt = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+/** The sentence over the table: how much of the file it is and what an empty cell means. */
+function previewNote({ file, rows, total, columns }) {
+  if (total == null) {
+    return `Pierwsze ${rows.length} elementów listy \`items\` z pliku \`${file}\`. Każdy wiersz to jeden element, a nagłówek mówi, gdzie w JSON leży pole.`;
+  }
+  return `Pierwsze ${rows.length} z ${fmt(total)} ${plural(total, 'wiersza', 'wierszy', 'wierszy')} pliku \`${file}\`, tylko ${columns.length === 1 ? 'kolumna' : 'kolumny'} z tego zadania. Pusta komórka znaczy, że w pliku nie ma wartości.`;
+}
+
+function previewView(preview) {
+  const { columns, rows, extra } = preview;
+  return el('details.yt-preview', { open: true },
+    el('summary', `Tak wyglądają dane: ${preview.file}`),
+    el('p.py-note', { html: rich(previewNote(preview)) }),
+    el('div.yt-preview-wrap',
+      el('table.yt-preview-table',
+        el('thead', el('tr', columns.map((c) => el('th', c)))),
+        el('tbody', rows.map((r) => el('tr', r.map((v) => (v === '' ? el('td.yt-preview-empty', { 'aria-label': 'puste' }, '(puste)') : el('td', v)))))))),
+    extra ? el('p.py-note', el('code', extra), ' Token następnej strony stoi na końcu odpowiedzi, poza listą.') : null);
+}
+
+__modules["../../analiza-trendow-w-internecie/src/preview.js"] = { "previewNote": previewNote, "previewView": previewView };
+})();
+
 /* ===== ../../analiza-trendow-w-internecie/src/pylab.js ===== */
 (function () {
 /**
@@ -16338,6 +16386,7 @@ const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
 const { runPython, loadPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
 const { LABS, FILES, checkCode, checkBase, explainError } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
 const { walkView } = __modules["../../analiza-trendow-w-internecie/src/walk.js"];
+const { previewView } = __modules["../../analiza-trendow-w-internecie/src/preview.js"];
 const { download } = __modules["src/ui/download.js"];
 const INDENT = '    ';
 
@@ -16550,7 +16599,8 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       mount(paneHost, state.path === 'kod' ? codePane : basePane);
     };
     draw();
-    return el('div.py', el('p.py-intro', { html: rich(lab.intro) }), tabsHost, paneHost);
+    // topic 3: the real rows the code reads, seen on both tabs before the task starts
+    return el('div.py', el('p.py-intro', { html: rich(lab.intro) }), lab.preview ? previewView(lab.preview) : null, tabsHost, paneHost);
   };
 }
 

@@ -1960,6 +1960,18 @@ textarea.kc-input { resize: vertical; }
 /* a figure's body is a grid: its items may shrink below their longest code line, which then scrolls in its own box */
 .fg-body > * { min-width: 0; }
 
+/* topic 3: a snapshot of the real data above a lab */
+.yt-preview { margin: 8px 0 12px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.yt-preview summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.yt-preview-wrap { overflow-x: auto; max-width: 100%; }
+.yt-preview-table { border-collapse: collapse; font: 13px/1.4 var(--mono); white-space: nowrap; }
+.yt-preview-table th, .yt-preview-table td { padding: 3px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.yt-preview-table th { font-weight: 600; color: var(--ink-soft); }
+.yt-preview-empty { color: var(--ink-soft); font-style: italic; }
+/* the snapshot scrolls inside its own frame and never widens the lab or the page */
+.py, .yt-preview { min-width: 0; max-width: 100%; }
+.yt-preview-wrap { width: 100%; }
+
 </style>
 </head>
 <body>
@@ -16316,6 +16328,42 @@ function walkView({ say, starter, solution, notes, isOpen = () => true, noPython
 __modules["../../analiza-trendow-w-internecie/src/walk.js"] = { "codeOf": codeOf, "changeBlocks": changeBlocks, "walkView": walkView };
 })();
 
+/* ===== ../../analiza-trendow-w-internecie/src/preview.js ===== */
+(function () {
+/**
+ * Topic 3: a snapshot of the real data above a lab, so a student sees the rows before the code.
+ * The generator takes the first rows of the file the code reads, only the task's columns, values
+ * exactly as in the file; an empty cell is shown as empty on purpose, since several traps of the
+ * topic live there.
+ */
+const { el } = __modules["src/ui/dom.js"];
+const { rich } = __modules["src/book/rich.js"];
+const plural = (x, one, few, many) => (x === 1 ? one : [2, 3, 4].includes(x % 10) && ![12, 13, 14].includes(x % 100) ? few : many);
+const fmt = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+/** The sentence over the table: how much of the file it is and what an empty cell means. */
+function previewNote({ file, rows, total, columns }) {
+  if (total == null) {
+    return `Pierwsze ${rows.length} elementów listy \`items\` z pliku \`${file}\`. Każdy wiersz to jeden element, a nagłówek mówi, gdzie w JSON leży pole.`;
+  }
+  return `Pierwsze ${rows.length} z ${fmt(total)} ${plural(total, 'wiersza', 'wierszy', 'wierszy')} pliku \`${file}\`, tylko ${columns.length === 1 ? 'kolumna' : 'kolumny'} z tego zadania. Pusta komórka znaczy, że w pliku nie ma wartości.`;
+}
+
+function previewView(preview) {
+  const { columns, rows, extra } = preview;
+  return el('details.yt-preview', { open: true },
+    el('summary', `Tak wyglądają dane: ${preview.file}`),
+    el('p.py-note', { html: rich(previewNote(preview)) }),
+    el('div.yt-preview-wrap',
+      el('table.yt-preview-table',
+        el('thead', el('tr', columns.map((c) => el('th', c)))),
+        el('tbody', rows.map((r) => el('tr', r.map((v) => (v === '' ? el('td.yt-preview-empty', { 'aria-label': 'puste' }, '(puste)') : el('td', v)))))))),
+    extra ? el('p.py-note', el('code', extra), ' Token następnej strony stoi na końcu odpowiedzi, poza listą.') : null);
+}
+
+__modules["../../analiza-trendow-w-internecie/src/preview.js"] = { "previewNote": previewNote, "previewView": previewView };
+})();
+
 /* ===== ../../analiza-trendow-w-internecie/src/pylab.js ===== */
 (function () {
 /**
@@ -16338,6 +16386,7 @@ const { getItem, setItem, isDone, markDone } = __modules["src/book/store.js"];
 const { runPython, loadPython } = __modules["../../analiza-trendow-w-internecie/src/pyrun.js"];
 const { LABS, FILES, checkCode, checkBase, explainError } = __modules["../../analiza-trendow-w-internecie/src/tasks.js"];
 const { walkView } = __modules["../../analiza-trendow-w-internecie/src/walk.js"];
+const { previewView } = __modules["../../analiza-trendow-w-internecie/src/preview.js"];
 const { download } = __modules["src/ui/download.js"];
 const INDENT = '    ';
 
@@ -16550,7 +16599,8 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       mount(paneHost, state.path === 'kod' ? codePane : basePane);
     };
     draw();
-    return el('div.py', el('p.py-intro', { html: rich(lab.intro) }), tabsHost, paneHost);
+    // topic 3: the real rows the code reads, seen on both tabs before the task starts
+    return el('div.py', el('p.py-intro', { html: rich(lab.intro) }), lab.preview ? previewView(lab.preview) : null, tabsHost, paneHost);
   };
 }
 
@@ -16698,6 +16748,41 @@ const GENERATED3 = {
     "repeats": 43,
     "lastPage": 48,
     "pageSize": 50
+   },
+   "preview": {
+    "file": "search_page1.json",
+    "columns": [
+     "items[].id.videoId",
+     "items[].snippet.channelTitle"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "The Table"
+     ],
+     [
+      "hUp-H519HaY",
+      "ŚwiadomaStronaŻycia"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "Telesur Yucatán"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "Ordem dos Advogados Portugueses"
+     ],
+     [
+      "3ESMKnOoZO8",
+      "The Table"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "Czasem czuły, czasem barbarzyńca"
+     ]
+    ],
+    "total": null,
+    "extra": "nextPageToken: \"PAGE2\""
    }
   },
   "yt4": {
@@ -16730,6 +16815,61 @@ const GENERATED3 = {
     "zero": 149,
     "dedupTop": 9209,
     "dedupReplies": 8326
+   },
+   "preview": {
+    "file": "comments_status.csv",
+    "columns": [
+     "video_id",
+     "api_comment_count",
+     "n_top",
+     "n_replies",
+     "status"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "1",
+      "1",
+      "0",
+      "ok"
+     ],
+     [
+      "hUp-H519HaY",
+      "0",
+      "0",
+      "0",
+      "zero_comments"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "2",
+      "2",
+      "0",
+      "ok"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "",
+      "0",
+      "0",
+      "commentsDisabled"
+     ],
+     [
+      "3ESMKnOoZO8",
+      "1",
+      "1",
+      "0",
+      "ok"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "3",
+      "2",
+      "1",
+      "ok"
+     ]
+    ],
+    "total": 407
    }
   },
   "yt5": {
@@ -16767,6 +16907,47 @@ const GENERATED3 = {
      "en-US"
     ],
     "pl": 7
+   },
+   "preview": {
+    "file": "videos.csv",
+    "columns": [
+     "video_id",
+     "channel_title",
+     "default_audio_language"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "The Table",
+      "it"
+     ],
+     [
+      "hUp-H519HaY",
+      "ŚwiadomaStronaŻycia",
+      ""
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "Telesur Yucatán",
+      "es-MX"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "Ordem dos Advogados Portugueses",
+      "pt-PT"
+     ],
+     [
+      "3ESMKnOoZO8",
+      "The Table",
+      "it"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "Czasem czuły, czasem barbarzyńca",
+      "pl"
+     ]
+    ],
+    "total": 408
    }
   },
   "yt6": {
@@ -16801,6 +16982,40 @@ const GENERATED3 = {
     ],
     "channels": 288,
     "atLeast5": 9
+   },
+   "preview": {
+    "file": "videos.csv",
+    "columns": [
+     "video_id",
+     "channel_title"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "The Table"
+     ],
+     [
+      "hUp-H519HaY",
+      "ŚwiadomaStronaŻycia"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "Telesur Yucatán"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "Ordem dos Advogados Portugueses"
+     ],
+     [
+      "3ESMKnOoZO8",
+      "The Table"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "Czasem czuły, czasem barbarzyńca"
+     ]
+    ],
+    "total": 408
    }
   },
   "yt7": {
@@ -16834,6 +17049,47 @@ const GENERATED3 = {
     "top2Share": 0.429,
     "commentSum": 17749,
     "minViews": 4
+   },
+   "preview": {
+    "file": "videos.csv",
+    "columns": [
+     "video_id",
+     "view_count",
+     "comment_count"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "933",
+      "1"
+     ],
+     [
+      "hUp-H519HaY",
+      "2479",
+      "0"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "165",
+      "2"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "189",
+      ""
+     ],
+     [
+      "3ESMKnOoZO8",
+      "1270",
+      "1"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "3082",
+      "3"
+     ]
+    ],
+    "total": 408
    }
   },
   "yt8": {
@@ -16864,6 +17120,40 @@ const GENERATED3 = {
     "longComments": 13214,
     "allComments": 17749,
     "medianMinutes": 1.1
+   },
+   "preview": {
+    "file": "videos.csv",
+    "columns": [
+     "video_id",
+     "duration"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "PT1M14S"
+     ],
+     [
+      "hUp-H519HaY",
+      "PT6S"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "PT20M54S"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "PT12M14S"
+     ],
+     [
+      "3ESMKnOoZO8",
+      "PT1M33S"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "PT43S"
+     ]
+    ],
+    "total": 408
    }
   },
   "yt9": {
@@ -16896,6 +17186,40 @@ const GENERATED3 = {
     "total": 3293127,
     "gini": 0.88,
     "medianViews": 978.5
+   },
+   "preview": {
+    "file": "videos.csv",
+    "columns": [
+     "video_id",
+     "view_count"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "933"
+     ],
+     [
+      "hUp-H519HaY",
+      "2479"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "165"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "189"
+     ],
+     [
+      "3ESMKnOoZO8",
+      "1270"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "3082"
+     ]
+    ],
+    "total": 408
    }
   },
   "yt10": {
@@ -16928,6 +17252,54 @@ const GENERATED3 = {
     "videosWithout": 255,
     "commentsWithout": 14132,
     "allComments": 17749
+   },
+   "preview": {
+    "file": "videos.csv",
+    "columns": [
+     "video_id",
+     "relevance",
+     "default_audio_language",
+     "comment_count"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "core_query_with_terms",
+      "it",
+      "1"
+     ],
+     [
+      "hUp-H519HaY",
+      "core_query_with_terms",
+      "",
+      "0"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "core_query_with_terms",
+      "es-MX",
+      "2"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "core_query_with_terms",
+      "pt-PT",
+      ""
+     ],
+     [
+      "3ESMKnOoZO8",
+      "core_query_with_terms",
+      "it",
+      "1"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "core_query_with_terms",
+      "pl",
+      "3"
+     ]
+    ],
+    "total": 408
    }
   },
   "yt11": {
@@ -16956,6 +17328,47 @@ const GENERATED3 = {
     "topComments": 109,
     "pairs": 404,
     "topShareViews": 0.123
+   },
+   "preview": {
+    "file": "videos.csv",
+    "columns": [
+     "video_id",
+     "view_count",
+     "comment_count"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "933",
+      "1"
+     ],
+     [
+      "hUp-H519HaY",
+      "2479",
+      "0"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "165",
+      "2"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "189",
+      ""
+     ],
+     [
+      "3ESMKnOoZO8",
+      "1270",
+      "1"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "3082",
+      "3"
+     ]
+    ],
+    "total": 408
    }
   },
   "yt12": {
@@ -16991,6 +17404,61 @@ const GENERATED3 = {
     "early": 27,
     "lateTop10": 0.899,
     "allTop10": 0.764
+   },
+   "preview": {
+    "file": "comments_timing.csv",
+    "columns": [
+     "video_id",
+     "day1",
+     "day2_7",
+     "day8_30",
+     "later"
+    ],
+    "rows": [
+     [
+      "hFw5cl0iwO0",
+      "0",
+      "0",
+      "1",
+      "0"
+     ],
+     [
+      "hUp-H519HaY",
+      "0",
+      "0",
+      "0",
+      "0"
+     ],
+     [
+      "dD8ihWEuUHQ",
+      "2",
+      "0",
+      "0",
+      "0"
+     ],
+     [
+      "iWDR-DVUhJw",
+      "0",
+      "0",
+      "0",
+      "0"
+     ],
+     [
+      "3ESMKnOoZO8",
+      "0",
+      "0",
+      "1",
+      "0"
+     ],
+     [
+      "T8qPFuWnNsY",
+      "3",
+      "0",
+      "0",
+      "0"
+     ]
+    ],
+    "total": 408
    }
   }
  },
@@ -19549,6 +20017,7 @@ const LABS3 = {
     starter: G.yt3.starter,
     solution: G.yt3.solution,
     solutionOutput: G.yt3.solutionOutput,
+    preview: G.yt3.preview,
     files: PAGES,
     expect: G.yt3.expect,
     tol: 0,
@@ -19607,6 +20076,7 @@ LABS3.yt4 = {
   starter: G.yt4.starter,
   solution: G.yt4.solution,
   solutionOutput: G.yt4.solutionOutput,
+  preview: G.yt4.preview,
   files: ['comments_status.csv'],
   expect: G.yt4.expect,
   tol: 0.0006,
@@ -19657,6 +20127,7 @@ LABS3.yt5 = {
   starter: G.yt5.starter,
   solution: G.yt5.solution,
   solutionOutput: G.yt5.solutionOutput,
+  preview: G.yt5.preview,
   files: ['videos.csv'],
   expect: G.yt5.expect,
   tol: 0.0006,
@@ -19716,6 +20187,7 @@ LABS3.yt6 = {
   starter: G.yt6.starter,
   solution: G.yt6.solution,
   solutionOutput: G.yt6.solutionOutput,
+  preview: G.yt6.preview,
   files: ['videos.csv'],
   expect: G.yt6.expect,
   tol: 0,
@@ -19772,6 +20244,7 @@ LABS3.yt7 = {
   starter: G.yt7.starter,
   solution: G.yt7.solution,
   solutionOutput: G.yt7.solutionOutput,
+  preview: G.yt7.preview,
   files: ['videos.csv'],
   expect: G.yt7.expect,
   tol: 0.006,
@@ -19831,6 +20304,7 @@ LABS3.yt8 = {
   starter: G.yt8.starter,
   solution: G.yt8.solution,
   solutionOutput: G.yt8.solutionOutput,
+  preview: G.yt8.preview,
   files: ['videos.csv'],
   expect: G.yt8.expect,
   tol: 0.0006,
@@ -19882,6 +20356,7 @@ LABS3.yt9 = {
   starter: G.yt9.starter,
   solution: G.yt9.solution,
   solutionOutput: G.yt9.solutionOutput,
+  preview: G.yt9.preview,
   files: ['videos.csv'],
   expect: G.yt9.expect,
   tol: 0.004,
@@ -19934,6 +20409,7 @@ LABS3.yt10 = {
   starter: G.yt10.starter,
   solution: G.yt10.solution,
   solutionOutput: G.yt10.solutionOutput,
+  preview: G.yt10.preview,
   files: ['videos.csv'],
   expect: G.yt10.expect,
   tol: 0.0006,
@@ -19985,6 +20461,7 @@ LABS3.yt12 = {
   starter: G.yt12.starter,
   solution: G.yt12.solution,
   solutionOutput: G.yt12.solutionOutput,
+  preview: G.yt12.preview,
   files: ['comments_timing.csv'],
   expect: G.yt12.expect,
   tol: 0.0006,
@@ -20036,6 +20513,7 @@ LABS3.yt11 = {
   starter: G.yt11.starter,
   solution: G.yt11.solution,
   solutionOutput: G.yt11.solutionOutput,
+  preview: G.yt11.preview,
   files: ['videos.csv'],
   expect: G.yt11.expect,
   tol: 0.006,

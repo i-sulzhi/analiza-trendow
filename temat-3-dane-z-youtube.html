@@ -1972,6 +1972,18 @@ textarea.kc-input { resize: vertical; }
 .py, .yt-preview { min-width: 0; max-width: 100%; }
 .yt-preview-wrap { width: 100%; }
 
+/* contrast (check 2026-11-06): the engine's faint ink fell below 4.5:1 on panels and tinted boxes;
+   these values keep it below --ink-soft and above 4.5:1 on every background it is used on */
+:root { --ink-faint: #646a67; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-faint: #9aa39f; } }
+:root[data-theme="dark"] { --ink-faint: #9aa39f; }
+
+/* keyboard (check 2026-11-06): a clear focus ring, a skip link, the editor's way out */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.skip-link { position: absolute; left: 8px; top: -60px; z-index: 1000; padding: 8px 12px; background: var(--accent); color: var(--accent-ink); border-radius: var(--radius); text-decoration: none; font-weight: 600; }
+.skip-link:focus-visible { top: 8px; }
+.py-keys { margin: 4px 0 0; font-size: 13px; color: var(--ink-soft); }
+
 </style>
 </head>
 <body>
@@ -15236,9 +15248,10 @@ class BookApp {
       ch.recap ? el('div.bk-box.bk-recap', el('div.bk-box-title', t('bk.recap')), el('ol', ch.recap.map((r) => el('li', { html: rich(r) })))) : null,
       summary,
       el('aside.bk-note.bk-note-info', el('b', `${t('bk.next')} `), ch.next),
-      el('div.bk-box.bk-refs',
+      // no box over an empty list: a chapter without references shows none
+      Object.keys(ch.refs || {}).length ? el('div.bk-box.bk-refs',
         el('div.bk-box-title', t('bk.literature')),
-        el('ol', Object.values(ch.refs).sort((a, b) => a.localeCompare(b, 'pl')).map((r) => el('li', { html: rich(r) })))));
+        el('ol', Object.values(ch.refs).sort((a, b) => a.localeCompare(b, 'pl')).map((r) => el('li', { html: rich(r) })))) : null);
   }
 }
 
@@ -15734,6 +15747,7 @@ const STRINGS = {
   'py.pathCode': 'Z kodem (Python)',
   'py.pathBase': 'Bez kodu',
   'py.codeLabel': 'Kod w Pythonie',
+  'py.keys': 'Tab w edytorze robi wcięcie. Żeby wyjść z edytora klawiaturą, naciśnij Esc, a potem Tab.',
   'py.note': 'To zwykły Python. Kod używa bibliotek `requests` i `json`, a każda funkcja jest zdefiniowana poniżej, więc możesz ją przeczytać i zmienić. Ten sam kod zadziała na Twoim komputerze. Pierwsze uruchomienie pobiera Pythona (ok. 10 MB) i trwa kilkanaście sekund. Pętla bez końca zawiesi kartę. Zamknij ją wtedy i otwórz stronę ponownie, kod zostanie.',
   'py.files': 'Pliki obok kodu, do pobrania:',
   'py.tables': 'Tabele do pobrania:',
@@ -16475,6 +16489,7 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
     const area = el('textarea.py-code', {
       spellcheck: 'false', autocapitalize: 'off', autocomplete: 'off', autocorrect: 'off',
       'aria-label': t('py.codeLabel'), rows: String(lab.starter.split('\n').length + 1),
+      'aria-describedby': `py-keys-${lab.id}`,
     });
     // code saved before the labs moved to `requests` calls helpers that no longer exist: start again
     const stale = /\b(pobierz|wczytaj)\(/.test(saved.code || '');
@@ -16554,6 +16569,8 @@ function labExercise(labId, { labs = LABS, files = FILES, explain = explainError
       el('p.py-note', { html: rich(lab.note || t('py.note')) }),
       fileBar,
       area,
+      // the editor keeps Tab for indenting; the way out is said, so the keyboard is never trapped
+      el('p.py-keys', { id: `py-keys-${lab.id}` }, t('py.keys')),
       el('div.py-bar', runBtn, hintBtn, resetBtn),
       hintBox, out, verdict, pandasBox);
 
@@ -16625,6 +16642,28 @@ const { STRINGS } = __modules["../../analiza-trendow-w-internecie/src/strings.js
 const { labExercise, labAnswer, restoreLab } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 /** Make the engine this course: own saved state, own strings, the labs as exercises. */
 function setUp() {
+  // keyboard: a link past the header and the table of contents, shown when it gets focus
+  if (typeof document !== 'undefined' && typeof document.querySelector === 'function' && document.body?.prepend && !document.querySelector('.skip-link')) {
+    const skip = document.createElement('a');
+    skip.className = 'skip-link';
+    skip.href = '#bk-start';
+    skip.textContent = 'Przejdź do treści';
+    document.body.prepend(skip);
+    // the table of contents on a phone: opening it moves the focus into it, Esc closes it and
+    // gives the focus back to its button (the engine's drawer does neither)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest?.('.bk-toc-btn');
+      if (!btn) return;
+      setTimeout(() => { if (btn.getAttribute('aria-expanded') === 'true') (document.querySelector('.bk-toc .bk-toc-item') || document.querySelector('.bk-toc a'))?.focus(); }, 0);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const btn = document.querySelector('.bk-toc-btn[aria-expanded="true"]');
+      if (!btn || !btn.offsetParent) return;
+      btn.click();
+      btn.focus();
+    });
+  }
   useStore('analiza-trendow.book.v1');
   useProgressStore('analiza-trendow');
   extend(STRINGS);
@@ -16634,17 +16673,23 @@ function setUp() {
   for (const id of ['lab1', 'lab2', 'lab3']) { ANSWERS[id] = () => labAnswer(id); RESTORE[id] = (text) => restoreLab(id, text); }
 }
 
+/** After the name gate, focus the skip link, so the next Tab can jump past the table of contents (keyboard only: it shows on :focus-visible). */
+function focusSkip() {
+  if (typeof document === 'undefined' || typeof document.querySelector !== 'function') return;
+  document.querySelector('.skip-link')?.focus?.({ preventScroll: true });
+}
+
 /** "Kim jesteś?" with the way back from a report made on another computer. */
 const restoreOptions = (chapter) => ({ restore: (report) => reportPlan(chapter, report), sections: reportSections(chapter) });
 
 class TopicApp {
   constructor(host) {
     setUp();
-    gate(host, () => { this.book = new BookApp(host, CHAPTER); }, restoreOptions(CHAPTER));
+    gate(host, () => { this.book = new BookApp(host, CHAPTER); focusSkip(); }, restoreOptions(CHAPTER));
   }
 }
 
-__modules["../../analiza-trendow-w-internecie/src/main.js"] = { "setUp": setUp, "restoreOptions": restoreOptions, "TopicApp": TopicApp };
+__modules["../../analiza-trendow-w-internecie/src/main.js"] = { "setUp": setUp, "focusSkip": focusSkip, "restoreOptions": restoreOptions, "TopicApp": TopicApp };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/generated3.js ===== */
@@ -19813,7 +19858,18 @@ const CHAPTER = {
   datasets: [
     { name: 'YouTube Data API v3', url: 'https://developers.google.com/youtube/v3/docs/search/list', what: 'Wyszukiwanie filmów, strony wyników, tokeny.', licence: 'Warunki korzystania z YouTube API.' },
   ],
-  refs: {},
+  // sources this topic rests on, all read on 5 and 6 November 2026
+  refs: {
+    ytsearch: 'Google for Developers (2026). YouTube Data API v3. Search: list. [developers.google.com/youtube/v3/docs/search/list](https://developers.google.com/youtube/v3/docs/search/list) (dostęp 05.11.2026).',
+    ytthreads: 'Google for Developers (2026). YouTube Data API v3. CommentThreads: list. [developers.google.com/youtube/v3/docs/commentThreads/list](https://developers.google.com/youtube/v3/docs/commentThreads/list) (dostęp 05.11.2026).',
+    ytcomments: 'Google for Developers (2026). YouTube Data API v3. Comments: list. [developers.google.com/youtube/v3/docs/comments/list](https://developers.google.com/youtube/v3/docs/comments/list) (dostęp 05.11.2026).',
+    ytvideos: 'Google for Developers (2026). YouTube Data API v3. Videos. [developers.google.com/youtube/v3/docs/videos](https://developers.google.com/youtube/v3/docs/videos) (dostęp 05.11.2026).',
+    ytstart: 'Google for Developers (2026). YouTube Data API. Getting started. [developers.google.com/youtube/v3/getting-started](https://developers.google.com/youtube/v3/getting-started) (dostęp 05.11.2026).',
+    ytaudit: 'Google for Developers (2026). YouTube API Services. Quota and compliance audits. [developers.google.com/youtube/v3/guides/quota_and_compliance_audits](https://developers.google.com/youtube/v3/guides/quota_and_compliance_audits) (dostęp 05.11.2026).',
+    ytpolicies: 'YouTube (2026). YouTube API Services Developer Policies. [developers.google.com/youtube/terms/developer-policies](https://developers.google.com/youtube/terms/developer-policies) (dostęp 05.11.2026).',
+    ytresearch: 'YouTube (2022). YouTube Researcher Program. Program Terms & Conditions. [research.youtube.com/policies/terms](https://research.youtube.com/policies/terms) (dostęp 05.11.2026).',
+    ecdsa: 'Komisja Europejska (2025). New measures unlock access to data from largest online platforms to support research. [digital-strategy.ec.europa.eu](https://digital-strategy.ec.europa.eu/en/news/new-measures-unlock-access-data-largest-online-platforms-support-research) (dostęp 05.11.2026).',
+  },
 };
 
 __modules["../../analiza-trendow-w-internecie/src/chapter3.js"] = { "REPEAT_PAGES": REPEAT_PAGES, "CORPUS_FIELDS": CORPUS_FIELDS, "CHAPTER": CHAPTER };
@@ -21451,7 +21507,7 @@ __modules["../../analiza-trendow-w-internecie/src/figures3.js"] = { "keyFigure":
 const { BookApp, EXERCISES, ANSWERS, FIGURES, RESTORE } = __modules["src/book/book.js"];
 const { CARDS, cardExercise } = __modules["src/book/figures/project.js"];
 const { gate } = __modules["src/ui/people.js"];
-const { setUp: setUpCourse, restoreOptions } = __modules["../../analiza-trendow-w-internecie/src/main.js"];
+const { setUp: setUpCourse, restoreOptions, focusSkip } = __modules["../../analiza-trendow-w-internecie/src/main.js"];
 const { CHAPTER, CORPUS_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter3.js"];
 const { labExercise, labAnswer, restoreLab } = __modules["../../analiza-trendow-w-internecie/src/pylab.js"];
 const { LABS3, FILES3, explainError3 } = __modules["../../analiza-trendow-w-internecie/src/tasks3.js"];
@@ -21502,7 +21558,7 @@ function setUp3() {
 class TopicApp3 {
   constructor(host) {
     setUp3();
-    gate(host, () => { this.book = new BookApp(host, CHAPTER); }, restoreOptions(CHAPTER));
+    gate(host, () => { this.book = new BookApp(host, CHAPTER); focusSkip(); }, restoreOptions(CHAPTER));
   }
 }
 

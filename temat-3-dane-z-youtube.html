@@ -1670,6 +1670,236 @@ textarea.kc-input { resize: vertical; }
 .sh-right { background: var(--ok-bg); }
 .sh-wrong { background: var(--warn-bg); }
 
+/* ---- chapter 4, part A: rules for AGENTS.md (figures/brief.js) */
+.br-opts { display: grid; gap: 6px; min-width: 0; }
+.br-opt { display: grid; grid-template-columns: 1.8em minmax(0, 1fr); gap: 6px; align-items: start; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: transparent; color: var(--ink); font: inherit; font-size: 14px; line-height: 1.45; text-align: left; cursor: pointer; }
+.br-opt:hover { border-color: var(--accent); }
+.br-opt.br-on { border-color: var(--accent); background: var(--bg-sunken); box-shadow: inset 3px 0 0 var(--accent); }
+.br-letter { font: 700 13px var(--mono); color: var(--ink-soft); }
+.br-text code { overflow-wrap: anywhere; white-space: normal; }
+.br-md { white-space: pre-wrap; overflow-wrap: anywhere; }
+.br-run { display: grid; gap: 4px; min-width: 0; font-size: 13px; }
+.br-run-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.br-run-val { font-family: var(--mono); overflow-wrap: anywhere; }
+
+/* ---- chapter 4, figure 4.1: the pipeline of one search (figures/brief.js) */
+.pp-flow { display: grid; gap: 6px; min-width: 0; }
+.pp-row { display: grid; grid-template-columns: minmax(0, 7.5em) minmax(0, 1fr) 4.5em; gap: 8px; align-items: center; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: transparent; color: var(--ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.pp-row:hover { border-color: var(--accent); }
+.pp-row.pp-on { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.pp-row.pp-wait { opacity: .45; }
+.pp-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-track { display: block; height: 14px; border-radius: 3px; background: var(--bg-sunken); overflow: hidden; min-width: 0; }
+.pp-fill { display: block; height: 100%; background: var(--accent); transform-origin: left center; }
+.pp-new .pp-fill { animation: pp-grow .55s ease-out; }
+@keyframes pp-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .pp-new .pp-fill { animation: none; } }
+.pp-num { font: 12px var(--mono); text-align: right; white-space: nowrap; }
+
+/* ---- chapter 4, mechanism figures (figures/mechanics.js) */
+@keyframes mc-pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes mc-blink { 50% { opacity: .15; } }
+.mc-pop { animation: mc-pop .35s ease-out; }
+.mc-code { padding: 8px 10px; border-radius: var(--radius); background: var(--code-bg); font: 13px/1.7 var(--mono); }
+.mc-line { white-space: pre; }
+.mc-comma { min-width: 1.6em; margin-left: 2px; padding: 0 4px; border: 1px dashed var(--line-strong); border-radius: 4px; background: transparent; color: var(--ink); font: 700 13px var(--mono); cursor: pointer; }
+.mc-comma.mc-none { border-color: var(--err); color: var(--err); }
+.mc-items { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.mc-item { padding: 3px 8px; border-radius: 12px; background: var(--bg-sunken); font: 13px var(--mono); overflow-wrap: anywhere; animation: mc-pop .35s ease-out; }
+.mc-item.mc-glued { background: var(--warn-bg); outline: 1px solid var(--warn); }
+.mc-pages { display: grid; gap: 8px; min-width: 0; }
+.mc-page { padding: 8px; border: 1px solid var(--line-strong); border-radius: var(--radius); }
+.mc-page-head { font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+.mc-page-items { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.mc-vid { padding: 2px 7px; border-radius: 10px; background: var(--bg-sunken); font-size: 12px; }
+.mc-vid.mc-again { background: var(--warn-bg); outline: 1px solid var(--warn); }
+.mc-token { font: 12px var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+.mc-counters { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 13px var(--mono); }
+.mc-tree { display: grid; gap: 6px; }
+.mc-top { padding: 4px 8px; border-radius: var(--radius); background: var(--bg-sunken); font-size: 13px; }
+.mc-replies { display: grid; gap: 3px; margin: 3px 0 0 18px; overflow: hidden; max-height: 12em; transition: max-height .45s ease, opacity .45s ease; }
+.mc-reply { padding: 2px 8px; border-left: 3px solid var(--warn); font-size: 12px; }
+.mc-cut .mc-replies { max-height: 0; opacity: 0; }
+.mc-dots { display: grid; grid-template-columns: repeat(auto-fill, minmax(9px, 1fr)); gap: 2px; min-width: 0; }
+.mc-dot { aspect-ratio: 1; border-radius: 2px; }
+.mc-st-ok, .sq-leg.mc-st-ok::before { background: var(--accent); }
+.mc-st-zero, .sq-leg.mc-st-zero::before { background: var(--line-strong); }
+.mc-st-off, .sq-leg.mc-st-off::before { background: var(--warn); }
+.mc-st-miss, .sq-leg.mc-st-miss::before { background: var(--err); }
+.mc-dot.mc-st-miss { animation: mc-blink 1.2s ease-in-out infinite; outline: 2px solid var(--err); }
+.mc-bars { position: relative; min-width: 0; }
+.mc-bar-row { position: absolute; left: 0; right: 0; height: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 4em 3em; gap: 6px; align-items: center; font: 12px var(--mono); transition: top .6s ease; }
+.mc-still .mc-bar-row { transition: none; }
+.mc-bar-track { display: block; height: 12px; border-radius: 3px; background: var(--bg-sunken); overflow: hidden; }
+.mc-bar-fill { display: block; height: 100%; background: var(--accent); }
+.mc-bar-num, .mc-bar-cum { text-align: right; }
+.mc-bar-cum { color: var(--ink-soft); }
+.mc-half { box-shadow: 0 2px 0 var(--err); }
+.mc-half .mc-bar-cum { color: var(--err); font-weight: 700; }
+.mc-cols { display: flex; align-items: flex-end; height: 110px; gap: 0; border-bottom: 1px solid var(--line-strong); }
+.mc-col { display: block; background: var(--line-strong); border-right: 1px solid var(--bg-panel); transition: background .2s; }
+.mc-col.mc-got { background: var(--accent); }
+.mc-col.mc-later { background: repeating-linear-gradient(45deg, var(--line-strong) 0 4px, transparent 4px 8px); }
+.mc-axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-soft); }
+.mc-range { width: 100%; margin: 6px 0; }
+@media (prefers-reduced-motion: reduce) { .mc-pop, .mc-item, .mc-dot.mc-st-miss { animation: none; } .mc-replies, .mc-bar-row { transition: none; } }
+
+/* ---- chapter 4, 4.0: what an API is (figures/mechanics.js, apiFigure) */
+.ap-stage { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) 6.5em; gap: 6px; align-items: center; }
+.ap-box { padding: 10px 6px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg-sunken); font-size: 12px; font-weight: 700; text-align: center; }
+.ap-wire { position: relative; height: 26px; border-top: 2px dashed var(--line-strong); margin-top: 13px; }
+.ap-msg { position: absolute; top: -13px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
+.ap-ask { background: var(--accent); animation: ap-right 1.6s ease-in-out both; }
+.ap-answer { background: var(--ok); animation: ap-left 1.6s ease-in-out both; }
+/* the whole length of the wire: from one end to the other, minus the message's own width */
+@keyframes ap-right { from { left: 0; transform: none; } to { left: 100%; transform: translateX(-100%); } }
+@keyframes ap-left { from { left: 100%; transform: translateX(-100%); } to { left: 0; transform: none; } }
+.ap-scene-title { font-weight: 700; font-size: 14px; }
+.ap-panel { min-width: 0; animation: mc-pop .4s ease-out; }
+.ap-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12em), 1fr)); gap: 8px; }
+.ap-card { padding: 8px; border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.ap-card-head { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink-soft); }
+.ap-page-bar { font-size: 11px; color: var(--ink-soft); }
+.ap-page-big { margin: 6px 0; font-size: 18px; font-weight: 700; }
+.ap-json { margin: 0; padding: 8px 10px; border-radius: var(--radius); background: var(--code-bg); font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.ap-url { padding: 8px 10px; border-radius: var(--radius); background: var(--code-bg); font: 12px/1.6 var(--mono); overflow-wrap: anywhere; }
+.ap-host { color: var(--ink-soft); }
+.ap-path { color: var(--accent); font-weight: 700; }
+.ap-param { color: var(--ok); font-weight: 700; }
+.ap-key { color: var(--err); }
+.sq-leg.ap-host-leg::before { background: var(--ink-soft); }
+.sq-leg.ap-path-leg::before { background: var(--accent); }
+.sq-leg.ap-param-leg::before { background: var(--ok); }
+.sq-leg.ap-key-leg::before { background: var(--err); }
+.ap-meter { display: grid; grid-template-columns: minmax(0, 1fr) 5em auto; gap: 8px; align-items: center; margin-top: 8px; font-size: 12px; }
+.ap-meter-track { display: block; height: 10px; border-radius: 3px; background: var(--bg-sunken); overflow: hidden; }
+.ap-meter-fill { display: block; width: 1%; height: 100%; background: var(--err); animation: ap-fill 1.2s ease-out both; }
+@keyframes ap-fill { from { width: 0; } to { width: 3%; } }
+.ap-table { border-collapse: collapse; font-size: 13px; }
+.ap-table th, .ap-table td { padding: 3px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+.ap-new td { animation: mc-pop .5s ease-out; background: var(--ok-bg); }
+.ap-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ap-dots { display: inline-flex; gap: 4px; margin-left: 4px; }
+.ap-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
+.ap-dot.ap-dot-on { background: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .ap-ask, .ap-answer, .ap-panel, .ap-meter-fill, .ap-new td { animation: none; } .ap-ask { left: 100%; transform: translateX(-100%); } .ap-answer { left: 0; } }
+
+.br-own-box { display: flex; flex-direction: column; gap: 4px; }
+.br-own { width: 100%; min-height: 3.2em; resize: vertical; font: 13px var(--sans); }
+
+/* ---- chapter 4, part B: JSON, files, features, join (figures/datapath.js) */
+.dp-json { display: flex; flex-direction: column; padding: 8px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-sunken); font: 12px/1.55 var(--mono); max-width: 100%; overflow-x: auto; }
+.dp-line { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink-soft); min-width: 0; }
+.dp-key { display: block; width: 100%; padding: 1px 6px; border: 0; border-left: 3px solid transparent; background: transparent; color: var(--ink); font: inherit; text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; cursor: pointer; }
+.dp-key.dp-go { border-left-color: var(--accent); }
+.dp-key.dp-drop { color: var(--ink-faint); border-left-style: dashed; border-left-color: var(--line-strong); }
+.dp-key:hover { background: var(--bg); }
+.dp-key.dp-on { background: var(--warn-bg); box-shadow: inset 0 0 0 1px var(--warn); }
+.dp-legend { display: flex; flex-wrap: wrap; gap: 12px; font: 12px var(--mono); }
+.dp-legend .dp-key { width: auto; cursor: default; }
+.dp-say { padding: 6px 10px; border-radius: var(--radius); font-size: 14px; animation: mc-pop .3s ease-out; }
+.dp-say-go { background: var(--ok-bg); }
+.dp-say-drop { background: var(--bg-sunken); color: var(--ink-soft); }
+.dp-target { display: flex; flex-direction: column; gap: 4px; animation: mc-pop .35s ease-out; }
+.dp-to { font: 600 12px var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+.dp-host { min-width: 0; }
+.dp-target, .fl-panel > * { min-width: 0; }
+.dp-wrap { max-width: 100%; overflow-x: auto; }
+.dp-grid { border-collapse: collapse; font: 12px var(--mono); }
+.dp-grid th { padding: 2px 6px; background: var(--bg-sunken); color: var(--ink-soft); font-weight: 400; border: 1px solid var(--line); text-align: left; }
+.dp-grid td { padding: 3px 7px; border: 1px solid var(--line); transition: background .25s; }
+.dp-grid .dp-hot { background: var(--warn-bg); }
+.dp-grid th.dp-new { background: var(--ok-bg); color: var(--ink); }
+.dp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.dp-card { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius); }
+.dp-card-name { font: 600 13px var(--mono); overflow-wrap: anywhere; }
+.dp-card-meta { font-size: 12px; color: var(--ink-soft); }
+.dp-card-one { font-size: 13px; }
+.dp-count { font-size: 12px; padding: 2px 6px; border-radius: 10px; align-self: flex-start; animation: mc-pop .3s ease-out; }
+.dp-count-1 { background: var(--ok-bg); }
+.dp-count-2 { background: var(--err-bg); }
+.dp-follow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dp-chip-api { border-style: dashed; }
+.dp-feat { display: flex; flex-direction: column; gap: 6px; animation: mc-pop .3s ease-out; }
+.dp-feat-kind { font-size: 13px; color: var(--ink-soft); }
+.dp-join { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.dp-side { display: flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 100%; }
+.dp-arrow { font: 600 20px var(--mono); color: var(--accent); min-width: 1.5em; text-align: center; }
+@media (max-width: 560px) { .dp-arrow { display: none; } }
+.dp-row-on td { background: var(--ok-bg); }
+.dp-row-bad td { background: var(--err-bg); }
+.dp-row-dup td:first-child { box-shadow: inset 0 0 0 2px var(--err); }
+.dp-fake { text-decoration: underline wavy var(--err); }
+.dp-play { display: flex; flex-wrap: wrap; gap: 6px; }
+.dp-profile-head { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .dp-say, .dp-target, .dp-count, .dp-feat { animation: none; } .dp-grid td { transition: none; } }
+
+/* ---- chapter 4, 4.15: the whole way as a pipeline (figures/datapath.js, ytflow) */
+.fl-track { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.fl-node { position: relative; min-width: 0; }
+.fl-node:not(:last-child)::after { content: ''; position: absolute; top: 50%; right: -5px; width: 6px; height: 2px; background: var(--line-strong); }
+.fl-node button { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; min-height: 3.6em; padding: 6px 2px; border: 1px solid var(--line-strong); border-top-width: 4px; border-radius: var(--radius); background: var(--bg); color: var(--ink); font: 12px var(--sans); cursor: pointer; transition: background .3s, transform .3s; }
+.fl-node button:hover { background: var(--bg-sunken); }
+.fl-num { font: 700 11px var(--mono); color: var(--ink-soft); }
+.fl-name { font-weight: 700; overflow-wrap: anywhere; text-align: center; }
+.fl-loop { font-size: 13px; color: var(--accent); }
+.fl-api button { border-top-color: var(--ok); }
+.fl-agent button { border-top-color: var(--warn); }
+.fl-ty button { border-top-color: var(--accent); }
+.fl-past button { background: var(--bg-sunken); color: var(--ink-soft); }
+.fl-on button { background: var(--warn-bg); box-shadow: 0 0 0 2px var(--accent); transform: translateY(-2px); }
+.fl-on.fl-node::before { content: ''; position: absolute; left: 50%; bottom: -9px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--accent); animation: mc-pop .4s ease-out; }
+.fl-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; font-size: 12px; color: var(--ink-soft); }
+.fl-leg::before { content: ''; display: inline-block; width: 14px; height: 4px; margin-right: 5px; vertical-align: middle; border-radius: 2px; }
+.fl-leg.fl-api::before { background: var(--ok); }
+.fl-leg.fl-agent::before { background: var(--warn); }
+.fl-leg.fl-ty::before { background: var(--accent); }
+.fl-panel { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); animation: mc-pop .4s ease-out; min-width: 0; }
+.fl-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.fl-badge { font: 700 11px var(--mono); color: var(--ink-soft); }
+.fl-who { font-size: 12px; color: var(--ink-soft); }
+.fl-link { margin-left: auto; font-size: 13px; }
+.fl-shape { font-size: 13px; color: var(--ink-soft); }
+.fl-pages, .fl-files { display: flex; flex-wrap: wrap; gap: 6px; }
+.fl-page, .fl-file { display: flex; flex-direction: column; padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-sunken); font: 11px var(--mono); animation: mc-pop .4s ease-out both; }
+.fl-file b { overflow-wrap: anywhere; }
+.fl-page span, .fl-file span { color: var(--ink-soft); }
+.fl-page:last-child span { color: var(--err); }
+.fl-src-filmy { background: var(--warn-bg); }
+.fl-src-status { background: var(--ok-bg); }
+.fl-src-czas { background: var(--bg-sunken); }
+.fl-from { font-size: 10px; color: var(--ink-soft); border: 0 !important; }
+@media (max-width: 640px) { .fl-track { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 12px; } .fl-node::after { display: none; } .fl-link { margin-left: 0; } }
+@media (prefers-reduced-motion: reduce) { .fl-panel, .fl-page, .fl-file, .fl-on.fl-node::before { animation: none; } .fl-node button { transition: none; } }
+
+/* ---- chapter 4, part B: formulas played on a small sheet (figures/sheetanim.js) */
+.sa-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sa-chip { padding: 4px 9px; border: 1px solid var(--line-strong); border-radius: 14px; background: transparent; color: var(--ink); font: 12px var(--mono); cursor: pointer; overflow-wrap: anywhere; text-align: left; }
+.sa-chip:hover { border-color: var(--accent); }
+.sa-chip-wrong { border-color: var(--err); border-style: dashed; }
+.sa-chip-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sa-chip-wrong.sa-chip-on { background: var(--err); border-color: var(--err); }
+.sa-bar { display: flex; gap: 8px; align-items: center; padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--radius); font: 12px var(--mono); min-width: 0; }
+.sa-bar code { overflow-wrap: anywhere; }
+.sa-fx { font-style: italic; color: var(--ink-soft); }
+.sa-wrap { max-width: 100%; overflow-x: auto; }
+.sa-grid { border-collapse: collapse; font: 12px var(--mono); }
+.sa-grid th { padding: 2px 6px; background: var(--bg-sunken); color: var(--ink-soft); font-weight: 400; border: 1px solid var(--line); }
+.sa-cell { min-width: 3.2em; padding: 3px 7px; border: 1px solid var(--line); text-align: right; transition: background .25s, box-shadow .25s; }
+.sa-head { text-align: left; color: var(--ink-soft); font-size: 11px; }
+.sa-ref { background: var(--warn-bg); box-shadow: inset 0 0 0 2px var(--warn); }
+.sa-new { animation: mc-pop .35s ease-out; background: var(--ok-bg); }
+.sa-bad { background: var(--err-bg); box-shadow: inset 0 0 0 2px var(--err); }
+.sa-skip { color: var(--ink-faint); background: repeating-linear-gradient(45deg, transparent 0 4px, var(--bg-sunken) 4px 8px); }
+.sa-result { display: flex; gap: 8px; align-items: baseline; font: 13px var(--mono); animation: mc-pop .35s ease-out; }
+.sa-result span { color: var(--ink-soft); }
+.sa-line { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font: 12px var(--mono); }
+.sa-line-label { color: var(--ink-soft); font-family: inherit; }
+.sa-pill { padding: 2px 7px; border-radius: 10px; background: var(--bg-sunken); }
+.sa-pill.sa-mid { background: var(--accent); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .sa-new, .sa-result { animation: none; } .sa-cell { transition: none; } }
+
 /* ---- chapter 3 figures (figures/chatgpt.js) */
 .cg-stacks { display: grid; gap: 6px; min-width: 0; }
 .cg-stack-row { display: grid; grid-template-columns: minmax(0, 8em) minmax(0, 1fr) 4.5em; gap: 8px; align-items: center; font-size: 13px; }
@@ -2015,6 +2245,174 @@ td.yt-key-v, td.yt-key-c, td.yt-key-k { border-width: 0 0 1px; border-style: sol
   .bk-top { gap: 8px; padding: 8px 10px; }
   .bk-top-title { display: none; }
 }
+
+/* ---------------------------------------------------------------- topic 4: the research agent (a4-*) */
+.a4-map-svg, .a4-loop-svg, .a4-axis { width: 100%; height: auto; display: block; }
+.a4-node rect { fill: var(--bg-panel); stroke: var(--line-strong); stroke-width: 1.5; }
+.a4-node-title { font: 600 14px var(--sans); fill: var(--ink); text-anchor: middle; }
+.a4-node-sub { font: 12px var(--sans); fill: var(--ink-soft); text-anchor: middle; }
+.a4-node-model rect { fill: var(--accent-soft); stroke: var(--accent); }
+.a4-node-web rect { fill: var(--bg-sunken); }
+.a4-node-folder rect { fill: var(--ok-bg); stroke: var(--ok); }
+.a4-container { fill: none; stroke: var(--ink-faint); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.a4-container-label { font: 12px var(--sans); fill: var(--ink-soft); text-anchor: middle; }
+.a4-route { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; }
+.a4-dot { fill: var(--accent); }
+.a4-flow { stroke-dasharray: 8 6; animation: a4-flow 0.9s linear infinite; }
+.a4-flow-late { animation-delay: 0.45s; }
+@keyframes a4-flow { to { stroke-dashoffset: -28; } }
+.a4-tour { display: flex; gap: 6px; list-style: none; padding: 0; margin: 8px 0; flex-wrap: wrap; }
+.a4-tour button, .a4-chip { min-width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--line-strong); background: var(--bg-panel); color: var(--ink); font: 600 13px var(--sans); cursor: pointer; }
+.a4-tour .a4-on button { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.a4-controls { display: flex; gap: 8px; margin: 8px 0; }
+.a4-arrow { fill: none; stroke: var(--line-strong); stroke-width: 3; marker-end: none; }
+.a4-arrow.a4-hot { stroke: var(--accent); }
+.a4-arrow-label, .a4-answer-label { font: 12px var(--sans); fill: var(--ink-soft); text-anchor: middle; }
+.a4-arrow-label[text-anchor="end"] { text-anchor: end; }
+.a4-arrow-label[text-anchor="start"] { text-anchor: start; }
+.a4-answer-label { fill: var(--ok); font-weight: 600; }
+.a4-tools-box { fill: var(--bg-sunken); stroke: var(--line-strong); stroke-width: 1.5; }
+.a4-tool rect { fill: var(--bg-panel); stroke: var(--line); }
+.a4-tool text { font: 12px var(--sans); fill: var(--ink-soft); }
+.a4-tool.a4-hot rect { stroke-width: 2.5; }
+.a4-tool.a4-hot text { fill: var(--ink); font-weight: 600; }
+/* kinds of step: the same colour in the tool list, the strip and the rules */
+.a4-k-fetch { --k: var(--accent); }
+.a4-k-compute { --k: var(--series-1); }
+.a4-k-write { --k: var(--ok); }
+.a4-k-skill { --k: var(--warn); }
+.a4-k-look { --k: var(--ink-faint); }
+.a4-tool.a4-hot rect { fill: color-mix(in srgb, var(--k) 22%, var(--bg-panel)); stroke: var(--k); }
+.a4-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.a4-chip { border-color: var(--k, var(--line-strong)); background: color-mix(in srgb, var(--k, transparent) 14%, var(--bg-panel)); }
+.a4-chip.a4-same { margin-left: -5px; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.a4-chip.a4-fail { outline: 2px solid var(--err); outline-offset: 1px; }
+.a4-chip.a4-on { background: var(--k, var(--ok)); color: var(--bg); }
+.a4-chip-answer { --k: var(--ok); }
+.a4-strip-small .a4-chip { min-width: 22px; height: 22px; font-size: 11px; cursor: default; }
+.a4-chip.a4-dim { opacity: 0.25; }
+.a4-chip.a4-lit { background: var(--k); color: var(--bg); }
+.a4-chip.a4-lit-bad { background: var(--warn); border-color: var(--warn); color: var(--bg); }
+.a4-detail { border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--bg-panel); min-width: 0; }
+.a4-say { margin-bottom: 6px; overflow-wrap: anywhere; }
+.a4-cmd-head { font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.a4-time { color: var(--ink-soft); font-weight: 400; white-space: nowrap; }
+.a4-cmd, .a4-out { font: 12px/1.45 var(--mono); background: var(--code-bg); border-radius: 6px; padding: 8px; margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 9.5em; overflow: auto; }
+.a4-out { border-left: 3px solid var(--ok); }
+.a4-out-fail { border-left-color: var(--err); background: var(--err-bg); }
+.a4-facts { color: var(--ink-soft); font-size: 13px; }
+.a4-q { font-weight: 600; }
+.a4-options { display: grid; gap: 6px; }
+.a4-option { text-align: left; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--line-strong); background: var(--bg-panel); color: var(--ink); font: inherit; cursor: pointer; }
+.a4-option.a4-right { border-color: var(--ok); background: var(--ok-bg); }
+.a4-option.a4-wrong { border-color: var(--err); background: var(--err-bg); }
+.a4-why { margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: var(--warn-bg); border-left: 3px solid var(--warn); }
+.a4-why-right { background: var(--ok-bg); border-left-color: var(--ok); }
+.a4-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 600px) { .a4-cards { grid-template-columns: minmax(0, 1fr); } }
+.a4-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; background: var(--bg-panel); min-width: 0; }
+.a4-card-head { font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.a4-card-what { color: var(--ink-soft); font-size: 13px; margin-bottom: 6px; }
+.a4-legend { width: 12px; height: 12px; border-radius: 50%; display: inline-block; background: var(--c); }
+.a4-c-empty { --c: var(--warn); }
+.a4-c-instr { --c: var(--series-1); }
+.a4-c-full { --c: var(--ok); }
+.a4-run { display: grid; grid-template-columns: 5.2em 1fr; gap: 2px 8px; width: 100%; text-align: left; padding: 6px; margin-top: 4px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; cursor: pointer; }
+.a4-run.a4-on { border-color: var(--accent); }
+.a4-run-num { font-weight: 700; grid-row: span 2; align-self: center; }
+.a4-run-bar { height: 8px; background: var(--bg-sunken); border-radius: 4px; align-self: center; }
+.a4-run-bar span { display: block; height: 100%; background: var(--accent-mid); border-radius: 4px; }
+.a4-run-meta { font-size: 12px; color: var(--ink-soft); }
+.a4-run-detail { margin: 8px 0; padding: 8px 12px; border: 1px solid var(--accent); border-radius: var(--radius); display: grid; gap: 4px; overflow-wrap: anywhere; min-width: 0; }
+.a4-files { margin: 2px 0 0; padding-left: 18px; }
+.a4-axis-line { stroke: var(--line-strong); }
+.a4-axis-tick, .a4-axis-note { font: 12px var(--sans); fill: var(--ink-soft); text-anchor: middle; }
+.a4-axis-note { fill: var(--ink); font-weight: 600; }
+.a4-pt { fill: var(--c); stroke: var(--bg); stroke-width: 1.5; }
+.a4-mine path { fill: var(--accent); }
+.a4-mine text { font: 600 12px var(--sans); fill: var(--accent); text-anchor: middle; }
+.a4-mine-input { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; font-weight: 600; }
+.a4-mine-input input { font: inherit; padding: 6px 8px; border: 1.5px solid var(--line-strong); border-radius: 6px; background: var(--bg); color: var(--ink); width: 9em; }
+.a4-rules { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 12px; }
+@media (max-width: 600px) { .a4-rules { grid-template-columns: minmax(0, 1fr); } }
+.a4-md { border: 1px solid var(--line); border-radius: var(--radius); background: var(--code-bg); padding: 6px; display: grid; gap: 4px; min-width: 0; }
+.a4-md-name { font: 600 12px var(--mono); color: var(--ink-soft); padding: 2px 6px; }
+.a4-md-sec { text-align: left; border: 1.5px solid transparent; border-radius: 6px; background: none; color: var(--ink); padding: 6px; font: 12px/1.4 var(--mono); cursor: pointer; display: grid; gap: 2px; }
+.a4-md-sec.a4-on { border-color: var(--accent); background: var(--accent-soft); }
+.a4-md-sec span { color: var(--ink-soft); white-space: pre-line; }
+.a4-rule-label { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.a4-term-steps { padding-left: 0; list-style: none; display: grid; gap: 10px; counter-reset: a4; }
+.a4-term-steps li { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; background: var(--bg-panel); min-width: 0; }
+.a4-term-steps li.a4-checked { border-color: var(--ok); }
+.a4-term-say { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.a4-term-say input { margin-top: 4px; }
+.a4-term-cmd { display: flex; gap: 8px; align-items: center; margin-top: 6px; background: #1d1f21; border-radius: 6px; padding: 8px 10px; min-width: 0; }
+.a4-term-cmd code { color: #e6e6e6; font: 13px/1.4 var(--mono); flex: 1; overflow-wrap: anywhere; min-width: 0; }
+.a4-term-cmd code::before { content: '$ '; color: #8fbf6a; }
+.a4-copy { font: 12px var(--sans); padding: 4px 8px; border-radius: 6px; border: 1px solid #555; background: #2b2d30; color: #e6e6e6; cursor: pointer; flex: none; }
+@media (prefers-reduced-motion: reduce) { .a4-flow { animation: none; } }
+
+/* topic 4, sections 4.4 to 4.7 */
+.a4-hash-file { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; background: var(--bg-panel); }
+.a4-hash-name { font-size: 13px; color: var(--ink-soft); overflow-wrap: anywhere; }
+.a4-hash-spot code { font: 14px/1.5 var(--mono); overflow-wrap: anywhere; }
+.a4-hash-note { font-size: 13px; color: var(--ink-soft); }
+.a4-hash-row { display: grid; grid-template-columns: 9em 1fr; gap: 8px; align-items: start; margin: 6px 0; }
+.a4-hash-label { font-weight: 600; font-size: 13px; }
+.a4-hash-hex { font: 13px/1.5 var(--mono); overflow-wrap: anywhere; word-break: break-all; min-width: 0; }
+.a4-hash-hex span { display: inline-block; }
+.a4-hash-saved { color: var(--ink-soft); }
+.a4-hx-diff { color: var(--err); font-weight: 700; }
+.a4-hx-flip { animation: a4-flip 0.35s ease-out both; }
+@keyframes a4-flip { from { transform: rotateX(90deg); opacity: 0.2; } to { transform: none; opacity: 1; } }
+.a4-hash-text { width: 100%; box-sizing: border-box; font: 12px/1.4 var(--mono); padding: 6px; border: 1.5px solid var(--line-strong); border-radius: 6px; background: var(--bg); color: var(--ink); }
+.a4-hash-more { margin-top: 8px; }
+.a4-hash-more summary { cursor: pointer; font-weight: 600; }
+@media (max-width: 520px) { .a4-hash-row { grid-template-columns: 1fr; gap: 2px; } }
+
+.a4-log { display: grid; gap: 6px; }
+.a4-trend { width: 100%; max-width: 640px; height: auto; display: block; }
+.a4-trend-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+.a4-trend-pt { fill: var(--accent); stroke: var(--bg); stroke-width: 1.5; }
+.a4-known-line { stroke: var(--ok); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.a4-log-scroll { overflow-x: auto; max-width: 100%; }
+.a4-log-table { border-collapse: collapse; font-size: 13px; }
+.a4-log-table th, .a4-log-table td { border: 1px solid var(--line); padding: 4px 8px; text-align: center; vertical-align: top; }
+.a4-log-table tbody th { text-align: left; font-weight: 600; white-space: nowrap; }
+.a4-log-change { font-weight: 400; color: var(--ink-soft); max-width: 12em; }
+.a4-log-num { font-weight: 600; white-space: nowrap; }
+.a4-cell-on { background: var(--ok-bg); color: var(--ok); font-weight: 700; }
+.a4-cell-warn { background: var(--warn-bg); color: var(--warn); font-weight: 700; }
+.a4-cell-off { color: var(--ink-faint); }
+.a4-trylog { display: grid; gap: 8px; }
+.a4-try { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; display: grid; gap: 6px; min-width: 0; }
+.a4-try legend { font-weight: 600; padding: 0 4px; }
+.a4-try-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.a4-try-field { display: grid; gap: 2px; font-size: 13px; min-width: 0; }
+.a4-try-field span { font-weight: 600; }
+.a4-try-field input, .a4-try-field select { font: inherit; font-size: 15px; padding: 5px 8px; border: 1.5px solid var(--line-strong); border-radius: 6px; background: var(--bg); color: var(--ink); min-width: 0; }
+.a4-try-row .a4-try-field input { width: 8em; }
+.a4-fallback { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.fg-toggle.a4-on { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+.a4-agree-svg { width: 100%; height: auto; display: block; }
+.a4-agree-pt { cursor: pointer; transition: transform 0.7s cubic-bezier(0.3, 0.7, 0.3, 1); }
+.a4-agree-pt.a4-on { stroke: var(--ink); stroke-width: 2.5; }
+.a4-agree-pt:focus-visible { outline: none; stroke: var(--accent); stroke-width: 3; }
+@media (prefers-reduced-motion: reduce) { .a4-agree-pt, .a4-hx-flip { transition: none; animation: none; } }
+.a4-agree-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--ink-soft); }
+
+.a4-home-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 12px; }
+@media (max-width: 640px) { .a4-home-cols { grid-template-columns: 1fr; } }
+.a4-zip { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; background: var(--bg-panel); min-width: 0; }
+.a4-tree { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 2px; }
+.a4-tree li { padding-left: calc(var(--depth) * 14px); min-width: 0; }
+.a4-tree button { font: 13px var(--mono); background: none; border: 1px solid transparent; border-radius: 5px; padding: 2px 6px; color: var(--ink); cursor: pointer; text-align: left; overflow-wrap: anywhere; max-width: 100%; }
+.a4-tree button.a4-on { border-color: var(--accent); background: var(--accent-soft); }
+.a4-home-side { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.a4-out-zip { border: 1px dashed var(--line-strong); border-radius: var(--radius); padding: 8px 10px; font-size: 14px; }
+.a4-out-zip ul { margin: 4px 0 0; padding-left: 18px; }
+.a4-tree-dir { font: 600 13px var(--mono); color: var(--ink-soft); padding: 2px 6px; display: inline-block; }
 
 </style>
 </head>
@@ -4350,6 +4748,7 @@ const pl = {
   'ui.site.chapter1': "Rozdział 1. Internet jako źródło danych",
   'ui.site.chapter2': "Rozdział 2. Zapytania w wyszukiwarkach",
   'ui.site.chapter3': "Rozdział 3. Ruch i zachowania użytkowników",
+  'ui.site.chapter4': "Rozdział 4. Dane z YouTube",
   'ui.site.trainer': "Trener. 13 lekcji z liczenia",
   'ui.dataNote': "Kliknij, by zobaczyć całą tabelę. Dane są fikcyjne i służą do ćwiczeń. Wyjątkiem są dwie prawdziwe tabele, „sceny” i „opinie”.",
   'ui.about': "Kurs do przedmiotu „Warsztat analityki internetowej”. Opracowali dr Ilya Sulzhytski i Claude (Anthropic). Dane i dokumenty są fikcyjne. Prawdziwe są dwie tabele. Tabela sceny pochodzi z badania Sulzhytski i Howanitz (2025). Tabela opinie to opinie z Allegro ze zbioru Allegro Reviews (licencja CC BY-SA 4.0). Postęp zapisuje się tylko w tej przeglądarce.",
@@ -9716,7 +10115,7 @@ __modules["src/book/store.js"] = { "useStore": useStore, "getItem": getItem, "on
  */
 const { el } = __modules["src/ui/dom.js"];
 const { t } = __modules["src/i18n/index.js"];
-const SITE_PAGES = { home: './', chapter1: 'rozdzial-1-internet-jako-zrodlo-danych.html', chapter2: 'rozdzial-2-zapytania-w-wyszukiwarkach.html', chapter3: 'rozdzial-3-ruch-i-zachowania-uzytkownikow.html', trainer: 'liczby-z-internetu.html' };
+const SITE_PAGES = { home: './', chapter1: 'rozdzial-1-internet-jako-zrodlo-danych.html', chapter2: 'rozdzial-2-zapytania-w-wyszukiwarkach.html', chapter3: 'rozdzial-3-ruch-i-zachowania-uzytkownikow.html', chapter4: 'rozdzial-4-dane-z-youtube.html', trainer: 'liczby-z-internetu.html' };
 
 function siteLinks(loc = typeof location === 'undefined' ? null : location) {
   return loc && /^https?:$/.test(loc.protocol) ? SITE_PAGES : null;
@@ -12947,7 +13346,7 @@ const CHAPTER = {
   plan: false,
   intro: false,
   card: 'karta2',
-  siteNav: ['home', 'chapter1', 'chapter3', 'trainer'],
+  siteNav: ['home', 'chapter1', 'chapter3', 'chapter4', 'trainer'],
   number: 2,
   kicker: 'Warsztat analityki internetowej · Rozdział 2 z 5',
   title: 'Badanie trendów na podstawie zapytań w wyszukiwarkach',
@@ -13345,14 +13744,15 @@ const queryCard = cardExercise('karta2');
  * The exercises of the chapter, for the summary, and under them the report for the teacher.
  * Items: {label, section, done(), facts(), answer()}; `course` is the report's "Kurs:" line.
  */
-function summaryBlock(items, { onRefresh, course = '', fileName = 'raport.txt', card = 'karta' } = {}) {
+function summaryBlock(items, { onRefresh, course = '', fileName = 'raport.txt', card = 'karta', extraSections = () => [] } = {}) {
   const host = el('div.sm');
   const list = el('div.sm-top');
   const report = reportPanel({
     course,
     fileName,
     items: () => items.map((it) => ({ label: it.label, ...(it.facts?.() || { status: it.done() ? 'done' : null }), answer: it.answer?.() || null })),
-    extra: () => [[CARDS[card].title(), fieldsText(CARDS[card].fields, getItem(card) || {})]],
+    // a chapter without a card (`card: false`) sends no card section
+    extra: () => [...(card && CARDS[card] ? [[CARDS[card].title(), fieldsText(CARDS[card].fields, getItem(card) || {})]] : []), ...extraSections()],
   });
   const draw = () => {
     const done = items.filter((it) => it.done()).length;
@@ -14839,8 +15239,9 @@ function reportPlan(chapter, report) {
     const it = byLabel.get(norm(line.label));
     if (it) pairs.push([it, line]); else unknown += 1;
   }
-  const cardKey = chapter.card || 'karta';
-  const cardText = CARDS[cardKey] && (report.sections || []).find((x) => norm(x.title) === norm(CARDS[cardKey].title()))?.text;
+  const cardKey = chapter.card === false ? null : chapter.card || 'karta';
+  const cardText = cardKey && CARDS[cardKey] && (report.sections || []).find((x) => norm(x.title) === norm(CARDS[cardKey].title()))?.text;
+  const extraText = chapter.reportExtra && (report.sections || []).find((x) => norm(x.title) === norm(chapter.reportExtra.title))?.text;
   const apply = () => {
     for (const [it, line] of pairs) {
       if (it.lesson) {
@@ -14855,6 +15256,7 @@ function reportPlan(chapter, report) {
       if (line.answer) RESTORE[it.id]?.(line.answer);
       setItem(`done:${it.id}`, line.doneAt || Date.now());
     }
+    if (extraText != null && chapter.reportExtra.restore && !String(chapter.reportExtra.text() || '').trim()) chapter.reportExtra.restore(extraText);
     if (cardText) {
       const have = getItem(cardKey) || {};
       const empty = (v) => v == null || (Array.isArray(v) ? !v.length : !String(v).trim());
@@ -14872,10 +15274,15 @@ function reportPlan(chapter, report) {
   };
 }
 
+/** What gate() needs to offer "Masz raport z innego komputera?" for a chapter (docs/decisions.md D56). */
+const restoreOptions = (chapter) => ({ restore: (report) => reportPlan(chapter, report), sections: reportSections(chapter) });
+
 /** The titles of further report sections in a chapter, where answers end (the card). */
 const reportSections = (chapter) => {
+  const extra = chapter.reportExtra ? [chapter.reportExtra.title] : [];
+  if (chapter.card === false) return extra;
   const key = chapter.card || 'karta';
-  return CARDS[key] ? [CARDS[key].title()] : [];
+  return [...(CARDS[key] ? [CARDS[key].title()] : []), ...extra];
 };
 
 const EXERCISES = {
@@ -15081,7 +15488,9 @@ class BookApp {
       onRefresh: (fn) => this.refreshers.push(fn),
       course: ch.kicker,
       fileName: `raport-${ch.id}.txt`,
-      card: ch.card || 'karta',
+      card: ch.card === false ? null : ch.card || 'karta',
+      // a chapter may add one section of its own to the report (chapter 4: the student's rule)
+      extraSections: ch.reportExtra ? () => [[ch.reportExtra.title, ch.reportExtra.text()]] : () => [],
     });
     return el('section.bk-section.bk-end', { id: 'bk-end' },
       el('div.bk-sec-head', el('h2.bk-sec-title', t('bk.summary'))),
@@ -15104,7 +15513,7 @@ function exerciseHead(b, minutes = true) {
     el('h3.bk-ex-title', b.title));
 }
 
-__modules["src/book/book.js"] = { "FIGURES": FIGURES, "ANSWERS": ANSWERS, "RESTORE": RESTORE, "reportPlan": reportPlan, "reportSections": reportSections, "EXERCISES": EXERCISES, "figureNumbers": figureNumbers, "BookApp": BookApp };
+__modules["src/book/book.js"] = { "FIGURES": FIGURES, "ANSWERS": ANSWERS, "RESTORE": RESTORE, "reportPlan": reportPlan, "restoreOptions": restoreOptions, "reportSections": reportSections, "EXERCISES": EXERCISES, "figureNumbers": figureNumbers, "BookApp": BookApp };
 })();
 
 /* ===== src/book/chapter1.js ===== */
@@ -15135,7 +15544,7 @@ const CHAPTER = {
   // where the work is done (author, 2026-10-08, D27). `parts` keep their minutes for the teacher's notes.
   minutes: false,
   plan: false,
-  siteNav: ['home', 'chapter2', 'chapter3', 'trainer'],
+  siteNav: ['home', 'chapter2', 'chapter3', 'chapter4', 'trainer'],
   number: 1,
   kicker: 'Warsztat analityki internetowej · Rozdział 1 z 5',
   title: 'Internet jako źródło danych o zachowaniach społecznych',
@@ -16765,7 +17174,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\n# Filmy z testu. Skrypt prosił API o wyniki po polsku: relevanceLanguage=\"pl\".\nvideos = pd.read_csv(\"videos.csv\")\nlang = videos[\"default_audio_language\"]   # język ścieżki dźwiękowej, jeśli autor go podał\nprint(lang.value_counts(dropna=False).head(8))\n\n# Zadanie: jaka część filmów ze znanym językiem jest po angielsku?\nenglish = (lang == \"en\").sum()   # tu popraw\nknown = len(lang)                # tu popraw\n\nresult = {\"known\": int(known), \"english\": int(english), \"share\": round(float(english / known), 3)}\nprint(result)\n",
    "solution": "import pandas as pd\n\n# Filmy z testu. Skrypt prosił API o wyniki po polsku: relevanceLanguage=\"pl\".\nvideos = pd.read_csv(\"videos.csv\")\nlang = videos[\"default_audio_language\"]   # język ścieżki dźwiękowej, jeśli autor go podał\nprint(lang.value_counts(dropna=False).head(8))\n\n# \"en\", \"en-US\", \"en-GB\" i inne to ten sam język: liczą się dwie pierwsze litery.\nenglish = (lang.str[:2] == \"en\").sum()\n# Pusty kod to brak informacji, a nie osobny język. Mianownik to filmy ze znanym językiem.\nknown = lang.notna().sum()\n\nresult = {\"known\": int(known), \"english\": int(english), \"share\": round(float(english / known), 3)}\nprint(result)\n",
-   "solutionOutput": "default_audio_language\nNaN       229\nen-US      52\nen         52\nen-GB      16\nes-419     12\nes-MX      10\npl          7\nit          5\nName: count, dtype: int64\n{'known': 179, 'english': 130, 'share': 0.726}\n",
+   "solutionOutput": "NaN       229\nen         52\nen-US      52\nen-GB      16\nes-419     12\nes-MX      10\npl          7\nen-AU       5\nName: default_audio_language, dtype: int64\n{'known': 179, 'english': 130, 'share': 0.726}\n",
    "expect": {
     "known": 179,
     "english": 130,
@@ -16843,7 +17252,7 @@ const GENERATED3 = {
    },
    "starter": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nprint(videos[\"channel_title\"].nunique(), \"kanałów\")\n\n# Reguła z projektu: kanał wygląda na serwis informacyjny, jeśli w nazwie jest\n# słowo \"news\" (wielkość liter bez znaczenia) albo \"radio\".\n# Zadanie: popraw wzorzec tak, żeby reguła złapała dokładnie takie kanały.\npattern = \"News\"   # tu popraw\nnews = videos[videos[\"channel_title\"].str.contains(pattern)]\nprint(news[\"channel_title\"].value_counts())\n\nresult = {\"videos\": len(news), \"channels\": \"; \".join(sorted(news[\"channel_title\"].unique()))}\nprint(result)\n",
    "solution": "import pandas as pd\n\nvideos = pd.read_csv(\"videos.csv\")\nprint(videos[\"channel_title\"].nunique(), \"kanałów\")\n\n# news\\b: słowo kończy się na \"news\", więc \"5NEWS\" tak, a \"Newsomat\" nie.\n# |radio: albo \"radio\". case=False: wielkość liter bez znaczenia.\npattern = r\"news\\b|radio\"\nnews = videos[videos[\"channel_title\"].str.contains(pattern, case=False, regex=True)]\nprint(news[\"channel_title\"].value_counts())\n\nresult = {\"videos\": len(news), \"channels\": \"; \".join(sorted(news[\"channel_title\"].unique()))}\nprint(result)\n",
-   "solutionOutput": "288 kanałów\nchannel_title\n5NEWS Kanał 007                1\nRadio Kanał 020                1\nKanał 029 News                 1\nRadioKanał051                  1\nNews Kanał 131                 1\nKanał 173 - Polityka i News    1\nKanał 272 Daily News           1\nName: count, dtype: int64\n{'videos': 7, 'channels': '5NEWS Kanał 007; Kanał 029 News; Kanał 173 - Polityka i News; Kanał 272 Daily News; News Kanał 131; Radio Kanał 020; RadioKanał051'}\n",
+   "solutionOutput": "288 kanałów\n5NEWS Kanał 007                1\nRadio Kanał 020                1\nKanał 029 News                 1\nRadioKanał051                  1\nNews Kanał 131                 1\nKanał 173 - Polityka i News    1\nKanał 272 Daily News           1\nName: channel_title, dtype: int64\n{'videos': 7, 'channels': '5NEWS Kanał 007; Kanał 029 News; Kanał 173 - Polityka i News; Kanał 272 Daily News; News Kanał 131; Radio Kanał 020; RadioKanał051'}\n",
    "expect": {
     "videos": 7,
     "channels": "5NEWS Kanał 007; Kanał 029 News; Kanał 173 - Polityka i News; Kanał 272 Daily News; News Kanał 131; Radio Kanał 020; RadioKanał051"

@@ -20354,6 +20354,212 @@ const GENERATED4 = {
   }
  ],
  "agentsMd": "# Instrukcja agenta\n\nTen plik agent czyta zawsze, przed każdym pytaniem. Zmieńcie go tak, żeby pasował do waszego\nbadania.\n\n## Rola\n\nJesteś analitykiem danych z internetu. Pomagasz parze studentów socjologii zebrać liczby do\nraportu. Odpowiadasz po polsku.\n\n## Źródła\n\nNajpierw szukaj oficjalnej statystyki i otwartych danych (Eurostat, GUS). Dopiero potem inne\nstrony. Nie bierz liczb z pamięci.\n\n## Odpowiedź\n\nKażdą liczbę podaj w tabeli: wartość, jednostka, rok, kogo dotyczy, adres źródła. Nie\nzaokrąglaj. Jeśli pytanie jest nieprecyzyjne, napisz, jak je rozumiesz.\n\n## Zasada „nie wiem”\n\nJeśli nie otworzyłeś źródła, w którym jest ta liczba, napisz „nie wiem”.\n\n## Pliki\n\n- Surowe odpowiedzi ze źródeł zapisuj w `data/raw/`.\n- Po każdym nowym pliku dopisz wiersz w `data/INDEX.md`.\n- Kartę źródła i notatki zapisuj w `notes/`.\n- Odpowiedź zapisz w `answer.md`.\n",
+ "live": [
+  {
+   "walk": "walk-1",
+   "step": "4.2",
+   "cond": "empty",
+   "q": "media",
+   "low": 60.0,
+   "high": 63.0,
+   "year": "2025-2026",
+   "sources": [
+    "CBOS",
+    "GUS",
+    "CEDMO/IPSOS",
+    "DataReportal"
+   ],
+   "seconds": 20
+  },
+  {
+   "walk": "rerun",
+   "step": "4.2",
+   "cond": "empty",
+   "q": "media",
+   "low": 65.0,
+   "high": 75.0,
+   "year": "2025",
+   "sources": [
+    "GUS",
+    "DataReportal",
+    "Gemius"
+   ],
+   "seconds": 22
+  },
+  {
+   "walk": "walk-2",
+   "step": "4.2",
+   "cond": "empty",
+   "q": "media",
+   "low": 70.0,
+   "high": 75.0,
+   "year": "2025-2026",
+   "sources": [
+    "IBRiS",
+    "DataReportal",
+    "CBOS"
+   ],
+   "seconds": 22
+  },
+  {
+   "walk": "walk-1",
+   "step": "4.3",
+   "cond": "instr",
+   "q": "media",
+   "low": 63.27,
+   "high": 63.27,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": 178
+  },
+  {
+   "walk": "rerun",
+   "step": "4.3",
+   "cond": "instr",
+   "q": "media",
+   "low": 63.27,
+   "high": 63.27,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": 139
+  },
+  {
+   "walk": "walk-2",
+   "step": "4.3",
+   "cond": "instr",
+   "q": "media",
+   "low": 63.27,
+   "high": 63.27,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": null
+  },
+  {
+   "walk": "walk-1",
+   "step": "4.5",
+   "cond": "instr",
+   "q": "fallback-3",
+   "low": 60.6,
+   "high": 60.6,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": null
+  },
+  {
+   "walk": "walk-1",
+   "step": "4.5",
+   "cond": "instr+rule-2025",
+   "q": "fallback-3",
+   "low": 60.6,
+   "high": 60.6,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": null
+  },
+  {
+   "walk": "walk-1",
+   "step": "4.6",
+   "cond": "instr+rule-2025",
+   "q": "fallback-3",
+   "low": 60.6,
+   "high": 60.6,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": null
+  },
+  {
+   "walk": "rerun",
+   "step": "4.5",
+   "cond": "instr",
+   "q": "fallback-3",
+   "low": 60.6,
+   "high": 60.6,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": null
+  },
+  {
+   "walk": "rerun",
+   "step": "4.5",
+   "cond": "instr+rule-2025",
+   "q": "fallback-3",
+   "low": 60.6,
+   "high": 60.6,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": null
+  },
+  {
+   "walk": "rerun",
+   "step": "4.6",
+   "cond": "instr+rule-2025",
+   "q": "fallback-3",
+   "low": 60.6,
+   "high": 60.6,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": null
+  },
+  {
+   "walk": "walk-2",
+   "step": "4.5",
+   "cond": "instr",
+   "q": "own-online-purchases",
+   "low": 72.9,
+   "high": 72.9,
+   "year": "2026",
+   "sources": [
+    "GUS",
+    "Eurostat"
+   ],
+   "seconds": 346
+  },
+  {
+   "walk": "walk-2",
+   "step": "4.5",
+   "cond": "instr+rule-gus-only",
+   "q": "own-online-purchases",
+   "low": 72.9,
+   "high": 72.9,
+   "year": "2026",
+   "sources": [
+    "GUS"
+   ],
+   "seconds": 210
+  },
+  {
+   "walk": "walk-2",
+   "step": "4.6",
+   "cond": "instr",
+   "q": "own-online-purchases",
+   "low": 69.73,
+   "high": 69.73,
+   "year": "2025",
+   "sources": [
+    "Eurostat"
+   ],
+   "seconds": 124
+  }
+ ],
+ "liveDay": "2026-11-18",
  "load": [
   {
    "container": 1,
@@ -20906,6 +21112,7 @@ function skadFigure({ num: n = 'Rysunek' } = {}) {
 const KNOWN = [
   { v: 63.27, tol: 0.06, ok: true, what: 'Osoby w wieku 16–74 lata, rok 2025, badanie GUS w bazie Eurostatu. Ta sama liczba co w nagraniu z instrukcją.' },
   { v: 63.3, tol: 0.001, ok: true, what: 'To samo badanie w raporcie GUS, zaokrąglone do jednego miejsca po przecinku.' },
+  { v: 63, tol: 0.001, ok: true, what: 'To samo badanie, zaokrąglone do całości. W tabeli raportu podajcie 63,27.' },
   { v: 60.97, tol: 0.06, what: 'To rok 2024. Sprawdźcie, czy agent wziął ostatni rok.' },
   { v: 70.57, tol: 0.06, what: 'To procent internautów, a nie wszystkich osób 16–74. Inny mianownik.' },
   { v: 71.3, tol: 0.06, what: 'To DataReportal. Liczy konta w narzędziach reklamowych, a nie osoby, i dzieli przez całą ludność.' },
@@ -21107,12 +21314,20 @@ const cond = (c) => G.runs.filter((r) => r.cond === c);
 const secs = (c) => cond(c).map((r) => r.seconds);
 const span = (xs) => `${Math.min(...xs)}–${Math.max(...xs)}`;
 const mins = (xs) => `${Math.round(Math.min(...xs) / 60)}–${Math.round(Math.max(...xs) / 60)}`;
+const pl = (x) => String(x).replace('.', ',');
+// live walks of 2026-11-18: what the empty folder and the instruction gave in a real container
+const LIVE_EMPTY = G.live.filter((r) => r.step === '4.2' && r.cond === 'empty');
+const LIVE_INSTR = G.live.filter((r) => r.step === '4.3' && r.cond === 'instr');
+const ranges = LIVE_EMPTY.map((r) => (r.low === r.high ? `${pl(r.low)}%` : `${pl(r.low)}–${pl(r.high)}%`));
+const LIVE_EMPTY_TEXT = `${ranges.slice(0, -1).join(', ')} i ${ranges.at(-1)}`;
+const LIVE_INSTR_SAME = LIVE_INSTR.every((r) => r.low === 63.27 && r.high === 63.27);
+const EMPTY_ALL_SAME = new Set(cond('empty').map((r) => r.exact)).size === 1;
 
 const sections = [
   step('a4-1', '4.1', 'Twoja piaskownica', [
     { p: 'Dziś każda para pracuje z prawdziwym agentem. To program, który dostaje pytanie, sam szuka danych w internecie i zapisuje pliki. Działa w kontenerze, czyli w małym, zamkniętym komputerze tylko dla waszej pary.' },
     { figure: 'agmapa' },
-    { note: 'Wszystko, co wpiszecie, trafia do modelu na serwerze DeepSeek. Nie wpisujcie danych osobowych ani haseł.', tone: 'warn' },
+    { note: 'Wszystko, co wpiszecie, trafia do firmy DeepSeek w Chinach. Nie wpisujcie danych osobowych ani haseł. Nie wklejajcie też komentarzy zebranych w temacie 3.', tone: 'warn' },
     { exercise: 'ag-start', num: 'Zrób', title: 'Wejdźcie do kontenera', toc: 'Zrób. Wejście do kontenera' },
     { terms: [
       ['model', 'program, który pisze tekst. Sam niczego nie otwiera i nie pobiera'],
@@ -21132,7 +21347,7 @@ const sections = [
   step('a4-3', '4.3', 'Instrukcja zmienia wynik', [
     { p: `Teraz to samo pytanie, ten sam model, ale w folderze leży instrukcja. Nagraliśmy po trzy przebiegi w trzech wersjach. Bez instrukcji agent odpowiadał w ${span(secs('empty'))} sekund, z instrukcją w ${mins([...secs('instr'), ...secs('full')])} minut.` },
     { figure: 'agwarunki' },
-    { p: `Różnica to nie przypadek. Bez instrukcji wszystkie trzy przebiegi dały ${RUN['empty-1'].exact}%, z instrukcją wszystkie sześć ${RUN['full-1'].exact}%. Inna liczba, bo co innego mierzy.` },
+    { p: `W nagraniu bez instrukcji wszystkie trzy przebiegi dały ${RUN['empty-1'].exact}%, z instrukcją wszystkie sześć ${RUN['full-1'].exact}%. Na próbach w kontenerze bez instrukcji za każdym razem wyszło co innego, ${LIVE_EMPTY_TEXT}. Z instrukcją znów ${RUN['full-1'].exact}% w ${LIVE_INSTR.length} z ${LIVE_INSTR.length} przebiegów. Instrukcja ustala, co agent liczy, więc wynik się powtarza.` },
     { figure: 'agreguly' },
     { exercise: 'ag-instr', num: 'Zrób', title: 'Zapytajcie agenta z instrukcją', toc: 'Zrób. Agent z instrukcją' },
   ]),
@@ -21141,12 +21356,13 @@ const sections = [
     { p: 'Agent zapisał w `data/raw` surowe odpowiedzi źródeł. Skąd za miesiąc wiadomo, że nikt ich nie zmienił? Umiejętność `raw-provenance` liczy dla każdego pliku odcisk SHA-256 i zapisuje go w `MANIFEST.csv`.' },
     { figure: 'agodcisk' },
     { p: 'Umiejętność to zwykły plik tekstowy z przepisem. Agent czyta go, zanim zapisze dane. Wy możecie go przeczytać tak samo.' },
+    { p: 'Odcisk mówi tylko, że plik się nie zmienił od zapisu. Że to naprawdę odpowiedź źródła, sprawdzicie, pobierając plik jeszcze raz z adresu w `meta.json`.' },
     { exercise: 'ag-odcisk', num: 'Zrób', title: 'Sprawdźcie odciski', toc: 'Zrób. Odciski plików' },
     { note: 'Przerwa, 5 minut.' },
   ]),
 
   step('a4-5', '4.5', 'Wasze pytanie', [
-    { p: 'Teraz pytanie z waszego projektu. Zmieniajcie w `AGENTS.md` jedną rzecz naraz. Wtedy wiadomo, co zmieniło wynik.' },
+    { p: 'Teraz pytanie z waszego projektu. Zmieniajcie w `AGENTS.md` jedną rzecz naraz. Każdą próbę uruchamia polecenie `proba` w nowym, czystym folderze. Wtedy różni je tylko instrukcja i wiadomo, co zmieniło wynik.' },
     { figure: 'agdziennik' },
     { p: 'Nie macie jeszcze pytania? Weźcie jedno z zapasowych. Odpowiedzi na nie są w danych Eurostatu nagranych do tematu 1, więc dziennik sam je sprawdzi.' },
     { table: { head: ['', 'Pytanie zapasowe'], rows: G.fallback.map((f, k) => [String(k + 1), f.q]) } },
@@ -21158,6 +21374,7 @@ const sections = [
   step('a4-6', '4.6', 'Czy agent mierzy tak samo?', [
     { p: `Instrument badawczy ocenia się po tym, czy daje ten sam wynik za każdym razem. Na próbie generalnej ${G.load.length} kontenerów dostało to samo pytanie w tej samej chwili.` },
     { figure: 'agzgodnosc' },
+    ...(EMPTY_ALL_SAME ? [{ p: `Zgodność to jeszcze nie trafność. W nagraniu puste foldery też były zgodne, trzy razy ${RUN['empty-1'].exact}%. A liczyły konta, nie osoby.` }] : []),
     { exercise: 'ag-dwa', num: 'Zrób', title: 'Zapytajcie drugi raz', toc: 'Zrób. Drugi przebieg' },
   ]),
 
@@ -21177,8 +21394,10 @@ const AGENT_FIELDS = [
   { id: 'zrodla', kind: 'area', label: 'Z jakich źródeł agent mógł brać liczby' },
   { id: 'proby', kind: 'area', label: 'Ile było prób i jak zmieniał się wynik' },
   { id: 'wynik', kind: 'area', label: 'Wynik. Liczba, jednostka, rok, grupa osób, adres źródła' },
+  { id: 'wskaznik', kind: 'area', label: 'Co dokładnie mierzy wskaźnik? Definicja ze źródła w jednym zdaniu' },
   { id: 'zgodnosc', kind: 'area', label: 'Czy drugi przebieg dał to samo?' },
   { id: 'granice', kind: 'area', label: 'Do czego tego agenta nie używać?' },
+  { id: 'agent', kind: 'area', label: 'Agent, model i data. Przepiszcie z pliku RUN.txt w zipie' },
 ];
 
 const CHAPTER = {
@@ -21209,14 +21428,14 @@ const CHAPTER = {
   recap: [
     'Model pisze tylko tekst. Pobiera, liczy i zapisuje Hermes, w waszym kontenerze.',
     'Każdy krok agenta jest w śladzie. Liczbę sprawdza się w kroku, z którego pochodzi.',
-    'Instrukcja w pliku zmienia źródła i to, co agent liczy. W nagraniu bez niej agent podał konta, z nią osoby.',
+    'Instrukcja w pliku zmienia źródła i to, co agent liczy. Bez niej każdy przebieg brał co innego, z nią wynik się powtarzał.',
     'Odcisk SHA-256 pokazuje, czy surowy plik się zmienił. Jedna spacja daje inny odcisk.',
     'Zmieniajcie w instrukcji jedną rzecz naraz i zapisujcie każdą próbę.',
-    'Agenta ocenia się jak instrument, po zgodności przebiegów. Metoda jest w folderze, który bierzecie do domu.',
+    'Agenta ocenia się jak instrument, po zgodności przebiegów i po tym, co mierzy wskaźnik. Metoda jest w folderze, który bierzecie do domu.',
   ],
 };
 
-__modules["../../analiza-trendow-w-internecie/src/chapter4.js"] = { "QUESTION": QUESTION, "AGENT_FIELDS": AGENT_FIELDS, "CHAPTER": CHAPTER };
+__modules["../../analiza-trendow-w-internecie/src/chapter4.js"] = { "QUESTION": QUESTION, "LIVE_EMPTY_TEXT": LIVE_EMPTY_TEXT, "LIVE_INSTR_SAME": LIVE_INSTR_SAME, "AGENT_FIELDS": AGENT_FIELDS, "CHAPTER": CHAPTER };
 })();
 
 /* ===== ../../analiza-trendow-w-internecie/src/figures4b.js ===== */
@@ -21567,7 +21786,7 @@ function judgeTwo(text) {
   if (Math.round(a * 10) === Math.round(b * 10)) return { ok: true, text: `Zgodne do 0,1, tak jak ${LOAD.length} kontenerów na próbie generalnej.` };
   const g = points(Math.round(gap * 100) / 100);
   if (gap <= 1) return { ok: false, text: `Różnica ${g}. Sprawdźcie, czy obie odpowiedzi mają ten sam rok i tę samą grupę osób.` };
-  return { ok: false, text: `Różnica ${g}. To pewnie inna miara albo inne źródło. Porównajcie adresy źródeł w obu odpowiedziach.` };
+  return { ok: false, text: `Różnica ${g}. Inna miara, inne źródło albo inny rok. Porównajcie rok i adres źródła w obu odpowiedziach.` };
 }
 
 // ---------------------------------------------------------------- 4.7 the agent goes home
@@ -21576,13 +21795,16 @@ const F3 = RUN['full-3'];
 const ROLE = [
   { test: (f) => f === 'AGENTS.md', what: 'Instrukcja, czyli wasza metoda. Każdy agent, który ją przeczyta, zacznie od tych zasad.' },
   { test: (f) => f === 'answer.md', what: 'Odpowiedź z tabelą liczb i adresami źródeł.' },
+  { test: (f) => f === 'RUN.txt', what: 'Który agent i model to policzył, i kiedy. Za rok inny model może dać co innego.' },
+  { test: (f) => f.startsWith('proby/'), what: 'Wasze próby z 4.5 i 4.6, każda w osobnym folderze, z instrukcją, której wtedy użyliście.' },
   { test: (f) => f === 'data/INDEX.md', what: 'Spis plików z danymi, po jednym wierszu na plik.' },
   { test: (f) => f.endsWith('MANIFEST.csv'), what: 'Odciski SHA-256 surowych plików. Za miesiąc verify powie, czy nikt ich nie zmienił.' },
   { test: (f) => f.endsWith('.meta.json'), what: 'Opis jednego pobrania. Adres, czas, rozmiar i odcisk.' },
   { test: (f) => f.startsWith('data/raw/'), what: 'Surowa odpowiedź źródła, dokładnie taka, jaka przyszła.' },
   { test: (f) => f.startsWith('notes/'), what: 'Notatki i karta źródła. Co mierzy źródło i czego nie mierzy.' },
 ];
-const ZIP = ['AGENTS.md', ...F3.files];
+// the full-3 folder as recorded, plus what pobierz and proba add to every zip
+const ZIP = ['AGENTS.md', 'RUN.txt', ...F3.files, 'proby/1/answer.md', 'proby/2/answer.md'];
 /** The zip as a tree: a folder row before its first file, then the files, indented. */
 const TREE = (() => {
   const rows = [], seen = new Set();
@@ -21641,7 +21863,7 @@ const { BookApp, EXERCISES, ANSWERS, FIGURES } = __modules["src/book/book.js"];
 const { CARDS, cardExercise } = __modules["src/book/figures/project.js"];
 const { gate } = __modules["src/ui/people.js"];
 const { setUp: setUpCourse, restoreOptions, focusSkip } = __modules["../../analiza-trendow-w-internecie/src/main.js"];
-const { CHAPTER, QUESTION, AGENT_FIELDS } = __modules["../../analiza-trendow-w-internecie/src/chapter4.js"];
+const { CHAPTER, QUESTION, AGENT_FIELDS, LIVE_EMPTY_TEXT } = __modules["../../analiza-trendow-w-internecie/src/chapter4.js"];
 const { mapFigure, loopFigure, skadFigure, conditionsFigure, rulesFigure, terminalExercise, terminalAnswer, judge, parseNum } = __modules["../../analiza-trendow-w-internecie/src/figures4.js"];
 const { hashFigure, exampleLogFigure, tryLogExercise, tryLogAnswer, agreementFigure, homeFigure, judgeVerify, judgeTwo } = __modules["../../analiza-trendow-w-internecie/src/figures4b.js"];
 const FIGURES4 = {
@@ -21658,9 +21880,17 @@ const FIGURES4 = {
 
 /** What the agent answered, judged against the recorded runs. */
 const judgeAnswer = (text) => {
-  const x = parseNum((String(text).match(/\d+(?:[.,]\d+)?/) || [''])[0]);
+  const m = String(text).match(/\d+(?:[.,]\d+)?/);
+  if (!m) return { ok: false, text: 'Wpiszcie liczbę, którą podał agent, na przykład 65,4.' };
+  const x = parseNum(m[0]);
   const v = judge(x);
   return v ? { ok: v.ok, text: v.text } : { ok: false, text: 'Wpiszcie liczbę, na przykład 65,4.' };
+};
+/** 4.2: without the instruction a number outside the recording is a finding, not a miss. */
+const judgeEmpty = (text) => {
+  const v = judgeAnswer(text);
+  if (!/Tej liczby nie ma w nagranych/.test(v.text)) return v;
+  return { ok: true, text: `Bez instrukcji agent za każdym razem bierze inne źródło. W nagraniu podał 71,3%, na próbach w kontenerze ${LIVE_EMPTY_TEXT}. Zapiszcie, skąd wziął waszą liczbę.` };
 };
 
 const TERMINAL4 = {
@@ -21673,7 +21903,7 @@ const TERMINAL4 = {
     { say: 'Zróbcie pusty folder, bez instrukcji i bez umiejętności, i uruchomcie w nim agenta. Po kilkunastu sekundach pojawi się pole na pytanie.', cmd: 'mkdir -p /tmp/pusty && cd /tmp/pusty && hermes-pusty' },
     { say: 'Zadajcie pytanie i patrzcie, jakie narzędzia uruchamia.', cmd: QUESTION },
     { say: 'Zapiszcie liczbę i stronę, z której pochodzi. Potem wyjdźcie z agenta.', cmd: '/exit' },
-  ], ask: { label: 'Jaką liczbę podał wasz agent (procent)?', placeholder: 'np. 65,4', judge: judgeAnswer } },
+  ], ask: { label: 'Jaką liczbę podał wasz agent (procent)?', placeholder: 'np. 65,4', judge: judgeEmpty } },
   'ag-instr': { id: 'ag-instr', steps: [
     { say: 'Wróćcie do folderu z instrukcją i uruchomcie agenta.', cmd: 'cd /work && hermes' },
     { say: 'Zadajcie to samo pytanie. Agent będzie pracował kilka minut.', cmd: QUESTION },
@@ -21688,19 +21918,18 @@ const TERMINAL4 = {
   ], ask: { label: 'Co napisał verify o kopii?', placeholder: 'np. changed: …', judge: judgeVerify } },
   'ag-pytanie': { id: 'ag-pytanie', steps: [
     { say: 'Wybierzcie pytanie z waszego projektu, jedno zdanie z liczbą w odpowiedzi. Albo jedno z pytań zapasowych.' },
-    { say: 'Zadajcie je agentowi w folderze z instrukcją. Zamiast tekstu w cudzysłowie wpiszcie wasze pytanie. Agent odpowie i zakończy pracę.', cmd: 'cd /work && hermes -z "tu wasze pytanie"' },
+    { say: 'Zadajcie je agentowi. Polecenie `proba` robi czysty folder z waszym `AGENTS.md`. Zamiast tekstu w cudzysłowie wpiszcie wasze pytanie.', cmd: 'cd /work && proba "tu wasze pytanie"' },
     { say: 'Zapiszcie próbę w dzienniku niżej. Potem dopiszcie do instrukcji jedną zasadę, na przykład tę.', cmd: 'echo "Zasada pary. Podawaj tylko dane z 2025 roku." >> AGENTS.md' },
-    { say: 'Zapytajcie jeszcze raz i zapiszcie następną próbę. Jedna zmiana, jedna próba.', cmd: 'hermes -z "tu wasze pytanie"' },
+    { say: 'Zapytajcie jeszcze raz i zapiszcie następną próbę. Jedna zmiana, jedna próba.', cmd: 'proba "tu wasze pytanie"' },
     { say: 'Jeśli zasada popsuła wynik, przywróćcie instrukcję z początku.', cmd: 'cp /lab/template/AGENTS.md AGENTS.md' },
   ] },
   'ag-dwa': { id: 'ag-dwa', steps: [
-    { say: 'Zróbcie czysty folder z waszą instrukcją. Wtedy drugi przebieg nie zobaczy plików z pierwszego.', cmd: 'mkdir -p /tmp/drugi && cp /work/AGENTS.md /tmp/drugi/ && cd /tmp/drugi' },
-    { say: 'Zadajcie to samo pytanie co w ostatniej próbie.', cmd: 'hermes -z "tu wasze pytanie"' },
+    { say: 'Zadajcie to samo pytanie co w ostatniej próbie, bez zmian w instrukcji. To drugi przebieg tej samej metody.', cmd: 'cd /work && proba "tu wasze pytanie"' },
     { say: 'Porównajcie liczbę z ostatnią próbą. Jeśli sąsiednia para ma to samo pytanie, porównajcie się też z nią.' },
   ], ask: { label: 'Liczba z ostatniej próby i z drugiego przebiegu', placeholder: 'np. 63,27 i 63,3', judge: judgeTwo } },
   'ag-domu': { id: 'ag-domu', steps: [
     { say: 'Spakujcie folder projektu. Przeglądarka zapyta, gdzie zapisać plik zip.', cmd: 'cd /work && pobierz' },
-    { say: 'Otwórzcie zip u siebie. Sprawdźcie, że są w nim `AGENTS.md`, `answer.md` i folder `data`.' },
+    { say: 'Otwórzcie zip u siebie. Sprawdźcie, że są w nim `AGENTS.md`, `RUN.txt`, folder `data` i wasze próby w `proby`.' },
   ] },
 };
 

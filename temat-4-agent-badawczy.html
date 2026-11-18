@@ -21164,7 +21164,7 @@ const sections = [
   step('a4-7', '4.7', 'Agent do domu', [
     { p: 'Kontener zniknie po zajęciach. Zostaje folder z instrukcją, danymi i notatkami. To on jest waszą metodą.' },
     { figure: 'agdomu' },
-    { p: 'W domu folder otworzy inny agent. Codex czyta `AGENTS.md` sam. Claude Code czyta `CLAUDE.md`, więc wpiszcie tam jedną linię `@AGENTS.md`. Gemini CLI czyta `GEMINI.md`, a w jego ustawieniach można wskazać `AGENTS.md`.' },
+    { p: 'W domu folder otworzy inny agent. Codex i Claude Code czytają `AGENTS.md` same. Claude Code robi to, jeśli w folderze nie ma `CLAUDE.md`. Gemini CLI czyta `GEMINI.md`, ale w pliku `.gemini/settings.json` można mu wskazać `AGENTS.md`.' },
     { exercise: 'ag-domu', num: 'Zrób', title: 'Pobierzcie folder', toc: 'Zrób. Pobranie folderu' },
     { exercise: 'raport4', num: 'Projekt', title: 'Karta agenta', toc: 'Projekt. Karta agenta' },
   ]),

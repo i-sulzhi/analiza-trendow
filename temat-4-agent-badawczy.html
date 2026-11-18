@@ -21209,7 +21209,7 @@ const CHAPTER = {
   recap: [
     'Model pisze tylko tekst. Pobiera, liczy i zapisuje Hermes, w waszym kontenerze.',
     'Każdy krok agenta jest w śladzie. Liczbę sprawdza się w kroku, z którego pochodzi.',
-    'Instrukcja w pliku zmienia źródła i to, co agent liczy. Bez niej agent podał konta, z nią osoby.',
+    'Instrukcja w pliku zmienia źródła i to, co agent liczy. W nagraniu bez niej agent podał konta, z nią osoby.',
     'Odcisk SHA-256 pokazuje, czy surowy plik się zmienił. Jedna spacja daje inny odcisk.',
     'Zmieniajcie w instrukcji jedną rzecz naraz i zapisujcie każdą próbę.',
     'Agenta ocenia się jak instrument, po zgodności przebiegów. Metoda jest w folderze, który bierzecie do domu.',
@@ -21414,40 +21414,61 @@ function tryLogExercise({ onDone } = {}) {
     setItem(`ans:${id}`, state);
     if (state.tries.filter((t) => Number.isFinite(parseNum(t.num)) && String(t.num).trim()).length >= 2 && !isDone(id)) { markDone(id); onDone?.(id); }
   };
+  // Typing redraws only the parts below the form (feedback, buttons, table). The inputs stay in
+  // place, so focus and Tab work; the form is rebuilt only when a try is added or removed.
+  const qInfo = el('div');
+  const out = el('div');
+  const form = el('div');
+  host.append(form, out);
+  const hasNum = (t) => Number.isFinite(parseNum(t.num)) && String(t.num).trim();
   const field = (t, key, label, attrs = {}) => el('label.a4-try-field', el('span', label),
-    el('input', { type: 'text', value: t[key] || '', ...attrs, onChange: (e) => { t[key] = e.target.value; save(); draw(); } }));
-  const draw = () => {
+    el('input', { type: 'text', value: t[key] || '', ...attrs, onInput: (e) => { t[key] = e.target.value; save(); drawOut(); } }));
+  const drawQ = () => {
     const fb = fallbackOf(state.q);
+    mount(qInfo,
+      el('div.a4-fallback', el('span', 'Albo pytanie zapasowe '), G.fallback.map((f, i) => el('button.fg-toggle', {
+        type: 'button', class: state.q === f.q ? 'fg-toggle a4-on' : 'fg-toggle',
+        onClick: () => { state.q = f.q; qInput.value = f.q; save(); drawQ(); drawOut(); },
+      }, String(i + 1)))),
+      fb ? el('div.sq-read', fb.q) : null);
+  };
+  const qInput = el('input', { type: 'text', value: state.q, placeholder: 'jedno zdanie z liczbą w odpowiedzi',
+    onInput: (e) => { state.q = e.target.value; save(); drawQ(); drawOut(); } });
+  const drawForm = () => {
     const t = state.tries.at(-1);
     const k = state.tries.length;
-    const last = Number.isFinite(parseNum(t.num)) && String(t.num).trim() ? parseNum(t.num) : null;
-    mount(host,
-      el('label.a4-try-field.a4-try-q', el('span', 'Wasze pytanie'),
-        el('input', { type: 'text', value: state.q, placeholder: 'jedno zdanie z liczbą w odpowiedzi', onChange: (e) => { state.q = e.target.value; save(); draw(); } })),
-      el('div.a4-fallback', el('span', 'Albo pytanie zapasowe '), G.fallback.map((f, i) => el('button.fg-toggle', {
-        type: 'button', class: state.q === f.q ? 'fg-toggle a4-on' : 'fg-toggle', onClick: () => { state.q = f.q; save(); draw(); },
-      }, String(i + 1)))),
-      fb ? el('div.sq-read', fb.q) : null,
+    mount(form,
+      el('label.a4-try-field.a4-try-q', el('span', 'Wasze pytanie'), qInput),
+      qInfo,
       el('fieldset.a4-try',
         el('legend', `Próba ${k}`),
         field(t, 'change', 'Co zmieniliście w AGENTS.md', { placeholder: k === 1 ? 'nic, instrukcja z początku' : 'jedna zmiana' }),
         el('div.a4-try-row',
           field(t, 'num', 'Liczba', { inputmode: 'decimal', placeholder: 'np. 63,27' }),
-          el('label.a4-try-field', el('span', 'Jednostka'), el('select', { onChange: (e) => { t.unit = e.target.value; save(); draw(); } },
+          el('label.a4-try-field', el('span', 'Jednostka'), el('select', { onChange: (e) => { t.unit = e.target.value; save(); drawOut(); } },
             el('option', { value: '' }, 'wybierz'), UNITS.map((u) => el('option', { value: u, selected: t.unit === u }, u)))),
           field(t, 'year', 'Rok', { inputmode: 'numeric', placeholder: '2025' })),
         field(t, 'who', 'Kogo dotyczy', { placeholder: 'np. osoby 16–74 w Polsce' }),
         field(t, 'url', 'Adres źródła', { placeholder: 'https://…' }),
-        el('label.a4-term-say', el('input', { type: 'checkbox', checked: !!t.unknown, onChange: (e) => { t.unknown = e.target.checked; save(); draw(); } }), el('span', 'Agent napisał, czego nie wie'))),
+        el('label.a4-term-say', el('input', { type: 'checkbox', checked: !!t.unknown, onChange: (e) => { t.unknown = e.target.checked; save(); drawOut(); } }), el('span', 'Agent napisał, czego nie wie'))));
+  };
+  const drawOut = () => {
+    const fb = fallbackOf(state.q);
+    const t = state.tries.at(-1);
+    const k = state.tries.length;
+    const last = hasNum(t) ? parseNum(t.num) : null;
+    mount(out,
       fb && last != null ? el(`div.a4-why${Math.abs(last - fb.v) <= 0.06 ? '.a4-why-right' : ''}`, Math.abs(last - fb.v) <= 0.06
         ? `Zgadza się z odpowiedzią Eurostatu nagraną ${G.fallbackRecorded.split('-').reverse().join('.')}, ${pl(fb.v)}% w roku ${fb.year}.`
         : `Nagrana odpowiedź Eurostatu to ${pl(fb.v)}% w roku ${fb.year}, tabela ${fb.table}. Sprawdźcie rok, grupę wieku i to, czy agent liczy osoby, czy internautów.`) : null,
       el('div.a4-controls',
-        el('button.fg-toggle', { type: 'button', onClick: () => { state.tries.push(blank()); save(); draw(); } }, 'Następna próba'),
-        k > 1 ? el('button.fg-toggle', { type: 'button', onClick: () => { state.tries.pop(); save(); draw(); } }, 'Usuń ostatnią') : null),
+        el('button.fg-toggle', { type: 'button', onClick: () => { state.tries.push(blank()); save(); drawForm(); drawOut(); } }, 'Następna próba'),
+        k > 1 ? el('button.fg-toggle', { type: 'button', onClick: () => { state.tries.pop(); save(); drawForm(); drawOut(); } }, 'Usuń ostatnią') : null),
       logGrid(state.tries, fb ? fb.v : null));
   };
-  draw();
+  drawQ();
+  drawForm();
+  drawOut();
   return host;
 }
 
@@ -21649,7 +21670,7 @@ const TERMINAL4 = {
     { say: 'Przeczytajcie instrukcję agenta. Ten plik agent czyta przed każdym pytaniem.', cmd: 'cat AGENTS.md' },
   ] },
   'ag-pusty': { id: 'ag-pusty', steps: [
-    { say: 'Zróbcie pusty folder, bez instrukcji i bez umiejętności, i uruchomcie w nim agenta. Po kilkunastu sekundach pojawi się pole na pytanie.', cmd: 'mkdir -p /tmp/pusty && cd /tmp/pusty && LAB_SKILLS=/tmp/pusty hermes' },
+    { say: 'Zróbcie pusty folder, bez instrukcji i bez umiejętności, i uruchomcie w nim agenta. Po kilkunastu sekundach pojawi się pole na pytanie.', cmd: 'mkdir -p /tmp/pusty && cd /tmp/pusty && hermes-pusty' },
     { say: 'Zadajcie pytanie i patrzcie, jakie narzędzia uruchamia.', cmd: QUESTION },
     { say: 'Zapiszcie liczbę i stronę, z której pochodzi. Potem wyjdźcie z agenta.', cmd: '/exit' },
   ], ask: { label: 'Jaką liczbę podał wasz agent (procent)?', placeholder: 'np. 65,4', judge: judgeAnswer } },

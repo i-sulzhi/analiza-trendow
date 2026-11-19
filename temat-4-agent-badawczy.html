@@ -20933,7 +20933,7 @@ const PATHS_N = [
 ];
 const firstFetch = RUN['full-3'].steps.find((s) => s.kind === 'fetch');
 const TOUR = [
-  { path: [mid('you', 'r'), mid('tunnel', 'l'), mid('tunnel', 'r'), [262, 157], [262, 123], mid('hermes', 'l')], text: 'Piszecie pytanie w terminalu. Przez tunel trafia do waszego kontenera, do programu Hermes.' },
+  { path: [mid('you', 'r'), mid('tunnel', 'l'), mid('tunnel', 'r'), [262, 157], [262, 123], mid('hermes', 'l')], text: 'Piszecie pytanie w czacie. Przez tunel trafia do waszego kontenera, do programu Hermes.' },
   { path: [mid('hermes', 'r'), [456, 123], [456, 53], mid('model', 'l')], text: 'Hermes wysyła modelowi całą rozmowę, instrukcję z AGENTS.md i listę narzędzi.' },
   { path: [mid('model', 'b'), [556, 110], [440, 110], [426, 110]], text: `Model odpisuje tylko tekstem. Na przykład „uruchom curl https://${hostOf(firstFetch)}/…”.` },
   { path: [mid('hermes', 'r'), [456, 123], [456, 227], mid('web', 'l')], text: 'Polecenie wykonuje Hermes, w waszym kontenerze. Model niczego sam nie otwiera.' },
@@ -21328,20 +21328,17 @@ const sections = [
     { p: 'Dziś każda para pracuje z prawdziwym agentem. To program, który dostaje pytanie, sam szuka danych w internecie i zapisuje pliki. Działa w kontenerze, czyli w małym, zamkniętym komputerze tylko dla waszej pary.' },
     { figure: 'agmapa' },
     { note: 'Wszystko, co wpiszecie, trafia do firmy DeepSeek w Chinach. Nie wpisujcie danych osobowych ani haseł. Nie wklejajcie też komentarzy zebranych w temacie 3.', tone: 'warn' },
-    { p: 'Z agentem rozmawiacie w terminalu, czyli w oknie na polecenia. Przycisk „Kopiuj” kopiuje polecenie ze strony. W terminalu wklejcie je skrótem Cmd+V na Macu albo Ctrl+Shift+V na Windows i naciśnijcie Enter.' },
-    { table: { head: ['Polecenie', 'Co robi'], rows: [
-      ['`ls`', 'Pokazuje pliki w folderze. `ls -R` pokazuje też podfoldery.'],
-      ['`cat plik`', 'Wypisuje treść pliku.'],
-      ['`cd folder`', 'Przechodzi do folderu. `cd /work` wraca do folderu projektu.'],
-      ['`mkdir folder`', 'Tworzy folder.'],
-      ['`cp skąd dokąd`', 'Kopiuje plik. Z `-r` kopiuje cały folder.'],
-      ['`echo "tekst" >> plik`', 'Dopisuje linię na końcu pliku. Jeden znak `>` zamiast dwóch skasowałby resztę pliku.'],
-      ['`hermes`', 'Otwiera rozmowę z agentem. Zamiast `/work$` widać wtedy znak `❯`. Polecenie `/exit` kończy rozmowę.'],
-      ['`proba "pytanie"`', 'Jedna próba agenta bez rozmowy. Pytanie stoi w prostym cudzysłowie.'],
-      ['Ctrl+C', 'Zatrzymuje to, co trwa. W rozmowie przerywa odpowiedź agenta, w `proba` kończy próbę.'],
+    { p: 'Z agentem rozmawiacie w czacie, tak jak w aplikacji Hermes Desktop. Po prawej stronie widać folder projektu. Przycisk „Kopiuj” kopiuje tekst ze strony. W czacie wklejcie go i naciśnijcie Enter.' },
+    { p: 'Niektóre kroki to polecenia, na przykład `proba` albo `pobierz`. Piszecie je w czacie po słowach „Uruchom w terminalu”. Agent uruchamia wtedy dokładnie to polecenie i pokazuje wynik. Tak każe mu zasada w `AGENTS.md`.' },
+    { table: { head: ['W czacie', 'Co robi'], rows: [
+      ['`Uruchom w terminalu: pusty "pytanie"`', 'Agent bez instrukcji i bez umiejętności, w pustym folderze.'],
+      ['`Uruchom w terminalu: proba "pytanie"`', 'Jedna próba agenta w czystym folderze z waszym `AGENTS.md`. Pytanie stoi w prostym cudzysłowie.'],
+      ['`Uruchom w terminalu: pobierz`', 'Pakuje folder projektu do pliku zip.'],
+      ['New session', 'Nowa rozmowa. Agent nie pamięta poprzedniej.'],
+      ['Przycisk ■', 'Zatrzymuje odpowiedź agenta.'],
     ] } },
-    { note: 'Gdy agent pracuje, nie zamykajcie karty z terminalem. Gdy nic się nie zmienia dłużej niż 10 minut, naciśnijcie Ctrl+C i zawołajcie prowadzącego.', tone: 'warn' },
-    { exercise: 'ag-start', num: 'Zrób', title: 'Wejdźcie do kontenera', toc: 'Zrób. Wejście do kontenera' },
+    { note: 'Gdy przez 10 minut nic się nie zmienia, zatrzymajcie agenta przyciskiem ■ i zawołajcie prowadzącego.', tone: 'warn' },
+    { exercise: 'ag-start', num: 'Zrób', title: 'Wejdźcie do czatu', toc: 'Zrób. Wejście do czatu' },
     { terms: [
       ['model', 'program, który pisze tekst. Sam niczego nie otwiera i nie pobiera'],
       ['narzędzie', 'polecenie, które Hermes uruchamia w kontenerze na prośbę modelu'],
@@ -21396,6 +21393,14 @@ const sections = [
     { note: 'Pobierzcie folder przed końcem zajęć. Po zajęciach waszych prób już nie będzie.', tone: 'warn' },
     { figure: 'agdomu' },
     { p: 'W domu folder może otworzyć inny agent. Codex, Claude Code i Gemini CLI to programy podobne do Hermesa, które instaluje się na własnym komputerze. Do karty agenta nie są potrzebne. Codex i Claude Code czytają `AGENTS.md` same. Claude Code robi to, jeśli w folderze nie ma `CLAUDE.md`. Gemini CLI czyta `GEMINI.md`, ale w pliku `.gemini/settings.json` można mu wskazać `AGENTS.md`.' },
+    { p: 'Hermes nie jest tylko programem na zajęcia. To agent do pracy na co dzień, który odróżnia od zwykłego czatu kilka rzeczy. Każda z nich pomaga albo przeszkadza w badaniu.' },
+    { table: { head: ['Co ma Hermes', 'Gdzie to widać', 'Co to znaczy dla badania'], rows: [
+      ['Umiejętności, czyli przepisy, które agent czyta przed pracą', 'Capabilities', 'Metodę można zapisać i dać innym. Dziś agent używał `raw-provenance`.'],
+      ['Wybór modelu w trakcie rozmowy', 'nazwa modelu w polu czatu, po prawej', 'Inny model daje inny wynik. Dlatego karta zapisuje model.'],
+      ['Zadania według harmonogramu, na przykład co tydzień', 'Scheduled jobs', 'Agent może co tydzień zbierać tę samą liczbę. Tak powstaje szereg do analizy trendu. Na zajęciach agent nie ma tego narzędzia.'],
+      ['Pamięć poprzednich rozmów', 'Settings, Memory & Context', 'Wynik zależy wtedy od tego, co agent pamięta. Na zajęciach pamięć jest wyłączona, pamięcią jest folder.'],
+      ['Ten sam agent w komunikatorze, na przykład w Slacku', 'Messaging', 'Wygoda, nie metoda.'],
+    ] } },
     { exercise: 'ag-domu', num: 'Zrób', title: 'Pobierzcie folder', toc: 'Zrób. Pobranie folderu' },
     { exercise: 'raport4', num: 'Projekt', title: 'Karta agenta', toc: 'Projekt. Karta agenta' },
   ]),
@@ -21429,7 +21434,7 @@ const CHAPTER = {
   siteNav: ['home'],
   sections,
   summary: [
-    { id: 'ag-start', label: 'Zrób. Wejście do kontenera', section: 'a4-1' },
+    { id: 'ag-start', label: 'Zrób. Wejście do czatu', section: 'a4-1' },
     { id: 'ag-pusty', label: 'Zrób. Agent bez instrukcji', section: 'a4-2' },
     { id: 'ag-instr', label: 'Zrób. Agent z instrukcją', section: 'a4-3' },
     { id: 'ag-odcisk', label: 'Zrób. Odciski plików', section: 'a4-4' },
@@ -21907,44 +21912,46 @@ const judgeEmpty = (text) => {
   return { ok: true, text: `Bez instrukcji agent za każdym razem bierze inne źródło. W nagraniu podał 71,3%, na próbach w kontenerze ${LIVE_EMPTY_TEXT}. Zapiszcie, skąd wziął waszą liczbę.` };
 };
 
+// Every command goes through the chat: "Uruchom w terminalu:" makes the agent run exactly that
+// command and show its output (rule "Polecenia pary" in the template AGENTS.md).
+const CHAT_RUN = 'Uruchom w terminalu: ';
+
 const TERMINAL4 = {
   'ag-start': { id: 'ag-start', steps: [
-    { say: 'Otwórzcie link od prowadzącego. Login `para`, hasło z kartki waszej pary.' },
-    { say: 'Zobaczcie, co jest w folderze.', cmd: 'ls -R' },
-    { say: 'Przeczytajcie instrukcję agenta. Ten plik agent czyta przed każdym pytaniem.', cmd: 'cat AGENTS.md' },
+    { say: 'Otwórzcie link czatu od prowadzącego. Login `para`, hasło z kartki waszej pary.' },
+    { say: 'Po prawej stronie jest folder projektu. Kliknijcie dwa razy `AGENTS.md`. Ten plik agent czyta przed każdym pytaniem.' },
+    { say: 'Poproście agenta o spis folderu. Tak uruchamia się każde polecenie.', cmd: `${CHAT_RUN}ls -R` },
   ] },
   'ag-pusty': { id: 'ag-pusty', steps: [
-    { say: 'Zróbcie pusty folder, bez instrukcji i bez umiejętności, i uruchomcie w nim agenta. Po kilkunastu sekundach pojawi się pole na pytanie.', cmd: 'mkdir -p /tmp/pusty && cd /tmp/pusty && hermes-pusty' },
-    { say: 'Zadajcie pytanie i patrzcie, jakie narzędzia uruchamia.', cmd: QUESTION },
-    { say: 'Zapiszcie liczbę i stronę, z której pochodzi. Potem wyjdźcie z agenta.', cmd: '/exit' },
+    { say: 'Uruchomcie agenta bez instrukcji i bez umiejętności, w pustym folderze. Odpowie po minucie.', cmd: `${CHAT_RUN}pusty "${QUESTION}"` },
+    { say: 'Zapiszcie liczbę i źródło, z którego pochodzi.' },
   ], ask: { label: 'Jaką liczbę podał wasz agent (procent)?', placeholder: 'np. 65,4', judge: judgeEmpty } },
   'ag-instr': { id: 'ag-instr', steps: [
-    { say: 'Wróćcie do folderu z instrukcją i uruchomcie agenta.', cmd: 'cd /work && hermes' },
-    { say: 'Zadajcie to samo pytanie. Agent będzie pracował kilka minut.', cmd: QUESTION },
-    { say: 'Wyjdźcie z agenta i zobaczcie, co zostawił w folderze.', cmd: '/exit' },
-    { say: 'Przeczytajcie odpowiedź i spis plików.', cmd: 'cat answer.md data/INDEX.md' },
+    { say: 'Otwórzcie nową rozmowę przyciskiem New session i zadajcie to samo pytanie. Teraz agent ma instrukcję i umiejętności.', cmd: QUESTION },
+    { say: 'Agent pracuje kilka minut. Nad odpowiedzią rośnie lista jego kroków.' },
+    { say: 'Odświeżcie listę plików po prawej i otwórzcie `answer.md` oraz `data/INDEX.md`.' },
   ], ask: { label: 'Jaką liczbę podał agent z instrukcją (procent)?', placeholder: 'np. 65,4', judge: judgeAnswer } },
   'ag-odcisk': { id: 'ag-odcisk', steps: [
-    { say: 'Sprawdźcie odciski plików, które zapisał wasz agent. „4 of 4 files match” znaczy, że 4 z 4 plików się zgadzają.', cmd: 'cd /work && python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root data/raw' },
-    { say: 'Zróbcie kopię surowych danych i dopiszcie spację do jednego pliku w kopii. Oryginał zostaje nietknięty.', cmd: 'rm -rf /tmp/kopia && cp -r data/raw /tmp/kopia && f=$(ls /tmp/kopia/*/* | grep -v meta.json | head -1) && echo " " >> "$f" && echo "$f"' },
-    { say: 'Sprawdźcie kopię. „changed” znaczy, że plik się zmienił, a „missing”, że go nie ma.', cmd: 'python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root /tmp/kopia' },
-    { say: 'Zobaczcie, skąd i kiedy agent pobrał pierwszy plik.', cmd: 'cat $(ls data/raw/*/*.meta.json | head -1)' },
-    { say: 'Zobaczcie umiejętność od środka. To przepis, który agent czyta przed zapisem.', cmd: 'head -30 /lab/skills/raw-provenance/SKILL.md' },
+    { say: 'Sprawdźcie odciski plików, które zapisał wasz agent. „4 of 4 files match” znaczy, że 4 z 4 plików się zgadzają.', cmd: `${CHAT_RUN}cd /work && python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root data/raw` },
+    { say: 'Zróbcie kopię surowych danych i dopiszcie spację do jednego pliku w kopii. Oryginał zostaje nietknięty.', cmd: `${CHAT_RUN}mkdir -p /tmp/kopia && cp -r /work/data/raw/. /tmp/kopia/ && f=$(ls /tmp/kopia/*/* | grep -v meta.json | head -1) && echo " " >> "$f" && echo "$f"` },
+    { say: 'Sprawdźcie kopię. „changed” znaczy, że plik się zmienił, a „missing”, że go nie ma.', cmd: `${CHAT_RUN}python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root /tmp/kopia` },
+    { say: 'Zobaczcie, skąd i kiedy agent pobrał pierwszy plik.', cmd: `${CHAT_RUN}cat $(ls /work/data/raw/*/*.meta.json | head -1)` },
+    { say: 'Zobaczcie umiejętność od środka. To przepis, który agent czyta przed zapisem.', cmd: `${CHAT_RUN}head -30 /lab/skills/raw-provenance/SKILL.md` },
   ], ask: { label: 'Co napisał verify o kopii?', placeholder: 'np. changed: …', judge: judgeVerify } },
   'ag-pytanie': { id: 'ag-pytanie', steps: [
     { say: 'Wybierzcie pytanie z waszego projektu, jedno zdanie z liczbą w odpowiedzi. Albo jedno z pytań zapasowych.' },
-    { say: 'Zadajcie je agentowi. Polecenie `proba` robi czysty folder z waszym `AGENTS.md`. Zamieńcie tekst w cudzysłowie na wasze pytanie, cudzysłów zostawcie.', cmd: 'cd /work && proba "tu wasze pytanie"' },
-    { say: 'Odpowiedź zostaje też w pliku. Zapiszcie próbę w dzienniku niżej.', cmd: 'cat proby/1/answer.md' },
-    { say: 'Dopiszcie do instrukcji jedną zasadę, na przykład tę. Własną wpiszcie w cudzysłowie, a znak `>>` zostawcie podwójny.', cmd: 'echo "Zasada pary. Podawaj tylko dane z 2025 roku." >> AGENTS.md' },
-    { say: 'Zapytajcie jeszcze raz i zapiszcie następną próbę. Jedna zmiana, jedna próba.', cmd: 'proba "tu wasze pytanie"' },
-    { say: 'Jeśli zasada popsuła wynik, przywróćcie instrukcję z początku.', cmd: 'cp /lab/template/AGENTS.md AGENTS.md' },
+    { say: 'Zadajcie je agentowi. Polecenie `proba` robi czysty folder z waszym `AGENTS.md`. Zamieńcie tekst w cudzysłowie na wasze pytanie, cudzysłów zostawcie.', cmd: `${CHAT_RUN}proba "tu wasze pytanie"` },
+    { say: 'Zapiszcie próbę w dzienniku niżej. Odpowiedź zostaje też w pliku `proby/1/answer.md`.' },
+    { say: 'Dopiszcie do `AGENTS.md` jedną zasadę. Otwórzcie plik, kliknijcie Edit, dopiszcie linię na końcu i Save. Na przykład taką.', cmd: 'Zasada pary. Podawaj tylko dane z 2025 roku.' },
+    { say: 'Zapytajcie jeszcze raz i zapiszcie następną próbę. Jedna zmiana, jedna próba.', cmd: `${CHAT_RUN}proba "tu wasze pytanie"` },
+    { say: 'Jeśli zasada popsuła wynik, przywróćcie instrukcję z początku.', cmd: `${CHAT_RUN}cp /lab/template/AGENTS.md /work/AGENTS.md` },
   ] },
   'ag-dwa': { id: 'ag-dwa', steps: [
-    { say: 'Zadajcie to samo pytanie co w ostatniej próbie, bez zmian w instrukcji. To drugi przebieg tej samej metody.', cmd: 'cd /work && proba "tu wasze pytanie"' },
+    { say: 'Zadajcie to samo pytanie co w ostatniej próbie, bez zmian w instrukcji. To drugi przebieg tej samej metody.', cmd: `${CHAT_RUN}proba "tu wasze pytanie"` },
     { say: 'Porównajcie liczbę z ostatnią próbą. Jeśli sąsiednia para ma to samo pytanie, porównajcie się też z nią.' },
   ], ask: { label: 'Liczba z ostatniej próby i z drugiego przebiegu', placeholder: 'np. 63,27 i 63,3', judge: judgeTwo } },
   'ag-domu': { id: 'ag-domu', steps: [
-    { say: 'Spakujcie folder projektu. Przeglądarka zapyta, gdzie zapisać plik zip.', cmd: 'cd /work && pobierz' },
+    { say: 'Spakujcie folder projektu. W czacie pojawi się plik zip z przyciskiem Download.', cmd: `${CHAT_RUN}pobierz` },
     { say: 'Otwórzcie zip u siebie. Sprawdźcie, że są w nim `AGENTS.md`, `RUN.txt`, folder `data` i wasze próby w `proby`.' },
   ] },
 };
@@ -21970,7 +21977,7 @@ class TopicApp4 {
   }
 }
 
-__modules["../../analiza-trendow-w-internecie/src/main4.js"] = { "FIGURES4": FIGURES4, "TERMINAL4": TERMINAL4, "setUp4": setUp4, "TopicApp4": TopicApp4 };
+__modules["../../analiza-trendow-w-internecie/src/main4.js"] = { "FIGURES4": FIGURES4, "CHAT_RUN": CHAT_RUN, "TERMINAL4": TERMINAL4, "setUp4": setUp4, "TopicApp4": TopicApp4 };
 })();
 
 const Boot = __modules["../../analiza-trendow-w-internecie/src/main4.js"].TopicApp4;

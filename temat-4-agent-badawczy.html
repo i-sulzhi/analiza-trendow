@@ -21328,6 +21328,19 @@ const sections = [
     { p: 'Dziś każda para pracuje z prawdziwym agentem. To program, który dostaje pytanie, sam szuka danych w internecie i zapisuje pliki. Działa w kontenerze, czyli w małym, zamkniętym komputerze tylko dla waszej pary.' },
     { figure: 'agmapa' },
     { note: 'Wszystko, co wpiszecie, trafia do firmy DeepSeek w Chinach. Nie wpisujcie danych osobowych ani haseł. Nie wklejajcie też komentarzy zebranych w temacie 3.', tone: 'warn' },
+    { p: 'Z agentem rozmawiacie w terminalu, czyli w oknie na polecenia. Przycisk „Kopiuj” kopiuje polecenie ze strony. W terminalu wklejcie je skrótem Cmd+V na Macu albo Ctrl+Shift+V na Windows i naciśnijcie Enter.' },
+    { table: { head: ['Polecenie', 'Co robi'], rows: [
+      ['`ls`', 'Pokazuje pliki w folderze. `ls -R` pokazuje też podfoldery.'],
+      ['`cat plik`', 'Wypisuje treść pliku.'],
+      ['`cd folder`', 'Przechodzi do folderu. `cd /work` wraca do folderu projektu.'],
+      ['`mkdir folder`', 'Tworzy folder.'],
+      ['`cp skąd dokąd`', 'Kopiuje plik. Z `-r` kopiuje cały folder.'],
+      ['`echo "tekst" >> plik`', 'Dopisuje linię na końcu pliku. Jeden znak `>` zamiast dwóch skasowałby resztę pliku.'],
+      ['`hermes`', 'Otwiera rozmowę z agentem. Zamiast `/work$` widać wtedy znak `❯`. Polecenie `/exit` kończy rozmowę.'],
+      ['`proba "pytanie"`', 'Jedna próba agenta bez rozmowy. Pytanie stoi w prostym cudzysłowie.'],
+      ['Ctrl+C', 'Zatrzymuje to, co trwa. W rozmowie przerywa odpowiedź agenta, w `proba` kończy próbę.'],
+    ] } },
+    { note: 'Gdy agent pracuje, nie zamykajcie karty z terminalem. Gdy nic się nie zmienia dłużej niż 10 minut, naciśnijcie Ctrl+C i zawołajcie prowadzącego.', tone: 'warn' },
     { exercise: 'ag-start', num: 'Zrób', title: 'Wejdźcie do kontenera', toc: 'Zrób. Wejście do kontenera' },
     { terms: [
       ['model', 'program, który pisze tekst. Sam niczego nie otwiera i nie pobiera'],
@@ -21356,7 +21369,7 @@ const sections = [
     { p: 'Agent zapisał w `data/raw` surowe odpowiedzi źródeł. Skąd za miesiąc wiadomo, że nikt ich nie zmienił? Umiejętność `raw-provenance` liczy dla każdego pliku odcisk SHA-256 i zapisuje go w `MANIFEST.csv`.' },
     { figure: 'agodcisk' },
     { p: 'Umiejętność to zwykły plik tekstowy z przepisem. Agent czyta go, zanim zapisze dane. Wy możecie go przeczytać tak samo.' },
-    { p: 'Odcisk mówi tylko, że plik się nie zmienił od zapisu. Że to naprawdę odpowiedź źródła, sprawdzicie, pobierając plik jeszcze raz z adresu w `meta.json`.' },
+    { p: 'Odcisk mówi tylko, że plik się nie zmienił od zapisu. Że to naprawdę odpowiedź źródła, sprawdzicie, pobierając plik jeszcze raz. Adres i godzinę pobrania umiejętność zapisuje w pliku `.meta.json` obok niego.' },
     { exercise: 'ag-odcisk', num: 'Zrób', title: 'Sprawdźcie odciski', toc: 'Zrób. Odciski plików' },
     { note: 'Przerwa, 5 minut.' },
   ]),
@@ -21372,16 +21385,17 @@ const sections = [
   ]),
 
   step('a4-6', '4.6', 'Czy agent mierzy tak samo?', [
-    { p: `Instrument badawczy ocenia się po tym, czy daje ten sam wynik za każdym razem. Na próbie generalnej ${G.load.length} kontenerów dostało to samo pytanie w tej samej chwili.` },
+    { p: `Instrument badawczy ocenia się po tym, czy daje ten sam wynik za każdym razem. To jego rzetelność. Na próbie generalnej ${G.load.length} kontenerów dostało to samo pytanie w tej samej chwili.` },
     { figure: 'agzgodnosc' },
-    ...(EMPTY_ALL_SAME ? [{ p: `Zgodność to jeszcze nie trafność. W nagraniu puste foldery też były zgodne, trzy razy ${RUN['empty-1'].exact}%. A liczyły konta, nie osoby.` }] : []),
+    ...(EMPTY_ALL_SAME ? [{ p: `Rzetelność to jeszcze nie trafność. W nagraniu puste foldery też były zgodne, trzy razy ${RUN['empty-1'].exact}%. A liczyły konta, nie osoby.` }] : []),
     { exercise: 'ag-dwa', num: 'Zrób', title: 'Zapytajcie drugi raz', toc: 'Zrób. Drugi przebieg' },
   ]),
 
   step('a4-7', '4.7', 'Agent do domu', [
     { p: 'Kontener zniknie po zajęciach. Zostaje folder z instrukcją, danymi i notatkami. To on jest waszą metodą.' },
+    { note: 'Pobierzcie folder przed końcem zajęć. Po zajęciach waszych prób już nie będzie.', tone: 'warn' },
     { figure: 'agdomu' },
-    { p: 'W domu folder otworzy inny agent. Codex i Claude Code czytają `AGENTS.md` same. Claude Code robi to, jeśli w folderze nie ma `CLAUDE.md`. Gemini CLI czyta `GEMINI.md`, ale w pliku `.gemini/settings.json` można mu wskazać `AGENTS.md`.' },
+    { p: 'W domu folder może otworzyć inny agent. Codex, Claude Code i Gemini CLI to programy podobne do Hermesa, które instaluje się na własnym komputerze. Do karty agenta nie są potrzebne. Codex i Claude Code czytają `AGENTS.md` same. Claude Code robi to, jeśli w folderze nie ma `CLAUDE.md`. Gemini CLI czyta `GEMINI.md`, ale w pliku `.gemini/settings.json` można mu wskazać `AGENTS.md`.' },
     { exercise: 'ag-domu', num: 'Zrób', title: 'Pobierzcie folder', toc: 'Zrób. Pobranie folderu' },
     { exercise: 'raport4', num: 'Projekt', title: 'Karta agenta', toc: 'Projekt. Karta agenta' },
   ]),
@@ -21394,7 +21408,7 @@ const AGENT_FIELDS = [
   { id: 'zrodla', kind: 'area', label: 'Z jakich źródeł agent mógł brać liczby' },
   { id: 'proby', kind: 'area', label: 'Ile było prób i jak zmieniał się wynik' },
   { id: 'wynik', kind: 'area', label: 'Wynik. Liczba, jednostka, rok, grupa osób, adres źródła' },
-  { id: 'wskaznik', kind: 'area', label: 'Co dokładnie mierzy wskaźnik? Definicja ze źródła w jednym zdaniu' },
+  { id: 'wskaznik', kind: 'area', label: 'Co dokładnie mierzy wskaźnik? Definicja ze źródła w jednym zdaniu. Agent podaje ją w answer.md' },
   { id: 'zgodnosc', kind: 'area', label: 'Czy drugi przebieg dał to samo?' },
   { id: 'granice', kind: 'area', label: 'Do czego tego agenta nie używać?' },
   { id: 'agent', kind: 'area', label: 'Agent, model i data. Przepiszcie z pliku RUN.txt w zipie' },
@@ -21576,7 +21590,7 @@ const CHECKS = [
   { id: 'num', label: 'liczba z jednostką', test: (t) => Number.isFinite(parseNum(t.num)) && String(t.num).trim() !== '' && !!t.unit },
   { id: 'year', label: 'rok', test: (t) => /^(19|20)\d\d$/.test(String(t.year || '').trim()) },
   { id: 'who', label: 'kogo dotyczy', test: (t) => String(t.who || '').trim().length >= 3 },
-  { id: 'src', label: 'źródło publiczne', test: (t) => OFFICIAL.test(hostIn(t.url)), warn: (t) => !!hostIn(t.url) },
+  { id: 'src', label: 'źródło publiczne (GUS, Eurostat)', test: (t) => OFFICIAL.test(hostIn(t.url)), warn: (t) => !!hostIn(t.url) },
   { id: 'unknown', label: 'mówi, czego nie wie', test: (t) => !!t.unknown },
 ];
 /**
@@ -21669,7 +21683,7 @@ function tryLogExercise({ onDone } = {}) {
           field(t, 'year', 'Rok', { inputmode: 'numeric', placeholder: '2025' })),
         field(t, 'who', 'Kogo dotyczy', { placeholder: 'np. osoby 16–74 w Polsce' }),
         field(t, 'url', 'Adres źródła', { placeholder: 'https://…' }),
-        el('label.a4-term-say', el('input', { type: 'checkbox', checked: !!t.unknown, onChange: (e) => { t.unknown = e.target.checked; save(); drawOut(); } }), el('span', 'Agent napisał, czego nie wie'))));
+        el('label.a4-term-say', el('input', { type: 'checkbox', checked: !!t.unknown, onChange: (e) => { t.unknown = e.target.checked; save(); drawOut(); } }), el('span', 'Agent napisał, czego nie wie (słowa „nie wiem” w odpowiedzi)'))));
   };
   const drawOut = () => {
     const fb = fallbackOf(state.q);
@@ -21911,15 +21925,17 @@ const TERMINAL4 = {
     { say: 'Przeczytajcie odpowiedź i spis plików.', cmd: 'cat answer.md data/INDEX.md' },
   ], ask: { label: 'Jaką liczbę podał agent z instrukcją (procent)?', placeholder: 'np. 65,4', judge: judgeAnswer } },
   'ag-odcisk': { id: 'ag-odcisk', steps: [
-    { say: 'Sprawdźcie odciski plików, które zapisał wasz agent.', cmd: 'cd /work && python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root data/raw' },
+    { say: 'Sprawdźcie odciski plików, które zapisał wasz agent. „4 of 4 files match” znaczy, że 4 z 4 plików się zgadzają.', cmd: 'cd /work && python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root data/raw' },
     { say: 'Zróbcie kopię surowych danych i dopiszcie spację do jednego pliku w kopii. Oryginał zostaje nietknięty.', cmd: 'rm -rf /tmp/kopia && cp -r data/raw /tmp/kopia && f=$(ls /tmp/kopia/*/* | grep -v meta.json | head -1) && echo " " >> "$f" && echo "$f"' },
-    { say: 'Sprawdźcie kopię.', cmd: 'python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root /tmp/kopia' },
+    { say: 'Sprawdźcie kopię. „changed” znaczy, że plik się zmienił, a „missing”, że go nie ma.', cmd: 'python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root /tmp/kopia' },
+    { say: 'Zobaczcie, skąd i kiedy agent pobrał pierwszy plik.', cmd: 'cat $(ls data/raw/*/*.meta.json | head -1)' },
     { say: 'Zobaczcie umiejętność od środka. To przepis, który agent czyta przed zapisem.', cmd: 'head -30 /lab/skills/raw-provenance/SKILL.md' },
   ], ask: { label: 'Co napisał verify o kopii?', placeholder: 'np. changed: …', judge: judgeVerify } },
   'ag-pytanie': { id: 'ag-pytanie', steps: [
     { say: 'Wybierzcie pytanie z waszego projektu, jedno zdanie z liczbą w odpowiedzi. Albo jedno z pytań zapasowych.' },
-    { say: 'Zadajcie je agentowi. Polecenie `proba` robi czysty folder z waszym `AGENTS.md`. Zamiast tekstu w cudzysłowie wpiszcie wasze pytanie.', cmd: 'cd /work && proba "tu wasze pytanie"' },
-    { say: 'Zapiszcie próbę w dzienniku niżej. Potem dopiszcie do instrukcji jedną zasadę, na przykład tę.', cmd: 'echo "Zasada pary. Podawaj tylko dane z 2025 roku." >> AGENTS.md' },
+    { say: 'Zadajcie je agentowi. Polecenie `proba` robi czysty folder z waszym `AGENTS.md`. Zamieńcie tekst w cudzysłowie na wasze pytanie, cudzysłów zostawcie.', cmd: 'cd /work && proba "tu wasze pytanie"' },
+    { say: 'Odpowiedź zostaje też w pliku. Zapiszcie próbę w dzienniku niżej.', cmd: 'cat proby/1/answer.md' },
+    { say: 'Dopiszcie do instrukcji jedną zasadę, na przykład tę. Własną wpiszcie w cudzysłowie, a znak `>>` zostawcie podwójny.', cmd: 'echo "Zasada pary. Podawaj tylko dane z 2025 roku." >> AGENTS.md' },
     { say: 'Zapytajcie jeszcze raz i zapiszcie następną próbę. Jedna zmiana, jedna próba.', cmd: 'proba "tu wasze pytanie"' },
     { say: 'Jeśli zasada popsuła wynik, przywróćcie instrukcję z początku.', cmd: 'cp /lab/template/AGENTS.md AGENTS.md' },
   ] },

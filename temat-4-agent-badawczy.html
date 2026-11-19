@@ -21325,24 +21325,30 @@ const EMPTY_ALL_SAME = new Set(cond('empty').map((r) => r.exact)).size === 1;
 
 const sections = [
   step('a4-1', '4.1', 'Twoja piaskownica', [
-    { p: 'Dziś każda para pracuje z prawdziwym agentem. To program, który dostaje pytanie, sam szuka danych w internecie i zapisuje pliki. Działa w kontenerze, czyli w małym, zamkniętym komputerze tylko dla waszej pary.' },
+    { p: 'Dziś każda para pracuje z prawdziwym agentem. To program, który dostaje pytanie, sam szuka danych w internecie i zapisuje pliki. Działa w kontenerze, czyli w małym, zamkniętym komputerze tylko dla waszej pary. Agent nie ma dostępu do waszych komputerów ani kont. Może zepsuć tylko swój kontener, a ten i tak zniknie po zajęciach. Dlatego to piaskownica.' },
     { figure: 'agmapa' },
     { note: 'Wszystko, co wpiszecie, trafia do firmy DeepSeek w Chinach. Nie wpisujcie danych osobowych ani haseł. Nie wklejajcie też komentarzy zebranych w temacie 3.', tone: 'warn' },
-    { p: 'Z agentem rozmawiacie w czacie, tak jak w aplikacji Hermes Desktop. Po prawej stronie widać folder projektu. Przycisk „Kopiuj” kopiuje tekst ze strony. W czacie wklejcie go i naciśnijcie Enter.' },
-    { p: 'Niektóre kroki to polecenia, na przykład `proba` albo `pobierz`. Piszecie je w czacie po słowach „Uruchom w terminalu”. Agent uruchamia wtedy dokładnie to polecenie i pokazuje wynik. Tak każe mu zasada w `AGENTS.md`.' },
+    { p: 'Agent nazywa się Hermes. To darmowy, otwarty program firmy Nous Research. Rozmawiacie z nim w czacie, w tym samym oknie, co w aplikacji Hermes Desktop, tylko w przeglądarce. Po prawej stronie widać folder projektu, czyli pliki, na których agent pracuje. Przycisk „Kopiuj” kopiuje tekst ze strony. W czacie wklejcie go i naciśnijcie Enter.' },
+    { p: 'Niektóre kroki to polecenia, na przykład `proba` albo `pobierz`. Piszecie je w czacie po słowach „Uruchom w terminalu”. Agent uruchamia wtedy dokładnie to polecenie i pokazuje wynik. Tak każe mu zasada w `AGENTS.md`. Wszystko robicie w jednym oknie, a w czacie zostaje ślad każdego polecenia.' },
     { table: { head: ['W czacie', 'Co robi'], rows: [
       ['`Uruchom w terminalu: pusty "pytanie"`', 'Agent bez instrukcji i bez umiejętności, w pustym folderze.'],
       ['`Uruchom w terminalu: proba "pytanie"`', 'Jedna próba agenta w czystym folderze z waszym `AGENTS.md`. Pytanie stoi w prostym cudzysłowie.'],
       ['`Uruchom w terminalu: pobierz`', 'Pakuje folder projektu do pliku zip.'],
-      ['New session', 'Nowa rozmowa. Agent nie pamięta poprzedniej.'],
+      ['New session', 'Nowa rozmowa. W jednej rozmowie agent pamięta, co było wcześniej. Nowa zaczyna od zera.'],
       ['Przycisk ■', 'Zatrzymuje odpowiedź agenta.'],
     ] } },
+    { note: 'Panel TERMINAL w prawym dolnym rogu w przeglądarce nie działa. Wszystko piszcie w polu czatu. Szare powiadomienie o GPU i czerwone „Backend checking” w pierwszych sekundach to nie błąd.' },
     { note: 'Gdy przez 10 minut nic się nie zmienia, zatrzymajcie agenta przyciskiem ■ i zawołajcie prowadzącego.', tone: 'warn' },
     { exercise: 'ag-start', num: 'Zrób', title: 'Wejdźcie do czatu', toc: 'Zrób. Wejście do czatu' },
     { terms: [
       ['model', 'program, który pisze tekst. Sam niczego nie otwiera i nie pobiera'],
       ['narzędzie', 'polecenie, które Hermes uruchamia w kontenerze na prośbę modelu'],
       ['AGENTS.md', 'instrukcja, którą agent czyta przed każdym pytaniem'],
+      ['Capabilities', 'umiejętności agenta, w menu po lewej'],
+      ['Edit, Save', 'edycja i zapis pliku otwartego po prawej'],
+      ['Refresh tree', 'ikona odświeżenia nad listą plików'],
+      ['Download', 'pobranie pliku, po kliknięciu go prawym przyciskiem'],
+      ['Settings', 'ustawienia, ikona koła zębatego u góry po prawej'],
     ] },
   ]),
 
@@ -21374,6 +21380,7 @@ const sections = [
   step('a4-5', '4.5', 'Wasze pytanie', [
     { p: 'Teraz pytanie z waszego projektu. Zmieniajcie w `AGENTS.md` jedną rzecz naraz. Każdą próbę uruchamia polecenie `proba` w nowym, czystym folderze. Wtedy różni je tylko instrukcja i wiadomo, co zmieniło wynik.' },
     { figure: 'agdziennik' },
+    { p: 'Na rysunku próba 1 to przebieg bez instrukcji. U was już pierwsza próba ma `AGENTS.md`, a przebieg z 4.2 do dziennika nie wchodzi. Jeśli zasada nie zmieniła liczby, to też wynik. Liczba od tej zasady nie zależy.' },
     { p: 'Nie macie jeszcze pytania? Weźcie jedno z zapasowych. Odpowiedzi na nie są w danych Eurostatu nagranych do tematu 1, więc dziennik sam je sprawdzi.' },
     { table: { head: ['', 'Pytanie zapasowe'], rows: G.fallback.map((f, k) => [String(k + 1), f.q]) } },
     { exercise: 'ag-pytanie', num: 'Zrób', title: 'Zapytajcie o wasze pytanie', toc: 'Zrób. Wasze pytanie' },
@@ -21410,12 +21417,12 @@ const sections = [
 const AGENT_FIELDS = [
   { id: 'pytanie', kind: 'area', label: 'Pytanie, które zadaliście agentowi' },
   { id: 'zmiany', kind: 'area', label: 'Co zmieniliście w AGENTS.md i dlaczego' },
-  { id: 'zrodla', kind: 'area', label: 'Z jakich źródeł agent mógł brać liczby' },
-  { id: 'proby', kind: 'area', label: 'Ile było prób i jak zmieniał się wynik' },
-  { id: 'wynik', kind: 'area', label: 'Wynik. Liczba, jednostka, rok, grupa osób, adres źródła' },
+  { id: 'zrodla', kind: 'area', label: 'Z jakich źródeł agent wziął liczby? Na przykład Eurostat, GUS albo DataReportal' },
+  { id: 'proby', kind: 'area', label: 'Ile było prób w dzienniku i jak zmieniał się wynik' },
+  { id: 'wynik', kind: 'area', label: 'Wynik z ostatniej próby. Liczba, jednostka, rok, grupa osób, adres źródła' },
   { id: 'wskaznik', kind: 'area', label: 'Co dokładnie mierzy wskaźnik? Definicja ze źródła w jednym zdaniu. Agent podaje ją w answer.md' },
   { id: 'zgodnosc', kind: 'area', label: 'Czy drugi przebieg dał to samo?' },
-  { id: 'granice', kind: 'area', label: 'Do czego tego agenta nie używać?' },
+  { id: 'granice', kind: 'area', label: 'Do czego tego agenta nie używać? Na przykład do danych osobowych albo do liczb, których źródła nie otworzył' },
   { id: 'agent', kind: 'area', label: 'Agent, model i data. Przepiszcie z pliku RUN.txt w zipie' },
 ];
 
@@ -21596,7 +21603,7 @@ const CHECKS = [
   { id: 'year', label: 'rok', test: (t) => /^(19|20)\d\d$/.test(String(t.year || '').trim()) },
   { id: 'who', label: 'kogo dotyczy', test: (t) => String(t.who || '').trim().length >= 3 },
   { id: 'src', label: 'źródło publiczne (GUS, Eurostat)', test: (t) => OFFICIAL.test(hostIn(t.url)), warn: (t) => !!hostIn(t.url) },
-  { id: 'unknown', label: 'mówi, czego nie wie', test: (t) => !!t.unknown },
+  { id: 'unknown', label: 'pisze „nie wiem”, gdy czegoś nie sprawdził', test: (t) => !!t.unknown },
 ];
 /**
  * Two recorded runs as two tries of a log, read by hand from their answers the way a pair
@@ -21688,7 +21695,7 @@ function tryLogExercise({ onDone } = {}) {
           field(t, 'year', 'Rok', { inputmode: 'numeric', placeholder: '2025' })),
         field(t, 'who', 'Kogo dotyczy', { placeholder: 'np. osoby 16–74 w Polsce' }),
         field(t, 'url', 'Adres źródła', { placeholder: 'https://…' }),
-        el('label.a4-term-say', el('input', { type: 'checkbox', checked: !!t.unknown, onChange: (e) => { t.unknown = e.target.checked; save(); drawOut(); } }), el('span', 'Agent napisał, czego nie wie (słowa „nie wiem” w odpowiedzi)'))));
+        el('label.a4-term-say', el('input', { type: 'checkbox', checked: !!t.unknown, onChange: (e) => { t.unknown = e.target.checked; save(); drawOut(); } }), el('span', 'Agent napisał „nie wiem” przy czymś, czego nie sprawdził w źródle. Jeśli wszystko sprawdził, zostawcie puste, to nie błąd.'))));
   };
   const drawOut = () => {
     const fb = fallbackOf(state.q);
@@ -21697,7 +21704,7 @@ function tryLogExercise({ onDone } = {}) {
     const last = hasNum(t) ? parseNum(t.num) : null;
     mount(out,
       fb && last != null ? el(`div.a4-why${Math.abs(last - fb.v) <= 0.06 ? '.a4-why-right' : ''}`, Math.abs(last - fb.v) <= 0.06
-        ? `Zgadza się z odpowiedzią Eurostatu nagraną ${G.fallbackRecorded.split('-').reverse().join('.')}, ${pl(fb.v)}% w roku ${fb.year}.`
+        ? `Zgadza się z odpowiedzią Eurostatu zapisaną w danych tematu 1 (${G.fallbackRecorded.split('-').reverse().join('.')}), ${pl(fb.v)}% w roku ${fb.year}.`
         : `Nagrana odpowiedź Eurostatu to ${pl(fb.v)}% w roku ${fb.year}, tabela ${fb.table}. Sprawdźcie rok, grupę wieku i to, czy agent liczy osoby, czy internautów.`) : null,
       el('div.a4-controls',
         el('button.fg-toggle', { type: 'button', onClick: () => { state.tries.push(blank()); save(); drawForm(); drawOut(); } }, 'Następna próba'),
@@ -21923,14 +21930,14 @@ const TERMINAL4 = {
     { say: 'Poproście agenta o spis folderu. Tak uruchamia się każde polecenie.', cmd: `${CHAT_RUN}ls -R` },
   ] },
   'ag-pusty': { id: 'ag-pusty', steps: [
-    { say: 'Uruchomcie agenta bez instrukcji i bez umiejętności, w pustym folderze. Odpowie po minucie.', cmd: `${CHAT_RUN}pusty "${QUESTION}"` },
-    { say: 'Zapiszcie liczbę i źródło, z którego pochodzi.' },
-  ], ask: { label: 'Jaką liczbę podał wasz agent (procent)?', placeholder: 'np. 65,4', judge: judgeEmpty } },
+    { say: 'Uruchomcie agenta bez instrukcji i bez umiejętności, w pustym folderze. Odpowie w ciągu minuty.', cmd: `${CHAT_RUN}pusty "${QUESTION}"` },
+    { say: 'Agent często podaje kilka liczb. Wpiszcie niżej tę, którą nazwał główną albo podał pierwszą, i zapiszcie jej źródło.' },
+  ], ask: { label: 'Jaką liczbę agent podał jako główną (procent)?', placeholder: 'np. 65,4', judge: judgeEmpty } },
   'ag-instr': { id: 'ag-instr', steps: [
     { say: 'Otwórzcie nową rozmowę przyciskiem New session i zadajcie to samo pytanie. Teraz agent ma instrukcję i umiejętności.', cmd: QUESTION },
     { say: 'Agent pracuje kilka minut. Nad odpowiedzią rośnie lista jego kroków.' },
-    { say: 'Odświeżcie listę plików po prawej i otwórzcie `answer.md` oraz `data/INDEX.md`.' },
-  ], ask: { label: 'Jaką liczbę podał agent z instrukcją (procent)?', placeholder: 'np. 65,4', judge: judgeAnswer } },
+    { say: 'Odświeżcie listę plików po prawej ikoną Refresh tree i otwórzcie `answer.md` oraz `data/INDEX.md`. Niżej wpiszcie liczbę główną.' },
+  ], ask: { label: 'Jaką liczbę główną podał agent z instrukcją (procent)?', placeholder: 'np. 65,4', judge: judgeAnswer } },
   'ag-odcisk': { id: 'ag-odcisk', steps: [
     { say: 'Sprawdźcie odciski plików, które zapisał wasz agent. „4 of 4 files match” znaczy, że 4 z 4 plików się zgadzają.', cmd: `${CHAT_RUN}cd /work && python3 /lab/skills/raw-provenance/scripts/provenance.py verify --root data/raw` },
     { say: 'Zróbcie kopię surowych danych i dopiszcie spację do jednego pliku w kopii. Oryginał zostaje nietknięty.', cmd: `${CHAT_RUN}mkdir -p /tmp/kopia && cp -r /work/data/raw/. /tmp/kopia/ && f=$(ls /tmp/kopia/*/* | grep -v meta.json | head -1) && echo " " >> "$f" && echo "$f"` },
@@ -21944,14 +21951,14 @@ const TERMINAL4 = {
     { say: 'Zapiszcie próbę w dzienniku niżej. Odpowiedź zostaje też w pliku `proby/1/answer.md`.' },
     { say: 'Dopiszcie do `AGENTS.md` jedną zasadę. Otwórzcie plik, kliknijcie Edit, dopiszcie linię na końcu i Save. Na przykład taką.', cmd: 'Zasada pary. Podawaj tylko dane z 2025 roku.' },
     { say: 'Zapytajcie jeszcze raz i zapiszcie następną próbę. Jedna zmiana, jedna próba.', cmd: `${CHAT_RUN}proba "tu wasze pytanie"` },
-    { say: 'Jeśli zasada popsuła wynik, przywróćcie instrukcję z początku.', cmd: `${CHAT_RUN}cp /lab/template/AGENTS.md /work/AGENTS.md` },
+    { say: 'Jeśli zasada popsuła wynik, przywróćcie instrukcję z początku. To usuwa wszystkie wasze zasady.', cmd: `${CHAT_RUN}cp /lab/template/AGENTS.md /work/AGENTS.md` },
   ] },
   'ag-dwa': { id: 'ag-dwa', steps: [
-    { say: 'Zadajcie to samo pytanie co w ostatniej próbie, bez zmian w instrukcji. To drugi przebieg tej samej metody.', cmd: `${CHAT_RUN}proba "tu wasze pytanie"` },
-    { say: 'Porównajcie liczbę z ostatnią próbą. Jeśli sąsiednia para ma to samo pytanie, porównajcie się też z nią.' },
+    { say: 'Zadajcie to samo pytanie co w ostatniej próbie z dziennika, bez zmian w instrukcji. To drugi przebieg tej samej metody.', cmd: `${CHAT_RUN}proba "tu wasze pytanie"` },
+    { say: 'Porównajcie liczbę z ostatnią próbą. Jeśli sąsiednia para ma to samo pytanie, porównajcie się też z nią. Gdy agent myśli długo, czekajcie. Nie uruchamiajcie próby drugi raz.' },
   ], ask: { label: 'Liczba z ostatniej próby i z drugiego przebiegu', placeholder: 'np. 63,27 i 63,3', judge: judgeTwo } },
   'ag-domu': { id: 'ag-domu', steps: [
-    { say: 'Spakujcie folder projektu. W czacie pojawi się plik zip z przyciskiem Download.', cmd: `${CHAT_RUN}pobierz` },
+    { say: 'Spakujcie folder projektu. Plik zip pojawi się po prawej w folderze `do-pobrania`. Kliknijcie go prawym przyciskiem i wybierzcie Download.', cmd: `${CHAT_RUN}pobierz` },
     { say: 'Otwórzcie zip u siebie. Sprawdźcie, że są w nim `AGENTS.md`, `RUN.txt`, folder `data` i wasze próby w `proby`.' },
   ] },
 };
